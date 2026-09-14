@@ -36,6 +36,17 @@
     margin:0;
   }
   #app{max-width:640px;margin:0 auto;min-height:100vh;position:relative;padding-bottom:24px;}
+  @media (min-width:820px){
+    #app{max-width:920px;}
+    body{font-size:1.15rem;}
+    .prompt-text{font-size:1.5rem;}
+    .pic-target{font-size:5.6rem;}
+    .task-instr{font-size:1.25rem;}
+    .opt-btn, .pic-opt-btn{font-size:1.3rem;min-height:96px;}
+    .btn{font-size:1.2rem;padding:16px 30px;}
+    .station-icon{width:66px;height:66px;font-size:2rem;}
+    .station-body h3{font-size:1.25rem;}
+  }
 
   /* ---------- header / wave ---------- */
   .topbar{
@@ -367,7 +378,7 @@ const levelGoals = {
     3:'Jetzt wird genau hingehört: schwierigere Reime und Anlaute, damit dein Ohr richtig fit wird.',
   },
   buchstabe: {
-    1:'Hier lernst du, welcher Buchstabe zu welchem Laut gehört – die Basis für alles Lesen und Schreiben.',
+    1:'Hier lernst du, welcher Buchstabe zu welchem Laut gehört – die Basis für Lesen und Schreiben.',
     2:'Du verbindest jetzt schon ganze Wörter mit ihren Buchstaben.',
     3:'Kniffliger: Buchstaben, die leicht verwechselt werden (b, d, p) oder besonders klingen (Qu, Pf, St).',
   },
@@ -465,7 +476,7 @@ const content = {
       pic('🔁','🐰','Hase', ['👃','⚽','🌳'], 0, 'Hase – Nase: gleicher Klang am Wortende.'),
       pic('👏','🍌','Banane', [silbenbogen(2),silbenbogen(3),silbenbogen(4)], 1, 'Schwinge mit: Ba-na-ne. Drei Bögen!'),
       pic('🎯','☀️','Sonne', ['🧦','🌙','🌳'], 0, 'Sonne – Socke: gleicher erster Laut „S".'),
-      pic('🎯','🦆','Ente', ['🥚','🐕','🌳'], 0, 'Ente – Ei: beide beginnen mit „E".'),
+      pic('🎯','🦆','Ente', ['🐘','🐕','🌳'], 0, 'Ente – Elefant: beide beginnen mit „E".'),
       pic('👏','🍫','Schokolade', [silbenbogen(3),silbenbogen(4),silbenbogen(5)], 1, 'Scho-ko-la-de: vier Bögen.'),
       pic('🔁','🦵','Bein', ['🪨','🐟','🌳'], 0, 'Bein – Stein: reimt sich!'),
       pic('🎯','🌙','Mond', ['🐭','🌳','⚽'], 0, 'Mond – Maus: gleicher Anfangslaut „M".'),
@@ -474,8 +485,8 @@ const content = {
     2:[
       pic('🔁','☀️','Sonne', ['🛢️','🐟','⭐'], 0, 'Sonne – Tonne: reimt sich!'),
       pic('👏','🦋','Schmetterling', [silbenbogen(2),silbenbogen(3),silbenbogen(4)], 1, 'Schwinge mit: Schmet-ter-ling. Drei Bögen!'),
-      pic('🎯','🌸','Blume', ['⚡','⚽','🐱'], 0, 'Blume – Blitz: gleicher Anfang „Bl".'),
-      pic('🔁','🌳','Baum', ['💭','⚽','🐟'], 0, 'Baum – Traum: reimt sich!'),
+      pic('🎯','🌸','Blume', ['⚡','🌙','🐱'], 0, 'Blume – Blitz: gleicher Anfang „Bl".'),
+      pic('🔁','🌳','Baum', ['💤','⚽','🐟'], 0, 'Baum – Traum: reimt sich!'),
       pic('👏','🦓','Zebra', [silbenbogen(1),silbenbogen(2),silbenbogen(3)], 1, 'Ze-bra: zwei Bögen.'),
       pic('🎯','🦁','Löwe', ['🍃','🐟','🌳'], 0, 'Löwe – Laub: gleicher Anlaut „L".'),
       pic('🎯','🚢','Schiff', ['🏫','🐕','🌙'], 0, 'Schiff – Schule: gleicher Anlaut „Sch".'),
@@ -519,7 +530,7 @@ const content = {
       pic('🔡','🐧','Pinguin', ['P','B','T'], 0, 'P-inguin: erster Laut „P".'),
       pic('🔡','🦉','Uhu', ['U','O','A'], 0, 'U-hu: erster Laut „U".'),
       pic('🔡','🐦','Vogel', ['V','F','W'], 0, 'V-ogel klingt wie „F", wird aber mit V geschrieben.'),
-      pic('🔡','🍦','Yoghurt', ['Y','J','I'], 0, 'Y-oghurt: erster Laut „Y".'),
+      pic('🔡','🐃','Yak', ['Y','J','I'], 0, 'Y-ak: erster Laut „Y".'),
       pic('🔠','X','X', ['x','y','k'], 0, 'Großes X und kleines x klingen gleich – nur die Form ist anders.'),
       pic('🔠','A','A', ['a','e','o'], 0, 'Großes A und kleines a klingen gleich – nur die Form ist anders.'),
       pic('🔠','M','M', ['m','n','w'], 0, 'Großes M und kleines m klingen gleich – nur die Form ist anders.'),
@@ -905,7 +916,8 @@ function speak(text){
     refreshVoices();
     const u = new SpeechSynthesisUtterance(text);
     u.lang='de-DE'; u.rate=0.95;
-    const deVoice = cachedVoices.find(v=>v.lang && v.lang.toLowerCase().startsWith('de'));
+    const deVoices = cachedVoices.filter(v=>v.lang && v.lang.toLowerCase().startsWith('de'));
+    const deVoice = deVoices.find(v=>/enhanced|premium|neural/i.test(v.name||'')) || deVoices[0];
     if(deVoice) u.voice = deVoice;
     let started = false;
     u.onstart = ()=>{ started = true; };
@@ -1563,6 +1575,7 @@ window.nextPracticeItem = function(){
     state.pendingSelfCheck = {domainId:p.domainId, level:p.level, errors:p.sessionErrors||0, items:p.itemsDone};
     state.screen='selfcheck';
     render();
+    speakSelfCheck();
     return;
   }
   pickPracticeItem();
@@ -1581,9 +1594,9 @@ function screenSelfCheck(){
       <button class="speak-btn" onclick="speakSelfCheck()">🔊</button>
       <div style="font-size:1rem;color:#4B6473;margin:14px 0 16px;">Was stimmt für dich?</div>
       <div style="display:flex;flex-direction:column;gap:14px;">
-        <button class="btn btn-ghost" style="font-size:1.05rem;padding:16px;text-align:left;display:flex;align-items:center;gap:12px;" onclick="selectSelfCheck('good')">${plantIcon(3,40)} Das kann ich schon gut!</button>
-        <button class="btn btn-ghost" style="font-size:1.05rem;padding:16px;text-align:left;display:flex;align-items:center;gap:12px;" onclick="selectSelfCheck('ok')">${plantIcon(2,40)} Das klappt schon manchmal, ich mache noch Fehler.</button>
         <button class="btn btn-ghost" style="font-size:1.05rem;padding:16px;text-align:left;display:flex;align-items:center;gap:12px;" onclick="selectSelfCheck('hard')">${plantIcon(1,40)} Das fällt mir noch schwer.</button>
+        <button class="btn btn-ghost" style="font-size:1.05rem;padding:16px;text-align:left;display:flex;align-items:center;gap:12px;" onclick="selectSelfCheck('ok')">${plantIcon(2,40)} Das klappt schon manchmal, ich mache noch Fehler.</button>
+        <button class="btn btn-ghost" style="font-size:1.05rem;padding:16px;text-align:left;display:flex;align-items:center;gap:12px;" onclick="selectSelfCheck('good')">${plantIcon(3,40)} Das kann ich schon gut!</button>
       </div>
     </div>
   </main>`;
@@ -1593,7 +1606,8 @@ window.speakSelfCheck = function(){
   const info = state.pendingSelfCheck || {};
   const d = anyDomain(info.domainId);
   const statement = d ? ((iCanStatements[d.id]||{})[info.level] || '') : '';
-  speak(statement + '. Was stimmt für dich?');
+  const options = 'Du kannst wählen: Das fällt mir noch schwer. Oder: Das klappt schon manchmal, ich mache noch Fehler. Oder: Das kann ich schon gut.';
+  speak(statement + '. ' + options + ' Was stimmt für dich?');
 };
 
 window.selectSelfCheck = function(rating){
