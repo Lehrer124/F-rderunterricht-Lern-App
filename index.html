@@ -514,12 +514,12 @@ const content = {
       pic('🔡','⚽','Ball', ['B','D','P'], 0, 'B-all: erster Laut „B".'),
       pic('🔡','🦔','Igel', ['I','E','O'], 0, 'I-gel: erster Laut „I".'),
       pic('🔚','⚽','Ball', ['L','N','M'], 0, 'Ba-LL: letzter Laut „L".'),
-      pic('🔡','🍴','Gabel', ['G','K','B'], 0, 'G-abel: erster Laut „G".'),
+      pic('🔡','🪿','Gans', ['G','K','B'], 0, 'G-ans: erster Laut „G".'),
       pic('🔡','🥫','Dose', ['D','B','P'], 0, 'D-ose: erster Laut „D".'),
       pic('🔡','👃','Nase', ['N','M','H'], 0, 'N-ase: erster Laut „N".'),
       pic('🔡','🚀','Rakete', ['R','L','W'], 0, 'R-akete: erster Laut „R".'),
       pic('🔡','🪮','Kamm', ['K','G','T'], 0, 'K-amm: erster Laut „K".'),
-      pic('🔡','🍽️','Tisch', ['T','D','P'], 0, 'T-isch: erster Laut „T".'),
+      pic('🔡','🐯','Tiger', ['T','D','P'], 0, 'T-iger: erster Laut „T".'),
       pic('🔡','☁️','Wolke', ['W','M','B'], 0, 'W-olke: erster Laut „W".'),
       pic('🔡','🦓','Zebra', ['Z','S','T'], 0, 'Z-ebra: erster Laut „Z".'),
       pic('🔡','💡','Lampe', ['L','N','M'], 0, 'L-ampe: erster Laut „L".'),
@@ -527,7 +527,7 @@ const content = {
       pic('🔡','🎩','Hut', ['H','F','W'], 0, 'H-ut: erster Laut „H".'),
       pic('🔡','🧥','Jacke', ['J','Y','G'], 0, 'J-acke: erster Laut „J".'),
       pic('🔡','🍊','Orange', ['O','A','U'], 0, 'O-range: erster Laut „O".'),
-      pic('🔡','🐧','Pinguin', ['P','B','T'], 0, 'P-inguin: erster Laut „P".'),
+      pic('🔡','🍄','Pilz', ['P','B','T'], 0, 'P-ilz: erster Laut „P".'),
       pic('🔡','🦉','Uhu', ['U','O','A'], 0, 'U-hu: erster Laut „U".'),
       pic('🔡','🐦','Vogel', ['V','F','W'], 0, 'V-ogel klingt wie „F", wird aber mit V geschrieben.'),
       pic('🔡','🐃','Yak', ['Y','J','I'], 0, 'Y-ak: erster Laut „Y".'),
@@ -813,7 +813,9 @@ function diagItem(domainId, level, usedSet){
   const pool = content[domainId][level] || [];
   const candidates = usedSet ? pool.filter(i => !usedSet.has(i)) : pool;
   const choices = candidates.length ? candidates : pool;
-  return choices[Math.floor(Math.random()*choices.length)];
+  const original = choices[Math.floor(Math.random()*choices.length)];
+  if(usedSet) usedSet.add(original);
+  return original;
 }
 
 /* ============================================================
@@ -917,8 +919,12 @@ function speak(text){
     const u = new SpeechSynthesisUtterance(text);
     u.lang='de-DE'; u.rate=0.95;
     const deVoices = cachedVoices.filter(v=>v.lang && v.lang.toLowerCase().startsWith('de'));
-    const deVoice = deVoices.find(v=>/enhanced|premium|neural/i.test(v.name||'')) || deVoices[0];
-    if(deVoice) u.voice = deVoice;
+    const enhancedVoice = deVoices.find(v=>/enhanced|premium|neural/i.test(v.name||''));
+    if(enhancedVoice) u.voice = enhancedVoice;
+    // Ohne besonders gekennzeichnete Stimme: keine Stimme fest vorgeben,
+    // damit der Browser/das Betriebssystem seine eigene Standardauswahl
+    // für "de-DE" trifft - das entspricht eher der auf dem Gerät
+    // eingestellten Stimme, als wenn wir selbst irgendeine erzwingen.
     let started = false;
     u.onstart = ()=>{ started = true; };
     u.onerror = ()=>{ warnNoTts(); };
@@ -1118,9 +1124,8 @@ window.diagAnswer = function(given){
     state.diag.midCorrect = correct;
     const nextLevel = correct ? 3 : 1;
     state.diag.stage = correct ? 'high' : 'low';
-    state.diag.current = diagItem(d.id, nextLevel, state.diag.usedItems);
+    state.diag.current = shuffleOptions(diagItem(d.id, nextLevel, state.diag.usedItems));
     state.diag.currentLevel = nextLevel;
-    state.diag.usedItems.add(state.diag.current);
     render();
     return;
   }
@@ -1133,9 +1138,8 @@ window.diagAnswer = function(given){
     else tentative=1;
     state.diag.tentativeLevel = tentative;
     state.diag.stage = 'confirm';
-    state.diag.current = diagItem(d.id, tentative, state.diag.usedItems);
+    state.diag.current = shuffleOptions(diagItem(d.id, tentative, state.diag.usedItems));
     state.diag.currentLevel = tentative;
-    state.diag.usedItems.add(state.diag.current);
     render();
     return;
   }
@@ -1165,9 +1169,8 @@ window.diagAnswer = function(given){
   state.diag.stage='mid';
   state.diag.midCorrect=null;
   const nd = domains[state.diag.domainIndex].id;
-  state.diag.current = diagItem(nd, 2, state.diag.usedItems);
+  state.diag.current = shuffleOptions(diagItem(nd, 2, state.diag.usedItems));
   state.diag.currentLevel = 2;
-  state.diag.usedItems.add(state.diag.current);
   render();
 };
 
@@ -1265,10 +1268,9 @@ window.startDiagnose = function(){
   const firstId = domains[0].id;
   const used = new Set();
   const firstItem = diagItem(firstId, 2, used);
-  used.add(firstItem);
   state.diag = {
     domainIndex:0, stage:'mid', midCorrect:null, tentativeLevel:null, currentLevel:2,
-    current: firstItem, usedItems: used, domainResults: {},
+    current: shuffleOptions(firstItem), usedItems: used, domainResults: {},
   };
   state.screen='diagnose';
   render();
@@ -1351,6 +1353,18 @@ function shuffle(arr){
   return a;
 }
 
+// Antwortoptionen jedes Mal neu mischen, statt immer in derselben
+// Reihenfolge zu zeigen - sonst lernen Kinder "die richtige Antwort ist
+// immer links", statt die Aufgabe wirklich zu lösen.
+function shuffleOptions(item){
+  if(!item || !item.options || item.options.length < 2) return item;
+  const idx = item.options.map((_,i)=>i);
+  const order = shuffle(idx);
+  const newOptions = order.map(i=>item.options[i]);
+  const newAnswer = order.indexOf(item.answer);
+  return {...item, options:newOptions, answer:newAnswer};
+}
+
 let flashIntervalId = null;
 function clearFlashInterval(){
   if(flashIntervalId){ clearInterval(flashIntervalId); flashIntervalId = null; }
@@ -1386,7 +1400,7 @@ function pickPracticeItem(){
     }
     p.queue = shuffled;
   }
-  p.current = p.queue.shift();
+  p.current = shuffleOptions(p.queue.shift());
   p.answered=false;
   p.message=null;
   if(p.current && p.current.type==='flash'){
@@ -1405,6 +1419,8 @@ function screenPractice(){
   if(p.answered){
     if(p.lastCorrect){
       feedback = `<div class="feedback-box feedback-good">✅ Richtig! ${p.levelUpMsg||'Weiter so!'}</div>`;
+    } else if(p.lastGiven==='__SKIP__'){
+      feedback = `<div class="feedback-box feedback-tip">💡 Kein Problem, das lernst du noch! Hier die Erklärung:<br><br>${item.tip}${p.levelDownMsg?('<br><br>'+p.levelDownMsg):''}</div>`;
     } else {
       const hintLine = item.type==='input' ? (diffHint(p.lastGiven, item.answer) + '<br><br>') : '';
       feedback = `<div class="feedback-box feedback-tip">💡 Das war leider noch nicht richtig – versuche es noch mal. Das schaffst du!<br><br>${hintLine}${item.tip}${p.levelDownMsg?('<br><br>'+p.levelDownMsg):''}</div>`;
@@ -1413,6 +1429,9 @@ function screenPractice(){
   }
 
   const bodyHtml = p.answered ? renderItemBodyStatic(item, p.lastGiven) : renderItemBody(item, 'practiceAnswer');
+  const skipBtn = (!p.answered && item.type!=='flash' && p.level>=2)
+    ? `<button class="btn btn-ghost" style="margin-top:14px;font-size:0.95rem;" onclick="practiceDontKnow()">🤷 Weiß ich nicht</button>`
+    : '';
 
   return `
   ${topbar(d.name, d.sub, true)}
@@ -1421,10 +1440,15 @@ function screenPractice(){
     <div class="prompt-card">
       <div class="domain-tag" style="background:${d.color}22;">${d.icon} Stufe ${p.level} von 3</div>
       ${bodyHtml}
+      ${skipBtn}
       ${feedback}
     </div>
   </main>`;
 }
+
+window.practiceDontKnow = function(){
+  window.practiceAnswer('__SKIP__');
+};
 
 function renderItemBodyStatic(item, given){
   if(item.type==='flash'){
@@ -1502,14 +1526,6 @@ window.practiceAnswer = function(given){
   const correct = checkAnswer(item, given);
   p.answered = true;
   p.lastCorrect = correct;
-  if(correct){
-    speak('Richtig! Weiter so!');
-  } else if(item.type==='input'){
-    const hint = diffHint(given, item.answer);
-    speak('Das war leider noch nicht richtig. ' + hint + ' Versuche es noch einmal, das schaffst du! ' + item.tip);
-  } else {
-    speak('Das war leider noch nicht richtig. Versuche es noch einmal, das schaffst du! ' + item.tip);
-  }
   p.lastGiven = given;
   p.itemsDone++;
   p.levelUpMsg=null; p.levelDownMsg=null;
@@ -1552,6 +1568,17 @@ window.practiceAnswer = function(given){
   const dObj = domains.find(x=>x.id===p.domainId);
   if(dObj && domainStatus(dObj).status==='mastered' && !state.mastery[p.domainId]){
     state.mastery[p.domainId] = {nextReviewAt: addDays(todayStr(), 14)};
+  }
+
+  if(correct){
+    speak('Richtig! ' + (p.levelUpMsg || 'Weiter so!'));
+  } else if(given==='__SKIP__'){
+    speak('Kein Problem, das lernst du noch! ' + item.tip + (p.levelDownMsg ? ' ' + p.levelDownMsg : ''));
+  } else if(item.type==='input'){
+    const hint = diffHint(given, item.answer);
+    speak('Das war leider noch nicht richtig. ' + hint + ' Versuche es noch einmal, das schaffst du! ' + item.tip + (p.levelDownMsg ? ' ' + p.levelDownMsg : ''));
+  } else {
+    speak('Das war leider noch nicht richtig. Versuche es noch einmal, das schaffst du! ' + item.tip + (p.levelDownMsg ? ' ' + p.levelDownMsg : ''));
   }
 
   saveProgress();
@@ -1669,7 +1696,7 @@ function pickDrillItem(){
     state.screen = 'drilldone';
     return;
   }
-  d.current = d.queue.shift();
+  d.current = shuffleOptions(d.queue.shift());
   d.answered = false;
   d.lastGiven = null;
 }
