@@ -278,6 +278,7 @@ const domains = [
   {id:'schreib1', name:'Schreibwerft', sub:'Wörter lauttreu schreiben', icon:'⚓', color:'#0F3145'},
   {id:'schreib2', name:'Leuchtturm', sub:'Richtig schreiben mit Regeln', icon:'🗼', color:'#F4B93E'},
   {id:'grundwortschatz', name:'Speicherstadt', sub:'Hamburger Grundwortschatz üben', icon:'🧱', color:'#A34A3D'},
+  {id:'diktat', name:'Flaschenpost', sub:'Sätze diktieren & auf Papier schreiben', icon:'📝', color:'#6E4A8E'},
 ];
 
 // Entwicklungsstufen (angelehnt an die alphabetische → orthografische
@@ -287,8 +288,12 @@ const domains = [
 const TIERS = {
   phon:0, buchstabe:0, silbendock:0,
   lesen:1, schreib1:1,
-  schreib2:2, grundwortschatz:2,
+  schreib2:2, grundwortschatz:2, diktat:2,
 };
+// Flaschenpost braucht Papier und eine Erwachsenen-nahe Zeitspanne - kein
+// Teil der kurzen digitalen Einstiegsdiagnostik. Startet regulär bei Stufe 1,
+// sobald sie über die normale Stufen-Freischaltung erreichbar wird.
+const diagDomains = domains.filter(d => d.id !== 'diktat');
 const PREREQ_LEVEL = 2;   // Vorstufe muss mind. Stufe 2 erreicht haben
 const MASTERY_STARS = 12; // ab so vielen Sternen bei Stufe 3 gilt ein Bereich als gefestigt
 
@@ -369,6 +374,11 @@ const iCanStatements = {
     2:'Ich kann aus dem Gelesenen schließen, was als Nächstes passiert.',
     3:'Ich kann längere Texte lesen und auch versteckte Zusammenhänge verstehen.',
   },
+  diktat: {
+    1:'Ich kann einen kurzen, einfachen Satz nach dem Hören auf Papier aufschreiben.',
+    2:'Ich kann etwas längere Sätze aufschreiben und meine Schreibung selbst überprüfen.',
+    3:'Ich kann auch längere, kniffligere Sätze sicher aufschreiben.',
+  },
 };
 
 const levelGoals = {
@@ -417,6 +427,11 @@ const levelGoals = {
     2:'Jetzt musst du zwischen den Zeilen lesen: Die Antwort steht nicht wörtlich da, du musst sie erschließen.',
     3:'Längere Texte, mehr Zusammenhänge – du liest wie ein Profi-Leser.',
   },
+  diktat: {
+    1:'Hier schreibst du kurze Sätze auf, die du hörst – auf einem echten Blatt Papier! Danach vergleichst du selbst mit der Lösung.',
+    2:'Die Sätze werden etwas länger – schreib in deinem eigenen Tempo.',
+    3:'Jetzt kommen längere, kniffligere Sätze dran.',
+  },
 };
 
 // Eigene, konsistente Pflanzen-Wachstumsgrafik (statt uneinheitlicher Emojis
@@ -448,6 +463,26 @@ function plantIcon(stage, size){
   return `<svg viewBox="0 0 80 80" width="${size}" height="${size}" style="display:inline-block;vertical-align:middle;">${plant}${soil}</svg>`;
 }
 
+// "Lotse Lumi" - der kleine Kapitän, der die App bisher nur im Text begleitet
+// hat, jetzt auch als eigene, einfache Strichzeichnung (Vektorgrafik).
+function mascotIcon(size){
+  size = size || 70;
+  return `<svg viewBox="0 0 100 100" width="${size}" height="${size}" style="display:inline-block;vertical-align:middle;">
+    <path d="M20 96 Q20 70 50 68 Q80 70 80 96 Z" fill="#1B6E7F"/>
+    <path d="M35 78 L50 90 L65 78 L60 70 L50 76 L40 70 Z" fill="#FFFFFF"/>
+    <circle cx="50" cy="48" r="27" fill="#F2C9A0"/>
+    <circle cx="33" cy="54" r="5" fill="#F4A28C" opacity="0.55"/>
+    <circle cx="67" cy="54" r="5" fill="#F4A28C" opacity="0.55"/>
+    <circle cx="40" cy="45" r="3.2" fill="#173142"/>
+    <circle cx="60" cy="45" r="3.2" fill="#173142"/>
+    <path d="M38 58 Q50 67 62 58" stroke="#173142" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M18 34 Q50 8 82 34 Q84 40 78 40 L22 40 Q16 40 18 34 Z" fill="#0F3145"/>
+    <rect x="14" y="36" width="72" height="9" rx="4" fill="#0F3145"/>
+    <circle cx="50" cy="22" r="7" fill="#F4B93E"/>
+    <path d="M50 18 L50 27 M46.5 22 L53.5 22" stroke="#0F3145" stroke-width="1.6" stroke-linecap="round"/>
+  </svg>`;
+}
+
 function ch(prompt, options, answerIdx, tip, speakText){
   // Lückensätze: "___" nie mitlesen (verunsichert Kinder) - stattdessen
   // eine kurze Sprechpause an der Lückenstelle.
@@ -467,6 +502,33 @@ function pic(taskIcon, targetEmoji, targetWord, options, answerIdx, tip){
 // Bild muss angetippt werden, bevor die Zeit abläuft.
 function flash(word, options, answerIdx, tip){
   return {type:'flash', word, options, answer:answerIdx, tip, speak:word};
+}
+
+// Diktat: Satz wird langsam vorgelesen, auf Papier geschrieben, dann selbst
+// mit der eingeblendeten Lösung verglichen (falsche Wörter antippen).
+function dictate(sentence, tip){
+  return {type:'dictate', sentence, tip, speak:sentence};
+}
+
+// Handgeprüfte Tipps für Wörter aus den Flaschenpost-Sätzen, die ein echtes
+// Rechtschreibphänomen zeigen. Absichtlich NICHT automatisch aus dem Wort
+// geraten - ein falsch zugeordneter Tipp wäre schlimmer als ein neutraler.
+const wordTips = {
+  'bellt': 'Schwingen-Trick: kurzer Vokal, doppelter Buchstabe – be-llt.',
+  'sonne': 'Schwingen-Trick: kurzer Vokal, doppelter Buchstabe – So-nne.',
+  'ball': 'Schwingen-Trick: kurzer Vokal, doppelter Buchstabe – Ba-ll.',
+  'rund': 'Verlängern-Trick: runde. Jetzt hörst du das „d" am Ende.',
+  'hund': 'Verlängern-Trick: die Hunde. Jetzt hörst du das „d" am Ende.',
+  'freundin': 'Ableiten-Trick: von „Freund" – das „d" bleibt erhalten.',
+  'montag': 'Zusammengesetztes Wort: „Mond" + „Tag", nicht „Mont".',
+  'nachmittag': 'Zusammengesetztes Wort: „Nach" + „Mittag".',
+  'wochenende': 'Zusammengesetztes Wort: „Woche" + „Ende".',
+  'bäcker': 'Schwingen-Trick: „ck" nach kurzem Vokal – Bä-cker.',
+  'backt': 'Schwingen-Trick: „ck" nach kurzem Vokal – ba-ckt.',
+};
+function tipForWord(word){
+  const key = word.toLowerCase().replace(/[.,!?]/g,'');
+  return wordTips[key] || 'Schau dir dieses Wort noch einmal ganz genau an. Sprich es langsam in Silben.';
 }
 
 const content = {
@@ -805,6 +867,26 @@ const content = {
       ch('Der Bauer sah dunkle Wolken aufziehen und brachte die Kühe schnell in den Stall. Kurz danach fing es an zu regnen. Warum brachte der Bauer die Kühe in den Stall?', ['Weil er merkte, dass Regen kommt','Weil die Kühe müde waren','Weil es Zeit zum Melken war'], 0, 'Was verraten die dunklen Wolken?'),
     ],
   },
+  diktat: {
+    1:[
+      dictate('Der Hund bellt.', 'Achte auf den Punkt am Satzende!'),
+      dictate('Die Sonne scheint.', 'Achte auf den Punkt am Satzende!'),
+      dictate('Mama kocht Suppe.', 'Der Satz beginnt groß – wie jeder Satz.'),
+      dictate('Der Ball ist rund.', 'Vier Wörter, ein Punkt am Ende.'),
+    ],
+    2:[
+      dictate('Der kleine Hund läuft schnell.', 'Achte auf Großschreibung am Satzanfang und den Punkt am Ende.'),
+      dictate('Am Montag gehen wir schwimmen.', 'Achte auf Großschreibung am Satzanfang und den Punkt am Ende.'),
+      dictate('Die Kinder spielen im Garten.', 'Achte auf Großschreibung am Satzanfang und den Punkt am Ende.'),
+      dictate('Papa liest ein spannendes Buch.', 'Achte auf Großschreibung am Satzanfang und den Punkt am Ende.'),
+    ],
+    3:[
+      dictate('Nach der Schule spielt Lena mit ihrer Freundin.', 'Ein langer Satz: höre dir jeden Wortteil genau an.'),
+      dictate('Der Regen hört am Nachmittag endlich auf.', 'Ein langer Satz: höre dir jeden Wortteil genau an.'),
+      dictate('Wir fahren am Wochenende zu Oma und Opa.', 'Ein langer Satz: höre dir jeden Wortteil genau an.'),
+      dictate('Der Bäcker backt jeden Morgen frisches Brot.', 'Ein langer Satz: höre dir jeden Wortteil genau an.'),
+    ],
+  },
 };
 
 // Diagnostik nutzt gezielt: erstes Item aus Stufe 2 (Einstieg), dann
@@ -826,6 +908,7 @@ let state = {
   diag:{domainIndex:0, stage:'mid', midCorrect:null, current:null, answeredThisStep:false},
   levels:{}, stars:{}, diagDone:false, history:[], errorCounts:{}, attemptLogs:{},
   mastery:{}, selfChecks:[], pendingSelfCheck:null, pendingReview:false,
+  wordStore:[],
   needsBasicLetterDrill:false, drill:null,
   practice:{domainId:null, level:1, attemptLog:[], queue:[], current:null, itemsDone:0, answered:false, lastCorrect:null},
   showTeacher:false, showInfo:false, pendingDomain:null,
@@ -863,7 +946,7 @@ function saveProgress(){
       errorCounts: state.errorCounts, attemptLogs: state.attemptLogs,
       mastery: state.mastery, selfChecks: state.selfChecks,
       needsBasicLetterDrill: state.needsBasicLetterDrill,
-      diagReports: state.diagReports,
+      diagReports: state.diagReports, wordStore: state.wordStore,
     }));
   }catch(e){}
 }
@@ -882,6 +965,7 @@ function loadProgress(){
       state.selfChecks = d.selfChecks || [];
       state.needsBasicLetterDrill = !!d.needsBasicLetterDrill;
       state.diagReports = d.diagReports || [];
+      state.wordStore = d.wordStore || [];
     }
   }catch(e){}
 }
@@ -889,7 +973,7 @@ window.confirmReset = function(){
   if(confirm('Fortschritt wirklich löschen und neu starten?')){
     state.levels={}; state.stars={}; state.diagDone=false; state.history=[];
     state.errorCounts={}; state.attemptLogs={}; state.mastery={}; state.selfChecks=[];
-    state.needsBasicLetterDrill=false; state.diagReports=[];
+    state.needsBasicLetterDrill=false; state.diagReports=[]; state.wordStore=[];
     try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
     state.showTeacher=false;
     state.screen='start';
@@ -909,7 +993,7 @@ if('speechSynthesis' in window){
     window.speechSynthesis.onvoiceschanged = refreshVoices;
   }catch(e){}
 }
-function speak(text){
+function speak(text, rate){
   if(!('speechSynthesis' in window) || typeof SpeechSynthesisUtterance === 'undefined'){
     warnNoTts();
     return;
@@ -917,7 +1001,7 @@ function speak(text){
   try{
     refreshVoices();
     const u = new SpeechSynthesisUtterance(text);
-    u.lang='de-DE'; u.rate=0.95;
+    u.lang='de-DE'; u.rate=rate||0.95;
     const deVoices = cachedVoices.filter(v=>v.lang && v.lang.toLowerCase().startsWith('de'));
     const enhancedVoice = deVoices.find(v=>/enhanced|premium|neural/i.test(v.name||''));
     if(enhancedVoice) u.voice = enhancedVoice;
@@ -961,6 +1045,7 @@ window.speakCurrent = function(){
 
 function checkAnswer(item, given){
   if(item.type==='choice' || item.type==='pic' || item.type==='flash') return given===item.answer;
+  if(item.type==='dictate') return given===0;
   const norm = s => (s||'').toString().trim().toLowerCase().replace(/ß/g,'ss');
   return norm(given)===norm(item.answer).replace(/ß/g,'ss');
 }
@@ -1041,9 +1126,9 @@ function renderInfoOverlay(){
 }
 
 function screenDiagnose(){
-  const d = domains[state.diag.domainIndex];
+  const d = diagDomains[state.diag.domainIndex];
   const item = state.diag.current;
-  const totalSteps = domains.length*3;
+  const totalSteps = diagDomains.length*3;
   const stepOf = {mid:0, high:1, low:1, confirm:2};
   const doneSteps = state.diag.domainIndex*3 + (stepOf[state.diag.stage]||0);
   const pct = Math.round((doneSteps/totalSteps)*100);
@@ -1065,6 +1150,26 @@ function screenDiagnose(){
 }
 
 function renderItemBody(item, handlerName){
+  if(item.type==='dictate'){
+    const p = state.practice;
+    if(!p.dictatePhase || p.dictatePhase==='listen'){
+      return `
+        <div class="task-instr">📝 Schreibe den Satz auf ein Blatt Papier, den du hörst.</div>
+        <button class="speak-btn" onclick="speakDictateSlow()">🔊</button>
+        <p style="font-size:0.92rem;color:#4B6473;margin:10px 0;">Nimm dir Zeit. Du kannst den Satz mehrmals anhören. Wenn du fertig geschrieben hast, vergleiche mit der Lösung.</p>
+        <button class="btn btn-primary btn-block" style="margin-top:10px;" onclick="dictateCompare()">👀 Jetzt vergleichen</button>`;
+    }
+    const words = item.sentence.split(' ');
+    const wordBtns = words.map((w,i)=>{
+      const marked = p.markedWords && p.markedWords[i];
+      return `<button onclick="toggleDictateWord(${i})" style="margin:4px;padding:9px 13px;border-radius:10px;border:2px solid var(--line);font-size:1.15rem;font-family:'Atkinson Hyperlegible';font-weight:700;background:${marked?'#F1A38B':'var(--sand)'};color:${marked?'#fff':'var(--ink)'};">${w}</button>`;
+    }).join('');
+    return `
+      <div class="task-instr">👀 Vergleiche mit deinem Blatt. Tippe die Wörter an, die du anders geschrieben hast.</div>
+      <button class="speak-btn" onclick="speakDictateSlow()">🔊</button>
+      <div style="text-align:center;line-height:2.4;margin:10px 0;">${wordBtns}</div>
+      <button class="btn btn-primary btn-block" style="margin-top:10px;" onclick="dictateSubmit()">✅ Fertig</button>`;
+  }
   if(item.type==='flash'){
     const secs = (state.practice && state.practice.flashSecondsLeft) || 0;
     const cls = item.options.length<=2 ? 'pic-options two' : 'pic-options';
@@ -1114,7 +1219,7 @@ window.diagDontKnow = function(){
 };
 
 window.diagAnswer = function(given){
-  const d = domains[state.diag.domainIndex];
+  const d = diagDomains[state.diag.domainIndex];
   const item = state.diag.current;
   const correct = checkAnswer(item, given);
   const dr = state.diag.domainResults[d.id] = state.diag.domainResults[d.id] || {};
@@ -1153,7 +1258,7 @@ window.diagAnswer = function(given){
   delete state.attemptLogs[d.id]; // alte Versuchsdaten passen ggf. nicht mehr zur neuen Stufe
 
   state.diag.domainIndex++;
-  if(state.diag.domainIndex>=domains.length){
+  if(state.diag.domainIndex>=diagDomains.length){
     state.diagDone = true;
     if(state.levels.buchstabe === 1){
       state.needsBasicLetterDrill = true;
@@ -1168,7 +1273,7 @@ window.diagAnswer = function(given){
   }
   state.diag.stage='mid';
   state.diag.midCorrect=null;
-  const nd = domains[state.diag.domainIndex].id;
+  const nd = diagDomains[state.diag.domainIndex].id;
   state.diag.current = shuffleOptions(diagItem(nd, 2, state.diag.usedItems));
   state.diag.currentLevel = 2;
   render();
@@ -1241,31 +1346,43 @@ function screenMap(){
 
   const drillBanner = state.needsBasicLetterDrill ? `
     <div class="prompt-card" style="text-align:center;border-color:var(--coral);margin-bottom:16px;">
-      <div style="font-size:0.95rem;color:var(--harbor-dark);font-family:'Baloo 2';font-weight:700;">🔤 Kurzes Buchstaben-Training empfohlen</div>
+      ${mascotIcon(44)}
+      <div style="font-size:0.95rem;color:var(--harbor-dark);font-family:'Baloo 2';font-weight:700;margin-top:4px;">🔤 Kurzes Buchstaben-Training empfohlen</div>
       <p style="font-size:0.88rem;color:#4B6473;margin:6px 0 10px;">Ein paar Buchstaben-Laute wirken noch unsicher.</p>
       <button class="btn btn-primary" style="padding:10px 20px;" onclick="startLetterDrill()">▶️ Jetzt üben</button>
     </div>` : '';
 
   const vertiefungBanner = advancedUnlocked() ? `
     <div class="prompt-card" style="text-align:center;border-color:var(--foam);margin-bottom:16px;">
-      <div style="font-size:0.95rem;color:var(--harbor-dark);font-family:'Baloo 2';font-weight:700;">🔭 Vertiefung freigeschaltet!</div>
+      ${mascotIcon(44)}
+      <div style="font-size:0.95rem;color:var(--harbor-dark);font-family:'Baloo 2';font-weight:700;margin-top:4px;">🔭 Vertiefung freigeschaltet!</div>
       <p style="font-size:0.88rem;color:#4B6473;margin:6px 0 10px;">Für besonders sichere Leser: Blitzlesen &amp; Textverständnis.</p>
       <button class="btn btn-primary" style="padding:10px 20px;" onclick="goVertiefung()">▶️ Entdecken</button>
+    </div>` : '';
+
+  const wordStoreBanner = (state.wordStore && state.wordStore.length>0) ? `
+    <div class="prompt-card" style="text-align:center;border-color:#6E4A8E;margin-bottom:16px;">
+      ${mascotIcon(44)}
+      <div style="font-size:0.95rem;color:var(--harbor-dark);font-family:'Baloo 2';font-weight:700;margin-top:4px;">📥 ${state.wordStore.length} eigene Wörter zum Üben</div>
+      <p style="font-size:0.88rem;color:#4B6473;margin:6px 0 10px;">Wörter aus Flaschenpost, die noch nicht sicher saßen.</p>
+      <button class="btn btn-primary" style="padding:10px 20px;" onclick="startWordReview()">▶️ Jetzt üben</button>
     </div>` : '';
 
   return `
   ${topbar('Deine Hafenkarte','Wähle eine Station', false)}
   <main>
-    <p style="font-size:0.92rem;color:#4B6473;margin:14px 0 4px;">Lotse Lumi hat deinen Startpunkt gefunden. Übe in jeder Station – die Aufgaben passen sich automatisch an dein Tempo an.</p>
+    <div style="text-align:center;margin-top:10px;">${mascotIcon(64)}</div>
+    <p style="font-size:0.92rem;color:#4B6473;margin:10px 0 4px;text-align:center;">Lotse Lumi hat deinen Startpunkt gefunden. Übe in jeder Station – die Aufgaben passen sich automatisch an dein Tempo an.</p>
     ${drillBanner}
     ${vertiefungBanner}
+    ${wordStoreBanner}
     <div class="map-wrap">${rows}</div>
     <p class="footnote">⚓ zeigt deine aktuelle Übungsstufe (1–3), ⭐ deine gesammelten Sterne, 🏆 einen gefestigten Bereich, 🔒 einen Bereich, der noch etwas wartet.</p>
   </main>`;
 }
 
 window.startDiagnose = function(){
-  const firstId = domains[0].id;
+  const firstId = diagDomains[0].id;
   const used = new Set();
   const firstItem = diagItem(firstId, 2, used);
   state.diag = {
@@ -1327,7 +1444,7 @@ function screenGoal(){
   <main>
     <div class="prompt-card" style="margin-top:20px;">
       <div class="domain-tag" style="background:${d.color}22;">${state.pendingReview ? '🔁 Auffrischen' : d.icon+' Stufe '+level+' von 3'}</div>
-      <div style="font-size:3rem;margin:8px 0;">${d.icon}</div>
+      <div style="margin:8px 0;">${mascotIcon(72)}</div>
       <p style="font-size:1.1rem;line-height:1.55;color:var(--harbor-dark);font-family:'Baloo 2';font-weight:600;">${goal}</p>
       <button class="speak-btn" onclick="speakGoal()">🔊</button>
       <button class="btn btn-primary btn-block" style="margin-top:14px;" onclick="startPracticeSession()">Los geht's! ▶️</button>
@@ -1408,6 +1525,10 @@ function pickPracticeItem(){
   } else {
     clearFlashInterval();
   }
+  if(p.current && p.current.type==='dictate'){
+    p.dictatePhase = 'listen';
+    p.markedWords = p.current.sentence.split(' ').map(()=>false);
+  }
 }
 
 function screenPractice(){
@@ -1419,6 +1540,8 @@ function screenPractice(){
   if(p.answered){
     if(p.lastCorrect){
       feedback = `<div class="feedback-box feedback-good">✅ Richtig! ${p.levelUpMsg||'Weiter so!'}</div>`;
+    } else if(item.type==='dictate'){
+      feedback = `<div class="feedback-box feedback-tip">💡 Okay, dieses Wort hast du noch nicht ganz richtig geschrieben. Das üben wir einfach noch mal.${p.levelDownMsg?('<br><br>'+p.levelDownMsg):''}</div>`;
     } else if(p.lastGiven==='__SKIP__'){
       feedback = `<div class="feedback-box feedback-tip">💡 Kein Problem, das lernst du noch! Hier die Erklärung:<br><br>${item.tip}${p.levelDownMsg?('<br><br>'+p.levelDownMsg):''}</div>`;
     } else {
@@ -1446,11 +1569,79 @@ function screenPractice(){
   </main>`;
 }
 
+window.dictateCompare = function(){
+  state.practice.dictatePhase = 'compare';
+  render();
+};
+
+window.toggleDictateWord = function(i){
+  const p = state.practice;
+  if(!p.markedWords) return;
+  p.markedWords[i] = !p.markedWords[i];
+  render();
+};
+
+window.dictateSubmit = function(){
+  const p = state.practice;
+  const marks = p.markedWords||[];
+  const words = (p.current.sentence||'').split(' ');
+  words.forEach((w,i)=>{
+    if(!marks[i]) return;
+    const clean = w.replace(/[.,!?]/g,'');
+    const key = clean.toLowerCase();
+    const existing = state.wordStore.find(x=>x.word.toLowerCase()===key);
+    if(existing){
+      existing.streak = 0; // wieder falsch -> Fortschritt im Speicher zurücksetzen
+    } else {
+      state.wordStore.push({word:clean, tip:tipForWord(clean), streak:0, added:todayStr()});
+    }
+  });
+  const wrongCount = marks.filter(Boolean).length;
+  saveProgress();
+  window.practiceAnswer(wrongCount);
+};
+
+window.speakDictateSlow = function(){
+  const p = state.practice;
+  if(p.current && p.current.type==='dictate') speak(p.current.speak, 0.65);
+};
+
 window.practiceDontKnow = function(){
   window.practiceAnswer('__SKIP__');
 };
 
+window.startWordReview = function(){
+  if(!state.wordStore || state.wordStore.length===0) return;
+  const pool = shuffle(state.wordStore).slice(0, Math.min(6, state.wordStore.length));
+  const items = pool.map(w=>{
+    const it = inp('Schreibe das Wort, das du hörst.', w.word.toLowerCase(), w.tip, w.word);
+    it.storeKey = w.word.toLowerCase();
+    return it;
+  });
+  state.practice = {
+    domainId:'schreib1', level: state.levels.schreib1||1, isWordReview:true,
+    sessionTarget: items.length, sessionErrors:0,
+    attemptLog:[], queue: items.slice(1),
+    itemsDone:0, answered:false, lastCorrect:null, current: items[0],
+    levelUpMsg:null, levelDownMsg:null,
+  };
+  state.screen='practice';
+  render();
+  speak('Wiederholung: Wörter, die du dir schon einmal gemerkt hast.');
+};
+
 function renderItemBodyStatic(item, given){
+  if(item.type==='dictate'){
+    const words = item.sentence.split(' ');
+    const p = state.practice;
+    const wordSpans = words.map((w,i)=>{
+      const marked = p.markedWords && p.markedWords[i];
+      return marked ? `<span style="color:var(--coral-dark);text-decoration:underline;">${w}</span>` : w;
+    }).join(' ');
+    return `
+      <div class="task-instr">📝 Dein Vergleich:</div>
+      <p style="font-size:1.3rem;font-family:'Baloo 2';font-weight:600;margin-top:10px;line-height:1.6;">${wordSpans}</p>`;
+  }
   if(item.type==='flash'){
     const cls = item.options.length<=2 ? 'pic-options two' : 'pic-options';
     return `
@@ -1534,44 +1725,63 @@ window.practiceAnswer = function(given){
   p.attemptLog.push(correct);
   if(p.attemptLog.length > 12) p.attemptLog.shift();
 
-  if(correct){
-    state.stars[p.domainId] = (state.stars[p.domainId]||0)+1;
+  if(p.isWordReview){
+    // Wortspeicher-Wiederholung: eigene, einfache Logik statt Phonemstufen.
+    if(item.storeKey){
+      const entry = state.wordStore.find(w=>w.word.toLowerCase()===item.storeKey);
+      if(entry){
+        if(correct){
+          entry.streak = (entry.streak||0) + 1;
+          if(entry.streak >= 2){
+            state.wordStore = state.wordStore.filter(w=>w!==entry);
+          }
+        } else {
+          entry.streak = 0;
+        }
+      }
+    }
   } else {
-    state.errorCounts[p.domainId] = (state.errorCounts[p.domainId]||0)+1;
-  }
-
-  let levelChanged = false;
-  // Aufstieg erst, wenn genug geübt wurde UND die Fehlerquote zuletzt
-  // erkennbar niedrig ist – reines Raten reicht nicht mehr aus.
-  if(p.level<3 && p.attemptLog.length>=8){
-    const lastSix = p.attemptLog.slice(-6);
-    if(lastSix.filter(x=>!x).length<=1){
-      p.level++;
-      p.attemptLog=[]; p.queue=[];
-      levelChanged = true;
-      p.levelUpMsg = '⬆️ Klasse gemacht – du gehst eine Stufe hoch! ' + (levelGoals[p.domainId]||{})[p.level];
+    if(correct){
+      state.stars[p.domainId] = (state.stars[p.domainId]||0)+1;
+    } else {
+      state.errorCounts[p.domainId] = (state.errorCounts[p.domainId]||0)+1;
     }
-  }
-  if(!levelChanged && p.level>1 && !correct){
-    const lastFour = p.attemptLog.slice(-4);
-    if(lastFour.filter(x=>!x).length>=3){
-      p.level--;
-      p.attemptLog=[]; p.queue=[];
-      p.levelDownMsg = '⬇️ Wir gehen eine Stufe zurück und üben das erst noch etwas.';
-      delete state.mastery[p.domainId]; // war ggf. gemeistert, ist es jetzt nicht mehr
-    }
-  }
-  state.levels[p.domainId] = p.level;
-  state.attemptLogs[p.domainId] = {level:p.level, log:p.attemptLog};
 
-  // Erstmalig gemeistert? Dann in zwei Wochen zur Auffrischung wieder vorlegen.
-  const dObj = domains.find(x=>x.id===p.domainId);
-  if(dObj && domainStatus(dObj).status==='mastered' && !state.mastery[p.domainId]){
-    state.mastery[p.domainId] = {nextReviewAt: addDays(todayStr(), 14)};
+    let levelChanged = false;
+    // Aufstieg erst, wenn genug geübt wurde UND die Fehlerquote zuletzt
+    // erkennbar niedrig ist – reines Raten reicht nicht mehr aus.
+    if(p.level<3 && p.attemptLog.length>=8){
+      const lastSix = p.attemptLog.slice(-6);
+      if(lastSix.filter(x=>!x).length<=1){
+        p.level++;
+        p.attemptLog=[]; p.queue=[];
+        levelChanged = true;
+        p.levelUpMsg = '⬆️ Klasse gemacht – du gehst eine Stufe hoch! ' + (levelGoals[p.domainId]||{})[p.level];
+      }
+    }
+    if(!levelChanged && p.level>1 && !correct){
+      const lastFour = p.attemptLog.slice(-4);
+      if(lastFour.filter(x=>!x).length>=3){
+        p.level--;
+        p.attemptLog=[]; p.queue=[];
+        p.levelDownMsg = '⬇️ Wir gehen eine Stufe zurück und üben das erst noch etwas.';
+        delete state.mastery[p.domainId]; // war ggf. gemeistert, ist es jetzt nicht mehr
+      }
+    }
+    state.levels[p.domainId] = p.level;
+    state.attemptLogs[p.domainId] = {level:p.level, log:p.attemptLog};
+
+    // Erstmalig gemeistert? Dann in zwei Wochen zur Auffrischung wieder vorlegen.
+    const dObj = domains.find(x=>x.id===p.domainId);
+    if(dObj && domainStatus(dObj).status==='mastered' && !state.mastery[p.domainId]){
+      state.mastery[p.domainId] = {nextReviewAt: addDays(todayStr(), 14)};
+    }
   }
 
   if(correct){
     speak('Richtig! ' + (p.levelUpMsg || 'Weiter so!'));
+  } else if(item.type==='dictate'){
+    speak('Okay, dieses Wort hast du noch nicht ganz richtig geschrieben. Das üben wir einfach noch mal.' + (p.levelDownMsg ? ' ' + p.levelDownMsg : ''));
   } else if(given==='__SKIP__'){
     speak('Kein Problem, das lernst du noch! ' + item.tip + (p.levelDownMsg ? ' ' + p.levelDownMsg : ''));
   } else if(item.type==='input'){
@@ -1590,6 +1800,12 @@ window.nextPracticeItem = function(){
   state.levels[p.domainId] = p.level;
   const target = p.sessionTarget || 6;
   if(p.itemsDone >= target){
+    if(p.isWordReview){
+      saveProgress();
+      state.screen = 'map';
+      render();
+      return;
+    }
     if(p.isReview){
       const today = todayStr();
       if(p.level>=3){
@@ -1617,6 +1833,7 @@ function screenSelfCheck(){
   ${topbar('Wie siehst du das?', null, false)}
   <main>
     <div class="prompt-card" style="margin-top:20px;text-align:center;">
+      <div style="margin-bottom:8px;">${mascotIcon(56)}</div>
       <div style="font-size:1.1rem;line-height:1.5;color:var(--harbor-dark);font-family:'Baloo 2';font-weight:700;margin-bottom:6px;">${statement}</div>
       <button class="speak-btn" onclick="speakSelfCheck()">🔊</button>
       <div style="font-size:1rem;color:#4B6473;margin:14px 0 16px;">Was stimmt für dich?</div>
@@ -1666,7 +1883,7 @@ function screenDrillOffer(){
   ${topbar('Kurzer Vorschlag', null, false)}
   <main>
     <div class="prompt-card" style="margin-top:20px;text-align:center;">
-      <div style="font-size:3rem;margin-bottom:10px;">🌉</div>
+      <div style="margin-bottom:10px;">${mascotIcon(72)}</div>
       <p style="font-size:1.05rem;line-height:1.55;color:var(--harbor-dark);font-family:'Baloo 2';font-weight:600;">${DRILL_OFFER_TEXT}</p>
       <button class="speak-btn" onclick="speak(DRILL_OFFER_TEXT)">🔊</button>
       <button class="btn btn-primary btn-block" style="margin-top:14px;" onclick="startLetterDrill()">▶️ Jetzt üben</button>
