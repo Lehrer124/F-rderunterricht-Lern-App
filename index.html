@@ -280,8 +280,8 @@ const domains = [
   {id:'schreib1', name:'Schreibwerft', sub:'Wörter lauttreu schreiben', icon:'⚓', color:'#0F3145'},
   {id:'schreib2', name:'Leuchtturm', sub:'Richtig schreiben mit Regeln', icon:'🗼', color:'#F4B93E'},
   {id:'grundwortschatz', name:'Speicherstadt', sub:'Hamburger Grundwortschatz üben', icon:'🧱', color:'#A34A3D'},
-  {id:'diktat', name:'Flaschenpost', sub:'Sätze diktieren & auf Papier schreiben', icon:'📝', color:'#6E4A8E'},
   {id:'satzbau', name:'Satzwerft', sub:'Ganze Sätze aus Bildern bauen & schreiben', icon:'🧩', color:'#2E6E8E'},
+  {id:'diktat', name:'Flaschenpost', sub:'Sätze diktieren & auf Papier schreiben', icon:'📝', color:'#6E4A8E'},
 ];
 
 // Entwicklungsstufen (angelehnt an die alphabetische → orthografische
@@ -291,8 +291,8 @@ const domains = [
 const TIERS = {
   phon:0, buchstabe:0, silbendock:0,
   lesen:1, schreib1:1,
-  schreib2:2, grundwortschatz:2, diktat:2,
-  satzbau:3,
+  schreib2:2, grundwortschatz:2, satzbau:2,
+  diktat:3,
 };
 // Flaschenpost und Satzwerft brauchen Papier bzw. freie Konstruktion - kein
 // Teil der kurzen digitalen Einstiegsdiagnostik. Starten regulär bei Stufe 1,
@@ -528,8 +528,8 @@ function inp(prompt, answer, tip, speakText, pictureEmoji, cutMs){
 // Bildbasierte Aufgabe: kein Lesen von Wörtern nötig, um die Aufgabe zu
 // verstehen. taskIcon zeigt den Aufgabentyp, targetEmoji das Zielwort als
 // Bild, options sind große Symbole/Buchstaben/Wörter zum Antippen.
-function pic(taskIcon, targetEmoji, targetWord, options, answerIdx, tip, niko){
-  return {type:'pic', taskIcon, targetEmoji, options, answer:answerIdx, tip, speak:targetWord, niko:!!niko};
+function pic(taskIcon, targetEmoji, targetWord, options, answerIdx, tip, niko, audioKey){
+  return {type:'pic', taskIcon, targetEmoji, options, answer:answerIdx, tip, speak:targetWord, niko:!!niko, audioKey};
 }
 
 // Blitzlesen: Wort erscheint, ein sichtbarer Countdown läuft, das passende
@@ -659,7 +659,7 @@ const content = {
       pic('🔡','🍊','Orange', ['O','A','U'], 0, 'O-range: erster Laut „O".'),
       pic('🔡','🍄','Pilz', ['P','B','T'], 0, 'P-ilz: erster Laut „P".'),
       pic('🔡','🦉','Uhu', ['U','O','A'], 0, 'U-hu: erster Laut „U".'),
-      pic('🔡','🐦','Vogel', ['V','F','W'], 0, 'V-ogel klingt wie „F", wird aber mit V geschrieben.', true),
+      pic('🔡','🐦','Vogel', ['V','F','W'], 0, 'V-ogel klingt wie „F", wird aber mit V geschrieben.', true, 'V1'),
       pic('🔡','🐃','Yak', ['Y','J','I'], 0, 'Y-ak: erster Laut „Y".', true),
       pic('🔠','X','X', ['x','y','k'], 0, 'Großes X und kleines x klingen gleich – nur die Form ist anders.'),
       pic('🔠','A','A', ['a','e','o'], 0, 'Großes A und kleines a klingen gleich – nur die Form ist anders.'),
@@ -1164,6 +1164,48 @@ if('speechSynthesis' in window){
 // unangetastet, das ist ein anderes Zeichen.
 function stripSyllableHyphens(text){
   return (text||'').replace(/([a-zA-ZäöüÄÖÜß])-(?=[a-zA-ZäöüÄÖÜß])/g, '$1');
+}
+
+// Echte Sprachaufnahmen für isolierte Laute (z.B. "A.m4a", "V1.m4a") -
+// umgehen das TTS-Problem komplett, weil eine Audiodatei einfach abspielt,
+// was aufgenommen wurde, ohne über Text-Ausspracheregeln zu gehen. Fehlt
+// eine Datei oder schlägt die Wiedergabe fehl, fällt es automatisch auf die
+// normale Sprachausgabe (das ganze Wort) zurück - nichts bricht ab.
+// Spielt die Aufnahme des isolierten Lauts ab und spricht danach das ganze
+// Wort - wartet auf das tatsächliche Ende der Aufnahme (kein geratenes
+// Timing). Fehlt die Aufnahme, wird nur das Wort gesprochen.
+function playLetterSoundThenWord(key, word){
+  if(!key){ speak(word); return; }
+  try{
+    const audio = new Audio(key + '.m4a');
+    let handled = false;
+    const finish = ()=>{ if(!handled){ handled = true; speak(word); } };
+    audio.addEventListener('error', finish);
+    audio.addEventListener('ended', finish);
+    const p = audio.play();
+    if(p && typeof p.catch === 'function'){ p.catch(finish); }
+  }catch(e){
+    speak(word);
+  }
+}
+
+function playLetterSound(key, fallbackText){
+  if(!key){ speak(fallbackText); return; }
+  try{
+    const audio = new Audio(key + '.m4a');
+    let handled = false;
+    audio.addEventListener('error', ()=>{
+      if(!handled){ handled = true; speak(fallbackText); }
+    });
+    const p = audio.play();
+    if(p && typeof p.catch === 'function'){
+      p.catch(()=>{
+        if(!handled){ handled = true; speak(fallbackText); }
+      });
+    }
+  }catch(e){
+    speak(fallbackText);
+  }
 }
 
 function speak(text, rate){
@@ -1761,6 +1803,12 @@ window.speakGoal = function(){
   speak(goal);
 };
 
+// Abwechslungsreiche Rückmeldungen statt immer derselben Formulierung.
+const CORRECT_PHRASES = ['Richtig! Weiter so!', 'Super!', 'Toll gemacht!', 'Spitze!', 'Du bist richtig gut!', 'Klasse!', 'Genau richtig!', 'Prima, das stimmt!'];
+function randomCorrectPhrase(){
+  return CORRECT_PHRASES[Math.floor(Math.random()*CORRECT_PHRASES.length)];
+}
+
 function shuffle(arr){
   const a = arr.slice();
   for(let i=a.length-1; i>0; i--){
@@ -1846,7 +1894,7 @@ function screenPractice(){
   let feedback='';
   if(p.answered){
     if(p.lastCorrect){
-      feedback = `<div class="feedback-box feedback-good">✅ Richtig! ${p.levelUpMsg||'Weiter so!'}</div>`;
+      feedback = `<div class="feedback-box feedback-good">✅ ${p.levelUpMsg ? (p.correctPhrase+' '+p.levelUpMsg) : p.correctPhrase}</div>`;
     } else if(item.type==='dictate'){
       feedback = `<div class="feedback-box feedback-tip">💡 Okay, dieses Wort hast du noch nicht ganz richtig geschrieben. Das üben wir einfach noch mal.${p.levelDownMsg?('<br><br>'+p.levelDownMsg):''}</div>`;
     } else if(item.type==='satzbau'){
@@ -2148,6 +2196,7 @@ window.practiceAnswer = function(given){
   p.lastGiven = given;
   p.itemsDone++;
   p.levelUpMsg=null; p.levelDownMsg=null;
+  p.correctPhrase = randomCorrectPhrase();
   if(!correct) p.sessionErrors = (p.sessionErrors||0) + 1;
 
   p.attemptLog.push(correct);
@@ -2210,7 +2259,7 @@ window.practiceAnswer = function(given){
   }
 
   if(correct){
-    speak('Richtig! ' + (p.levelUpMsg || 'Weiter so!'));
+    speak(p.levelUpMsg ? (p.correctPhrase + ' ' + p.levelUpMsg) : p.correctPhrase);
   } else if(item.type==='dictate'){
     speak('Okay, dieses Wort hast du noch nicht ganz richtig geschrieben. Das üben wir einfach noch mal.' + (p.levelDownMsg ? ' ' + p.levelDownMsg : ''));
   } else if(item.type==='satzbau'){
@@ -2360,10 +2409,10 @@ window.drillAnswer = function(given){
   const correct = checkAnswer(item, given);
   d.answered = true; d.lastGiven = given; d.lastCorrect = correct;
   const letter = item.options[item.answer];
-  // WICHTIG: nie den nackten Buchstaben sprechen lassen - Sprachausgabe liest
-  // "M" als BuchstabenNAMEN "Em" vor, nicht als Laut. Nur das echte Wort
-  // sprechen, das wird immer korrekt mit dem richtigen Anfangslaut ausgesprochen.
-  speak(item.speak);
+  // Erst die echte Aufnahme des isolierten Lauts (z.B. "M.m4a"), danach das
+  // ganze Wort - wartet auf das tatsächliche Ende der Aufnahme.
+  const audioKey = item.audioKey || letter.toUpperCase();
+  playLetterSoundThenWord(audioKey, item.speak);
   if(correct){
     d.doneCount++;
   } else {
