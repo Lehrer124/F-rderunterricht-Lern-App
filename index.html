@@ -575,6 +575,96 @@ function isVowel(letter){
   return 'aeiouäöüAEIOUÄÖÜ'.includes(letter);
 }
 
+// Zerlegt ein Wort in seine tatsächlichen Lautbausteine, passend zu den
+// aufgenommenen Dateien (SCH.m4a, CH1.m4a, AU.m4a, einzelne Buchstaben...).
+// Nur Verbindungen, für die wir eine echte Aufnahme haben, werden als ein
+// Baustein erkannt - alles andere zerfällt automatisch in Einzelbuchstaben
+// (für die wir durchgehend Aufnahmen haben), nie in eine geratene TTS-Lesung.
+function tokenizeSyllable(syl, prevChar, isLastSyllable){
+  const lower = syl.toLowerCase();
+  const tokens = [];
+  let i = 0;
+  while(i < lower.length){
+    const rest = lower.slice(i);
+    let len = 1, key = null;
+    if(rest.startsWith('sch')){ len=3; key='SCH'; }
+    else if(rest.startsWith('ch')){
+      // Ach-Laut (CH1) nach a/o/u, sonst Ich-Laut (CH2). Bei Silbenanfang
+      // zählt der letzte Buchstabe der VORHERIGEN Silbe (z.B. "Bau-ch").
+      const prev = i>0 ? lower[i-1] : (prevChar||'');
+      len=2; key = ['a','o','u'].includes(prev) ? 'CH1' : 'CH2';
+    }
+    else if(rest.startsWith('sp')){ len=2; key='SP'; }
+    else if(rest.startsWith('pf')){ len=2; key='PF'; }
+    else if(rest.startsWith('ck')){ len=2; key='CK'; }
+    else if(rest.startsWith('tz')){ len=2; key='TZ'; }
+    else if(rest.startsWith('qu')){ len=2; key='QU'; }
+    else if(rest.startsWith('ng')){ len=2; key='NG'; }
+    else if(rest.startsWith('äu')){ len=2; key='AEU'; }
+    else if(rest.startsWith('eu')){ len=2; key='EU'; }
+    else if(rest.startsWith('au')){ len=2; key='AU'; }
+    else if(rest.startsWith('ei')){ len=2; key='EI'; }
+    else if(rest.startsWith('ie')){ len=2; key='IE'; }
+    else if(rest[0]==='ä'){ len=1; key='AE'; }
+    else if(rest[0]==='ö'){ len=1; key='OE'; }
+    else if(rest[0]==='ü'){ len=1; key='UE'; }
+    else if(rest[0]==='y'){
+      // y als Konsonant am Wortanfang (wie Yak) vs. als Vokal am echten Wortende (wie Teddy)
+      len=1; key = (isLastSyllable && i === lower.length-1) ? 'Y1' : 'Y';
+    }
+    else if(rest[0]==='e' && isLastSyllable && i === lower.length-1){
+      len=1; key='-E'; // unbetontes Endungs-e am ECHTEN Wortende, z.B. Blume - nicht bei einer Mittelsilbe wie "ge" in "auf-ge-regt"
+    }
+    else if(/[a-zß]/.test(rest[0])){
+      len=1; key = rest[0].toUpperCase();
+    }
+    else {
+      len=1; key=null;
+    }
+    tokens.push({text: syl.slice(i, i+len), key});
+    i += len;
+  }
+  return tokens;
+}
+
+// Zerlegt ein Wort in Lautbausteine - Silbe für Silbe getrennt (anhand der
+// handgeprüften Silbentrennung), damit z.B. bei "Jun-ge" kein "ng" über die
+// Silbengrenze hinweg fälschlich erkannt wird. Rückgabe: eine Liste von
+// Silben, jede als Liste ihrer Lautbausteine.
+function tokenizeWordToSounds(word){
+  const clean = (word||'').replace(/[.,!?]/g,'');
+  const syls = syllablesFor(clean);
+  const groups = [];
+  let prevChar = '';
+  syls.forEach((syl,idx)=>{
+    groups.push(tokenizeSyllable(syl, prevChar, idx === syls.length-1));
+    const lowerSyl = syl.toLowerCase();
+    prevChar = lowerSyl[lowerSyl.length-1] || '';
+  });
+  return groups;
+}
+
+// Vokal-artige Laute bekommen die Königsbuchstabe-Krone, Konsonanten(-verbindungen) nicht.
+function isVowelSoundKey(key){
+  return ['A','E','I','O','U','AE','OE','UE','AU','AEU','EU','EI','IE','-E','Y1'].includes(key);
+}
+
+// Ordnet die Lautbausteine eines Wortes den (handgeprüften) Silben zu, damit
+// der Silbenbogen weiterhin über der richtigen Buchstabengruppe sitzt.
+
+// Spielt den Laut-Baustein ab; schlägt die Aufnahme fehl, wird sicherheitshalber
+// das ganze Wort normal vorgelesen (nie ein geratener Einzellaut per TTS).
+window.playSoundToken = function(key, wholeWord){
+  if(!key){ speak(wholeWord); return; }
+  try{
+    const audio = new Audio(key + '.m4a');
+    let handled = false;
+    audio.addEventListener('error', ()=>{ if(!handled){ handled=true; speak(wholeWord); } });
+    const p = audio.play();
+    if(p && typeof p.catch === 'function'){ p.catch(()=>{ if(!handled){ handled=true; speak(wholeWord); } }); }
+  }catch(e){ speak(wholeWord); }
+};
+
 // Handgeprüfte Tipps für Wörter aus den Flaschenpost-Sätzen, die ein echtes
 // Rechtschreibphänomen zeigen. Absichtlich NICHT automatisch aus dem Wort
 // geraten - ein falsch zugeordneter Tipp wäre schlimmer als ein neutraler.
@@ -655,7 +745,7 @@ const content = {
       pic('🔡','🔍','Lupe', ['L','N','M'], 0, 'L-upe: erster Laut „L".'),
       pic('🔡','🐱','Katze', ['K','G','T'], 0, 'K-atze: erster Laut „K".'),
       pic('🔡','🎩','Hut', ['H','F','W'], 0, 'H-ut: erster Laut „H".', true),
-      pic('🔡','🧥','Jacke', ['J','Y','G'], 0, 'J-acke: erster Laut „J".', true),
+      pic('🔡','🥣','Joghurt', ['J','Y','G'], 0, 'J-oghurt: erster Laut „J".', true),
       pic('🔡','🍊','Orange', ['O','A','U'], 0, 'O-range: erster Laut „O".'),
       pic('🔡','🍄','Pilz', ['P','B','T'], 0, 'P-ilz: erster Laut „P".'),
       pic('🔡','🦉','Uhu', ['U','O','A'], 0, 'U-hu: erster Laut „U".'),
@@ -1445,26 +1535,32 @@ function renderItemBody(item, handlerName){
     if(p.sbStep==='word'){
       const words = sentenceWords();
       const word = words[p.sbWordIndex];
-      const syllables = syllablesFor(word);
-      const letterBoxW = 44; // Breite pro Buchstabenkästchen inkl. Rand, fürs Bogen-Maß
-      const syllableGroups = syllables.map(syl=>{
-        const letterBoxes = syl.split('').map(l=>`
-          <span style="display:inline-block;position:relative;margin:2px;width:36px;height:44px;border:2px solid var(--line);border-radius:10px;font-size:1.3rem;font-family:'Atkinson Hyperlegible';font-weight:700;background:var(--sand);line-height:40px;text-align:center;">
-            ${isVowel(l) ? `<span style="position:absolute;top:-15px;left:50%;transform:translateX(-50%);font-size:0.95rem;">👑</span>` : ''}
-            ${l}
-          </span>`).join('');
-        const arcWidth = syl.length * letterBoxW;
+      const groups = tokenizeWordToSounds(word);
+      const boxW = 46; // Breite pro Baustein-Kästchen inkl. Rand, fürs Bogen-Maß
+      let globalIdx = 0;
+      const syllableGroups = groups.map(group=>{
+        const boxes = group.map(tok=>{
+          const idx = globalIdx++;
+          return `
+          <button onclick="satzbauPlayToken(${idx})" style="display:inline-block;position:relative;margin:2px;min-width:36px;height:44px;padding:0 6px;border:2px solid var(--line);border-radius:10px;font-size:1.25rem;font-family:'Atkinson Hyperlegible';font-weight:700;background:var(--sand);line-height:40px;text-align:center;">
+            ${isVowelSoundKey(tok.key) ? `<span style="position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:0.95rem;">👑</span>` : ''}
+            ${tok.text}
+          </button>`;
+        }).join('');
+        const arcWidth = group.length * boxW;
         return `<span style="display:inline-block;vertical-align:top;margin:0 4px;">
-            <div>${letterBoxes}</div>
+            <div>${boxes}</div>
             ${syllableArcSpan(arcWidth)}
           </span>`;
       }).join('');
+      p.sbTokens = groups.reduce((a,g)=>a.concat(g),[]);
       const isLastWord = p.sbWordIndex >= words.length-1;
       return `
-        <div class="task-instr">🔤 Wort ${p.sbWordIndex+1} von ${words.length}</div>
+        <div class="task-instr">🔤 Wort ${p.sbWordIndex+1} von ${words.length} – tippe die Kästchen an!</div>
         <div style="text-align:center;margin:20px 0 10px;">${syllableGroups}</div>
-        <button class="speak-btn" onclick="speakSatzWord()">🔊</button>
-        <p style="font-size:0.85rem;color:#4B6473;margin:10px 0;">Schreibe dieses Wort auf. Höre es dir so oft an, wie du magst. 👑 zeigt den Königsbuchstaben (Vokal) in jeder Silbe.</p>
+        <p style="font-size:0.8rem;color:#6B7F8C;text-align:center;">Jedes Kästchen spricht seinen eigenen Laut. Setze sie im Kopf zusammen!</p>
+        <button class="speak-btn" onclick="speakSatzWord()">🔊 Ganzes Wort</button>
+        <p style="font-size:0.85rem;color:#4B6473;margin:10px 0;">Schreibe dieses Wort auf. 👑 zeigt den Königsbuchstaben (Vokal) in jeder Silbe.</p>
         <button class="btn btn-primary btn-block" style="margin-top:10px;" onclick="satzbauWordDone()">${isLastWord ? '👀 Jetzt vergleichen' : '▶️ Nächstes Wort'}</button>`;
     }
     // sbStep === 'compare'
@@ -2017,6 +2113,14 @@ window.speakSatzWord = function(){
   const words = sentenceWords();
   const w = words[p.sbWordIndex];
   if(w) speak(w, 0.7);
+};
+
+window.satzbauPlayToken = function(idx){
+  const p = state.practice;
+  const tok = p.sbTokens && p.sbTokens[idx];
+  const words = sentenceWords();
+  const wholeWord = words[p.sbWordIndex] || '';
+  if(tok) window.playSoundToken(tok.key, wholeWord);
 };
 
 window.satzbauWordDone = function(){
