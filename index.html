@@ -96,6 +96,8 @@
 
   /* ---------- start screen ---------- */
   .hero{text-align:center;padding:8px 4px 10px;}
+  @keyframes lumiSail{ 0%{ transform:translateX(-40px); opacity:0; } 100%{ transform:translateX(0); opacity:1; } }
+  .lumi-sail{ animation: lumiSail 0.6s ease-out; }
   .lighthouse{font-size:64px;line-height:1;margin-bottom:4px;}
   .hero p{font-size:1rem;line-height:1.5;color:var(--ink);opacity:0.85;margin-top:10px;}
   .card{
@@ -279,6 +281,7 @@ const domains = [
   {id:'schreib2', name:'Leuchtturm', sub:'Richtig schreiben mit Regeln', icon:'🗼', color:'#F4B93E'},
   {id:'grundwortschatz', name:'Speicherstadt', sub:'Hamburger Grundwortschatz üben', icon:'🧱', color:'#A34A3D'},
   {id:'diktat', name:'Flaschenpost', sub:'Sätze diktieren & auf Papier schreiben', icon:'📝', color:'#6E4A8E'},
+  {id:'satzbau', name:'Satzwerft', sub:'Ganze Sätze aus Bildern bauen & schreiben', icon:'🧩', color:'#2E6E8E'},
 ];
 
 // Entwicklungsstufen (angelehnt an die alphabetische → orthografische
@@ -289,11 +292,12 @@ const TIERS = {
   phon:0, buchstabe:0, silbendock:0,
   lesen:1, schreib1:1,
   schreib2:2, grundwortschatz:2, diktat:2,
+  satzbau:3,
 };
-// Flaschenpost braucht Papier und eine Erwachsenen-nahe Zeitspanne - kein
-// Teil der kurzen digitalen Einstiegsdiagnostik. Startet regulär bei Stufe 1,
-// sobald sie über die normale Stufen-Freischaltung erreichbar wird.
-const diagDomains = domains.filter(d => d.id !== 'diktat');
+// Flaschenpost und Satzwerft brauchen Papier bzw. freie Konstruktion - kein
+// Teil der kurzen digitalen Einstiegsdiagnostik. Starten regulär bei Stufe 1,
+// sobald sie über die normale Stufen-Freischaltung erreichbar werden.
+const diagDomains = domains.filter(d => d.id !== 'diktat' && d.id !== 'satzbau');
 const PREREQ_LEVEL = 2;   // Vorstufe muss mind. Stufe 2 erreicht haben
 const MASTERY_STARS = 12; // ab so vielen Sternen bei Stufe 3 gilt ein Bereich als gefestigt
 
@@ -322,6 +326,15 @@ function silbenbogen(n){
     arcs += `<path d="M ${cx-14} 5 Q ${cx} 23 ${cx+14} 5" stroke="#173142" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
   }
   return `<svg viewBox="0 0 ${w} 26" width="${w}" height="30" style="display:block;margin:0 auto;">${arcs}</svg>`;
+}
+
+// Wie silbenbogen(), aber für eine einzelne Silbe mit frei wählbarer Breite -
+// wird in Satzwerft unter jede Buchstabengruppe einer Silbe gesetzt.
+function syllableArcSpan(width){
+  const cx = width/2;
+  return `<svg viewBox="0 0 ${width} 24" width="${width}" height="20" style="display:block;">
+    <path d="M 4 4 Q ${cx} 21 ${width-4} 4" stroke="#173142" stroke-width="3" fill="none" stroke-linecap="round"/>
+  </svg>`;
 }
 
 // Kindgerechte Lernziel-Erklärung je Bereich und Stufe – wird vor jeder
@@ -379,6 +392,11 @@ const iCanStatements = {
     2:'Ich kann etwas längere Sätze aufschreiben und meine Schreibung selbst überprüfen.',
     3:'Ich kann auch längere, kniffligere Sätze sicher aufschreiben.',
   },
+  satzbau: {
+    1:'Ich kann mir einen eigenen kurzen Satz ausdenken und aufschreiben.',
+    2:'Ich kann einen eigenen Satz mit mehr Bausteinen bauen und aufschreiben.',
+    3:'Ich kann einen längeren, eigenen Satz bauen und Wort für Wort sicher aufschreiben.',
+  },
 };
 
 const levelGoals = {
@@ -432,6 +450,11 @@ const levelGoals = {
     2:'Die Sätze werden etwas länger – schreib in deinem eigenen Tempo.',
     3:'Jetzt kommen längere, kniffligere Sätze dran.',
   },
+  satzbau: {
+    1:'Hier baust du dir deinen eigenen Satz aus Bildern zusammen – wähle einfach aus, was du magst! Dann schreibst du ihn Wort für Wort auf.',
+    2:'Jetzt kommt noch ein Baustein dazu – dein Satz wird etwas länger.',
+    3:'Vier Bausteine – dein längster eigener Satz. Wort für Wort schaffst du das!',
+  },
 };
 
 // Eigene, konsistente Pflanzen-Wachstumsgrafik (statt uneinheitlicher Emojis
@@ -483,10 +506,21 @@ function mascotIcon(size){
   </svg>`;
 }
 
-function ch(prompt, options, answerIdx, tip, speakText){
+// Fehlerkategorien für das strukturierte Fehlerprofil - bewusst nur dort
+// vergeben, wo eine Rechtschreibregel tatsächlich greift (Leuchtturm,
+// Speicherstadt), nicht künstlich für Bereiche wie Blitzlesen.
+const ERROR_CATEGORIES = {
+  doppelkonsonant: 'Doppelkonsonant (Schwingen-Trick)',
+  dehnung_auslaut: 'Dehnung/Auslautverhärtung (Verlängern-Trick)',
+  wortfamilie: 'Wortfamilie/Wortbausteine (Ableiten-Trick)',
+  zwielaut: 'Zwielaut-Merkwörter (ei/ai, au/äu)',
+  offene_silbe: 'Offene Silbe',
+};
+
+function ch(prompt, options, answerIdx, tip, speakText, errorCategory){
   // Lückensätze: "___" nie mitlesen (verunsichert Kinder) - stattdessen
   // eine kurze Sprechpause an der Lückenstelle.
-  return {type:'choice', prompt, options, answer:answerIdx, tip, speak:speakText||prompt.replace(/_+/g,'…')};
+  return {type:'choice', prompt, options, answer:answerIdx, tip, speak:speakText||prompt.replace(/_+/g,'…'), errorCategory};
 }
 function inp(prompt, answer, tip, speakText, pictureEmoji, cutMs){
   return {type:'input', prompt, answer, tip, speak:speakText||prompt, pictureEmoji, cutMs};
@@ -494,8 +528,8 @@ function inp(prompt, answer, tip, speakText, pictureEmoji, cutMs){
 // Bildbasierte Aufgabe: kein Lesen von Wörtern nötig, um die Aufgabe zu
 // verstehen. taskIcon zeigt den Aufgabentyp, targetEmoji das Zielwort als
 // Bild, options sind große Symbole/Buchstaben/Wörter zum Antippen.
-function pic(taskIcon, targetEmoji, targetWord, options, answerIdx, tip){
-  return {type:'pic', taskIcon, targetEmoji, options, answer:answerIdx, tip, speak:targetWord};
+function pic(taskIcon, targetEmoji, targetWord, options, answerIdx, tip, niko){
+  return {type:'pic', taskIcon, targetEmoji, options, answer:answerIdx, tip, speak:targetWord, niko:!!niko};
 }
 
 // Blitzlesen: Wort erscheint, ein sichtbarer Countdown läuft, das passende
@@ -504,10 +538,41 @@ function flash(word, options, answerIdx, tip){
   return {type:'flash', word, options, answer:answerIdx, tip, speak:word};
 }
 
+// Satzwerft: freie Konstruktion aus Körben (Wer? Was tut er? Wo? Wie?) statt
+// starrem Umordnen eines vorgegebenen Satzes - jede Kombination ergibt einen
+// grammatisch gültigen, individuellen Satz.
+function satzRound(baskets, tip){
+  return {type:'satzbau', baskets, tip};
+}
+
 // Diktat: Satz wird langsam vorgelesen, auf Papier geschrieben, dann selbst
 // mit der eingeblendeten Lösung verglichen (falsche Wörter antippen).
 function dictate(sentence, tip){
   return {type:'dictate', sentence, tip, speak:sentence};
+}
+
+// Handgeprüfte Silbentrennung für alle Wörter, die in den Satzwerft-Körben
+// vorkommen - bewusst nicht automatisch erraten (Silbentrennung im
+// Deutschen hat zu viele Ausnahmen für eine zuverlässige Faustregel).
+// Wörter ohne Eintrag gelten als einsilbig (ein Bogen über das ganze Wort).
+const wordSyllables = {
+  der:['der'], die:['die'], das:['das'], im:['im'], in:['in'], zu:['zu'], am:['am'],
+  junge:['Jun','ge'], mädchen:['Mäd','chen'], hund:['Hund'], katze:['Kat','ze'],
+  oma:['O','ma'], opa:['O','pa'], papa:['Pa','pa'],
+  lacht:['lacht'], rennt:['rennt'], schläft:['schläft'], singt:['singt'],
+  isst:['isst'], liest:['liest'], spielt:['spielt'], malt:['malt'],
+  spaziert:['spa','ziert'], baut:['baut'], backt:['backt'],
+  fröhlich:['fröh','lich'], geduldig:['ge','dul','dig'], aufgeregt:['auf','ge','regt'],
+  glücklich:['glück','lich'], ruhig:['ru','hig'], stolz:['stolz'],
+  garten:['Gar','ten'], schule:['Schu','le'], hause:['Hau','se'],
+  bett:['Bett'], park:['Park'], zimmer:['Zim','mer'], küche:['Kü','che'], auto:['Au','to'],
+};
+function syllablesFor(word){
+  const clean = word.replace(/[.,!?]/g,'');
+  return wordSyllables[clean.toLowerCase()] || [clean];
+}
+function isVowel(letter){
+  return 'aeiouäöüAEIOUÄÖÜ'.includes(letter);
 }
 
 // Handgeprüfte Tipps für Wörter aus den Flaschenpost-Sätzen, die ein echtes
@@ -550,7 +615,7 @@ const content = {
       pic('🎯','🌸','Blume', ['⚡','🌙','🐱'], 0, 'Blume – Blitz: gleicher Anfang „Bl".'),
       pic('🔁','🌳','Baum', ['💤','⚽','🐟'], 0, 'Baum – Traum: reimt sich!'),
       pic('👏','🦓','Zebra', [silbenbogen(1),silbenbogen(2),silbenbogen(3)], 1, 'Ze-bra: zwei Bögen.'),
-      pic('🎯','🦁','Löwe', ['🍃','🐟','🌳'], 0, 'Löwe – Laub: gleicher Anlaut „L".'),
+      pic('🎯','🦁','Löwe', ['🥄','🐟','🌳'], 0, 'Löwe – Löffel: gleicher Anlaut „L".'),
       pic('🎯','🚢','Schiff', ['🏫','🐕','🌙'], 0, 'Schiff – Schule: gleicher Anlaut „Sch".'),
       pic('🔁','🥅','Tor', ['👂','🐟','🌳'], 0, 'Tor – Ohr: reimt sich!'),
       pic('👏','🐘','Elefant', [silbenbogen(2),silbenbogen(3),silbenbogen(4)], 1, 'E-le-fant: drei Bögen.'),
@@ -568,31 +633,34 @@ const content = {
   },
   buchstabe: {
     1:[
-      pic('🔡','🐵','Affe', ['A','O','I'], 0, 'Sprich „Affe" langsam: A-ffe.'),
-      pic('🔡','🫏','Esel', ['E','I','A'], 0, 'E-sel: erster Laut „E".'),
-      pic('🔡','🪶','Feder', ['F','W','S'], 0, 'F-eder: erster Laut „F".'),
-      pic('🔡','☀️','Sonne', ['S','Z','T'], 0, 'S-onne: erster Laut „S".'),
+      pic('🔡','🐵','Affe', ['A','O','I'], 0, 'Sprich „Affe" langsam: A-ffe.', true),
+      pic('🔡','🫏','Esel', ['E','I','A'], 0, 'E-sel: erster Laut „E".', true),
+      pic('🔡','🪶','Feder', ['F','W','S'], 0, 'F-eder: erster Laut „F".', true),
+      pic('🔡','☀️','Sonne', ['S','Z','T'], 0, 'S-onne: erster Laut „S".', true),
       pic('🔚','🌳','Baum', ['M','N','B'], 0, 'Bau-M: letzter Laut „M".'),
-      pic('🔡','⚽','Ball', ['B','D','P'], 0, 'B-all: erster Laut „B".'),
+      pic('🔡','⚽','Ball', ['B','D','P'], 0, 'B-all: erster Laut „B".', true),
       pic('🔡','🦔','Igel', ['I','E','O'], 0, 'I-gel: erster Laut „I".'),
       pic('🔚','⚽','Ball', ['L','N','M'], 0, 'Ba-LL: letzter Laut „L".'),
+      pic('🔡','🍴','Gabel', ['G','K','B'], 0, 'G-abel: erster Laut „G".', true),
       pic('🔡','🪿','Gans', ['G','K','B'], 0, 'G-ans: erster Laut „G".'),
-      pic('🔡','🥫','Dose', ['D','B','P'], 0, 'D-ose: erster Laut „D".'),
-      pic('🔡','👃','Nase', ['N','M','H'], 0, 'N-ase: erster Laut „N".'),
-      pic('🔡','🚀','Rakete', ['R','L','W'], 0, 'R-akete: erster Laut „R".'),
-      pic('🔡','🪮','Kamm', ['K','G','T'], 0, 'K-amm: erster Laut „K".'),
+      pic('🔡','🥫','Dose', ['D','B','P'], 0, 'D-ose: erster Laut „D".', true),
+      pic('🔡','👃','Nase', ['N','M','H'], 0, 'N-ase: erster Laut „N".', true),
+      pic('🔡','🚀','Rakete', ['R','L','W'], 0, 'R-akete: erster Laut „R".', true),
+      pic('🔡','🪮','Kamm', ['K','G','T'], 0, 'K-amm: erster Laut „K".', true),
+      pic('🔡','🍽️','Tisch', ['T','D','P'], 0, 'T-isch: erster Laut „T".', true),
       pic('🔡','🐯','Tiger', ['T','D','P'], 0, 'T-iger: erster Laut „T".'),
-      pic('🔡','☁️','Wolke', ['W','M','B'], 0, 'W-olke: erster Laut „W".'),
-      pic('🔡','🦓','Zebra', ['Z','S','T'], 0, 'Z-ebra: erster Laut „Z".'),
-      pic('🔡','💡','Lampe', ['L','N','M'], 0, 'L-ampe: erster Laut „L".'),
+      pic('🔡','☁️','Wolke', ['W','M','B'], 0, 'W-olke: erster Laut „W".', true),
+      pic('🔡','🦓','Zebra', ['Z','S','T'], 0, 'Z-ebra: erster Laut „Z".', true),
+      pic('🔡','💡','Lampe', ['L','N','M'], 0, 'L-ampe: erster Laut „L".', true),
+      pic('🔡','🔍','Lupe', ['L','N','M'], 0, 'L-upe: erster Laut „L".'),
       pic('🔡','🐱','Katze', ['K','G','T'], 0, 'K-atze: erster Laut „K".'),
-      pic('🔡','🎩','Hut', ['H','F','W'], 0, 'H-ut: erster Laut „H".'),
-      pic('🔡','🧥','Jacke', ['J','Y','G'], 0, 'J-acke: erster Laut „J".'),
+      pic('🔡','🎩','Hut', ['H','F','W'], 0, 'H-ut: erster Laut „H".', true),
+      pic('🔡','🧥','Jacke', ['J','Y','G'], 0, 'J-acke: erster Laut „J".', true),
       pic('🔡','🍊','Orange', ['O','A','U'], 0, 'O-range: erster Laut „O".'),
       pic('🔡','🍄','Pilz', ['P','B','T'], 0, 'P-ilz: erster Laut „P".'),
       pic('🔡','🦉','Uhu', ['U','O','A'], 0, 'U-hu: erster Laut „U".'),
-      pic('🔡','🐦','Vogel', ['V','F','W'], 0, 'V-ogel klingt wie „F", wird aber mit V geschrieben.'),
-      pic('🔡','🐃','Yak', ['Y','J','I'], 0, 'Y-ak: erster Laut „Y".'),
+      pic('🔡','🐦','Vogel', ['V','F','W'], 0, 'V-ogel klingt wie „F", wird aber mit V geschrieben.', true),
+      pic('🔡','🐃','Yak', ['Y','J','I'], 0, 'Y-ak: erster Laut „Y".', true),
       pic('🔠','X','X', ['x','y','k'], 0, 'Großes X und kleines x klingen gleich – nur die Form ist anders.'),
       pic('🔠','A','A', ['a','e','o'], 0, 'Großes A und kleines a klingen gleich – nur die Form ist anders.'),
       pic('🔠','M','M', ['m','n','w'], 0, 'Großes M und kleines m klingen gleich – nur die Form ist anders.'),
@@ -606,7 +674,7 @@ const content = {
       pic('🔤','🐝','Biene', ['Biene','Piene','Diene'], 0, 'Biene: B-i-e-ne.'),
       pic('🔤','🦆','Ente', ['Ente','Änte','Emte'], 0, 'Ente: E-n-t-e.'),
       pic('🔤','🐑','Schaf', ['Schaf','Schaaf','Chaf'], 0, 'Schaf: „Sch" ist ein eigener Laut.'),
-      pic('🔤','🧥','Jacke', ['Jacke','Jake','Jakke'], 0, '„ck" nach kurzem Vokal: Ja-cke.'),
+      pic('🔤','🧥','Jacke', ['Jacke','Wacke','Nacke'], 0, 'J-acke: achte auf den ersten Laut.'),
       pic('🔤','☁️','Wolke', ['Wolke','Volke','Wolge'], 0, 'Wolke: W-o-l-ke.'),
       pic('🔤','💡','Lampe', ['Lampe','Rampe','Lambe'], 0, 'Lampe: L-a-m-pe.'),
     ],
@@ -740,37 +808,37 @@ const content = {
   },
   schreib2: {
     1:[
-      ch('Welches Wort ist richtig geschrieben?', ['Ball','Bal'], 0, 'Nach kurzem Vokal verdoppelt man oft den Konsonanten: Ba-ll.', 'Ball'),
-      ch('Welches Wort ist richtig geschrieben?', ['Teller','Teler'], 0, 'Tel-ler: doppeltes „l" nach kurzem „e".', 'Teller'),
-      ch('Welches Wort ist richtig geschrieben?', ['Sonne','Sone'], 0, 'Son-ne: kurzer Vokal, doppelter Konsonant.', 'Sonne'),
-      ch('Welches Wort ist richtig geschrieben?', ['Mutter','Muter'], 0, 'Mut-ter: höre den kurzen Vokal, dann weißt du: doppeltes „t".', 'Mutter'),
-      ch('Welches Wort ist richtig geschrieben?', ['Robbe','Robe'], 0, 'Rob-be: kurzer Vokal, doppeltes „b". „Robe" (ein b) ist ein ganz anderes Wort mit langem o!', 'Robbe'),
-      ch('Welches Wort ist richtig geschrieben?', ['Kissen','Kisen'], 0, 'Kis-sen: kurzer Vokal, doppeltes „s".', 'Kissen'),
-      ch('Welches Wort ist richtig geschrieben?', ['Hammer','Hamer'], 0, 'Ham-mer: kurzer Vokal, doppeltes „m".', 'Hammer'),
-      ch('Welches Wort ist richtig geschrieben?', ['Bett','Bet'], 0, 'Be-tt: kurzer Vokal, doppeltes „t".', 'Bett'),
-      ch('Welches Wort ist richtig geschrieben?', ['Zettel','Zetel'], 0, 'Zet-tel: kurzer Vokal, doppeltes „t".', 'Zettel'),
+      ch('Welches Wort ist richtig geschrieben?', ['Ball','Bal'], 0, 'Nach kurzem Vokal verdoppelt man oft den Konsonanten: Ba-ll.', 'Ball', 'doppelkonsonant'),
+      ch('Welches Wort ist richtig geschrieben?', ['Teller','Teler'], 0, 'Tel-ler: doppeltes „l" nach kurzem „e".', 'Teller', 'doppelkonsonant'),
+      ch('Welches Wort ist richtig geschrieben?', ['Sonne','Sone'], 0, 'Son-ne: kurzer Vokal, doppelter Konsonant.', 'Sonne', 'doppelkonsonant'),
+      ch('Welches Wort ist richtig geschrieben?', ['Mutter','Muter'], 0, 'Mut-ter: höre den kurzen Vokal, dann weißt du: doppeltes „t".', 'Mutter', 'doppelkonsonant'),
+      ch('Welches Wort ist richtig geschrieben?', ['Robbe','Robe'], 0, 'Rob-be: kurzer Vokal, doppeltes „b". „Robe" (ein b) ist ein ganz anderes Wort mit langem o!', 'Robbe', 'doppelkonsonant'),
+      ch('Welches Wort ist richtig geschrieben?', ['Kissen','Kisen'], 0, 'Kis-sen: kurzer Vokal, doppeltes „s".', 'Kissen', 'doppelkonsonant'),
+      ch('Welches Wort ist richtig geschrieben?', ['Hammer','Hamer'], 0, 'Ham-mer: kurzer Vokal, doppeltes „m".', 'Hammer', 'doppelkonsonant'),
+      ch('Welches Wort ist richtig geschrieben?', ['Bett','Bet'], 0, 'Be-tt: kurzer Vokal, doppeltes „t".', 'Bett', 'doppelkonsonant'),
+      ch('Welches Wort ist richtig geschrieben?', ['Zettel','Zetel'], 0, 'Zet-tel: kurzer Vokal, doppeltes „t".', 'Zettel', 'doppelkonsonant'),
     ],
     2:[
-      ch('Welches Wort ist richtig geschrieben?', ['Wohnung','Wonung'], 0, 'Verlängere: wohnen – man hört das „h" nach dem „o".', 'Wohnung'),
-      ch('Welches Wort ist richtig geschrieben?', ['Hund','Hunt'], 0, 'Verlängere das Wort: die Hunde. Jetzt hörst du das „d"!', 'Hund'),
-      ch('Welches Wort ist richtig geschrieben?', ['Zahn','Zan'], 0, 'Verlängere: zahnen/Zähne – das „h" macht den Vokal lang.', 'Zahn'),
-      ch('Welches Wort ist richtig geschrieben?', ['Rad','Rat'], 0, 'Ableiten: das Fahr-rad, die Räder – darum schreibt man „d".', 'Rad'),
-      ch('Welches Wort ist richtig geschrieben?', ['Kuh','Ku'], 0, 'Dehnungs-h: nach dem langen „u" hört man kein „h", man schreibt es trotzdem.', 'Kuh'),
-      ch('Welches Wort ist richtig geschrieben?', ['Weg','Wek'], 0, 'Verlängere: die Wege – du hörst auch dort ein „g".', 'Weg'),
-      ch('Welches Wort ist richtig geschrieben?', ['Schuh','Schu'], 0, 'Dehnungs-h nach langem „u": Schuh.', 'Schuh'),
-      ch('Welches Wort ist richtig geschrieben?', ['Stuhl','Stul'], 0, 'Dehnungs-h nach langem „u": Stuhl.', 'Stuhl'),
-      ch('Welches Wort ist richtig geschrieben?', ['Hemd','Hemt'], 0, 'Verlängere: die Hemden – du hörst das „d".', 'Hemd'),
+      ch('Welches Wort ist richtig geschrieben?', ['Wohnung','Wonung'], 0, 'Verlängere: wohnen – man hört das „h" nach dem „o".', 'Wohnung', 'dehnung_auslaut'),
+      ch('Welches Wort ist richtig geschrieben?', ['Hund','Hunt'], 0, 'Verlängere das Wort: die Hunde. Jetzt hörst du das „d"!', 'Hund', 'dehnung_auslaut'),
+      ch('Welches Wort ist richtig geschrieben?', ['Zahn','Zan'], 0, 'Verlängere: zahnen/Zähne – das „h" macht den Vokal lang.', 'Zahn', 'dehnung_auslaut'),
+      ch('Welches Wort ist richtig geschrieben?', ['Rad','Rat'], 0, 'Ableiten: das Fahr-rad, die Räder – darum schreibt man „d".', 'Rad', 'dehnung_auslaut'),
+      ch('Welches Wort ist richtig geschrieben?', ['Kuh','Ku'], 0, 'Dehnungs-h: nach dem langen „u" hört man kein „h", man schreibt es trotzdem.', 'Kuh', 'dehnung_auslaut'),
+      ch('Welches Wort ist richtig geschrieben?', ['Weg','Wek'], 0, 'Verlängere: die Wege – du hörst auch dort ein „g".', 'Weg', 'dehnung_auslaut'),
+      ch('Welches Wort ist richtig geschrieben?', ['Schuh','Schu'], 0, 'Dehnungs-h nach langem „u": Schuh.', 'Schuh', 'dehnung_auslaut'),
+      ch('Welches Wort ist richtig geschrieben?', ['Stuhl','Stul'], 0, 'Dehnungs-h nach langem „u": Stuhl.', 'Stuhl', 'dehnung_auslaut'),
+      ch('Welches Wort ist richtig geschrieben?', ['Hemd','Hemt'], 0, 'Verlängere: die Hemden – du hörst das „d".', 'Hemd', 'dehnung_auslaut'),
     ],
     3:[
-      ch('Welches Wort ist richtig geschrieben?', ['Fahrrad','Farrad'], 0, 'Ableiten von „fahren": Fahr-rad, zwei r wie bei „fahren" + „Rad".', 'Fahrrad'),
-      ch('Welches Wort ist richtig geschrieben?', ['Kindergarten','Kindergartn'], 0, 'Kinder-garten: zwei bekannte Wortbausteine zusammengesetzt.', 'Kindergarten'),
-      ch('Welches Wort ist richtig geschrieben?', ['verkaufen','ferkaufen'], 0, 'Die Vorsilbe „ver-" wird immer mit „v" geschrieben.', 'verkaufen'),
-      ch('Welches Wort ist richtig geschrieben?', ['Freundschaft','Freundschaftt'], 0, 'Die Nachsilbe „-schaft" wird nur mit einem „t" geschrieben.', 'Freundschaft'),
-      ch('Welches Wort ist richtig geschrieben?', ['Handschuh','Hantschuh'], 0, 'Zusammengesetztes Wort: Hand + Schuh.', 'Handschuh'),
-      ch('Welches Wort ist richtig geschrieben?', ['bezahlen','bezalen'], 0, 'Die Vorsilbe „be-" bleibt immer gleich geschrieben.', 'bezahlen'),
-      ch('Welches Wort ist richtig geschrieben?', ['Regenschirm','Regenschirrm'], 0, 'Zusammengesetztes Wort: Regen + Schirm.', 'Regenschirm'),
-      ch('Welches Wort ist richtig geschrieben?', ['verstehen','ferstehen'], 0, 'Die Vorsilbe „ver-" wird immer mit „v" geschrieben.', 'verstehen'),
-      ch('Welches Wort ist richtig geschrieben?', ['Freundlichkeit','Freuntlichkeit'], 0, 'Von „Freund" abgeleitet – das „d" bleibt erhalten.', 'Freundlichkeit'),
+      ch('Welches Wort ist richtig geschrieben?', ['Fahrrad','Farrad'], 0, 'Ableiten von „fahren": Fahr-rad, zwei r wie bei „fahren" + „Rad".', 'Fahrrad', 'wortfamilie'),
+      ch('Welches Wort ist richtig geschrieben?', ['Kindergarten','Kindergartn'], 0, 'Kinder-garten: zwei bekannte Wortbausteine zusammengesetzt.', 'Kindergarten', 'wortfamilie'),
+      ch('Welches Wort ist richtig geschrieben?', ['verkaufen','ferkaufen'], 0, 'Die Vorsilbe „ver-" wird immer mit „v" geschrieben.', 'verkaufen', 'wortfamilie'),
+      ch('Welches Wort ist richtig geschrieben?', ['Freundschaft','Freundschaftt'], 0, 'Die Nachsilbe „-schaft" wird nur mit einem „t" geschrieben.', 'Freundschaft', 'wortfamilie'),
+      ch('Welches Wort ist richtig geschrieben?', ['Handschuh','Hantschuh'], 0, 'Zusammengesetztes Wort: Hand + Schuh.', 'Handschuh', 'wortfamilie'),
+      ch('Welches Wort ist richtig geschrieben?', ['bezahlen','bezalen'], 0, 'Die Vorsilbe „be-" bleibt immer gleich geschrieben.', 'bezahlen', 'wortfamilie'),
+      ch('Welches Wort ist richtig geschrieben?', ['Regenschirm','Regenschirrm'], 0, 'Zusammengesetztes Wort: Regen + Schirm.', 'Regenschirm', 'wortfamilie'),
+      ch('Welches Wort ist richtig geschrieben?', ['verstehen','ferstehen'], 0, 'Die Vorsilbe „ver-" wird immer mit „v" geschrieben.', 'verstehen', 'wortfamilie'),
+      ch('Welches Wort ist richtig geschrieben?', ['Freundlichkeit','Freuntlichkeit'], 0, 'Von „Freund" abgeleitet – das „d" bleibt erhalten.', 'Freundlichkeit', 'wortfamilie'),
     ],
   },
   // Echte Wörter aus dem Hamburger Basiswortschatz (Behörde für Schule und
@@ -778,39 +846,39 @@ const content = {
   // Rechtschreibphänomenen statt erfundener Wortlisten.
   grundwortschatz: {
     1:[ // Regelhafte Laut-Buchstaben-Beziehung / offene Silbe
-      ch('Welches Wort ist richtig geschrieben?', ['Blume','Blome'], 0, 'Offene Silbe: Blu-me – der Vokal davor wird lang gesprochen.', 'Blume'),
-      ch('Welches Wort ist richtig geschrieben?', ['Hase','Hasse'], 0, 'Offene Silbe: Ha-se – lang gesprochener Vokal, kein doppelter Konsonant.', 'Hase'),
-      ch('Welches Wort ist richtig geschrieben?', ['Dose','Dosse'], 0, 'Offene Silbe: Do-se.', 'Dose'),
-      ch('Welches Wort ist richtig geschrieben?', ['Boden','Bodn'], 0, 'Offene Silbe mit unbetontem „-en" am Ende: Bo-den.', 'Boden'),
-      ch('Welches Wort ist richtig geschrieben?', ['Tafel','Taffel'], 0, 'Offene Silbe: Ta-fel.', 'Tafel'),
-      ch('Welches Wort ist richtig geschrieben?', ['Vase','Fase'], 0, 'Offene Silbe: Va-se. „V" klingt wie „F", wird aber mit V geschrieben.', 'Vase'),
-      ch('Welches Wort ist richtig geschrieben?', ['Hose','Hos'], 0, 'Hose endet auf ein unbetontes „e" – man hört es kaum, schreibt es aber immer mit.', 'Hose'),
-      ch('Welches Wort ist richtig geschrieben?', ['Lampe','Lamp'], 0, 'Lampe endet auf ein unbetontes „e" – leise gesprochen, aber nie weggelassen.', 'Lampe'),
-      ch('Welches Wort ist richtig geschrieben?', ['Krone','Krome'], 0, 'Offene Silbe: Kro-ne.', 'Krone'),
-      ch('Welches Wort ist richtig geschrieben?', ['Wiese','Wiesse'], 0, 'Offene Silbe: Wie-se.', 'Wiese'),
-      ch('Welches Wort ist richtig geschrieben?', ['Birne','Birrne'], 0, 'Offene Silbe: Bir-ne.', 'Birne'),
+      ch('Welches Wort ist richtig geschrieben?', ['Blume','Blome'], 0, 'Offene Silbe: Blu-me – der Vokal davor wird lang gesprochen.', 'Blume', 'offene_silbe'),
+      ch('Welches Wort ist richtig geschrieben?', ['Hase','Hasse'], 0, 'Offene Silbe: Ha-se – lang gesprochener Vokal, kein doppelter Konsonant.', 'Hase', 'offene_silbe'),
+      ch('Welches Wort ist richtig geschrieben?', ['Dose','Dosse'], 0, 'Offene Silbe: Do-se.', 'Dose', 'offene_silbe'),
+      ch('Welches Wort ist richtig geschrieben?', ['Boden','Bodn'], 0, 'Offene Silbe mit unbetontem „-en" am Ende: Bo-den.', 'Boden', 'offene_silbe'),
+      ch('Welches Wort ist richtig geschrieben?', ['Tafel','Taffel'], 0, 'Offene Silbe: Ta-fel.', 'Tafel', 'offene_silbe'),
+      ch('Welches Wort ist richtig geschrieben?', ['Vase','Fase'], 0, 'Offene Silbe: Va-se. „V" klingt wie „F", wird aber mit V geschrieben.', 'Vase', 'offene_silbe'),
+      ch('Welches Wort ist richtig geschrieben?', ['Hose','Hos'], 0, 'Hose endet auf ein unbetontes „e" – man hört es kaum, schreibt es aber immer mit.', 'Hose', 'offene_silbe'),
+      ch('Welches Wort ist richtig geschrieben?', ['Lampe','Lamp'], 0, 'Lampe endet auf ein unbetontes „e" – leise gesprochen, aber nie weggelassen.', 'Lampe', 'offene_silbe'),
+      ch('Welches Wort ist richtig geschrieben?', ['Krone','Krome'], 0, 'Offene Silbe: Kro-ne.', 'Krone', 'offene_silbe'),
+      ch('Welches Wort ist richtig geschrieben?', ['Wiese','Wiesse'], 0, 'Offene Silbe: Wie-se.', 'Wiese', 'offene_silbe'),
+      ch('Welches Wort ist richtig geschrieben?', ['Birne','Birrne'], 0, 'Offene Silbe: Bir-ne.', 'Birne', 'offene_silbe'),
     ],
     2:[ // Diphthonge & Konsonantenverdopplung/ck
-      ch('Welches Wort ist richtig geschrieben?', ['Haus','Hous'], 0, 'Zwielaut „au": Haus – Häuser.', 'Haus'),
-      ch('Welches Wort ist richtig geschrieben?', ['Baum','Boum'], 0, 'Zwielaut „au": Baum – Bäume.', 'Baum'),
-      ch('Welches Wort ist richtig geschrieben?', ['Schiff','Schif'], 0, 'Doppelkonsonant nach kurzem Vokal: Schiff.', 'Schiff'),
-      ch('Welches Wort ist richtig geschrieben?', ['Ecke','Eke'], 0, '„ck" nach kurzem Vokal: E-cke.', 'Ecke'),
-      ch('Welches Wort ist richtig geschrieben?', ['Nuss','Nus'], 0, 'Doppelkonsonant nach kurzem Vokal: Nuss.', 'Nuss'),
-      ch('Welches Wort ist richtig geschrieben?', ['Zeit','Zeid'], 0, 'Zwielaut „ei": Zeit. Verlängere: die Zeiten – du hörst auch dort ein „t".', 'Zeit'),
-      ch('Welches Wort ist richtig geschrieben?', ['Räuber','Reuber'], 0, 'Zwielaut „äu", nicht „eu": Räuber.', 'Räuber'),
-      ch('Welches Wort ist richtig geschrieben?', ['Locke','Loke'], 0, '„ck" nach kurzem Vokal: Lo-cke.', 'Locke'),
-      ch('Welches Wort ist richtig geschrieben?', ['Mücke','Müke'], 0, '„ck" nach kurzem Vokal: Mü-cke.', 'Mücke'),
+      ch('Welches Wort ist richtig geschrieben?', ['Haus','Hous'], 0, 'Zwielaut „au": Haus – Häuser.', 'Haus', 'zwielaut'),
+      ch('Welches Wort ist richtig geschrieben?', ['Baum','Boum'], 0, 'Zwielaut „au": Baum – Bäume.', 'Baum', 'zwielaut'),
+      ch('Welches Wort ist richtig geschrieben?', ['Schiff','Schif'], 0, 'Doppelkonsonant nach kurzem Vokal: Schiff.', 'Schiff', 'doppelkonsonant'),
+      ch('Welches Wort ist richtig geschrieben?', ['Ecke','Eke'], 0, '„ck" nach kurzem Vokal: E-cke.', 'Ecke', 'doppelkonsonant'),
+      ch('Welches Wort ist richtig geschrieben?', ['Nuss','Nus'], 0, 'Doppelkonsonant nach kurzem Vokal: Nuss.', 'Nuss', 'doppelkonsonant'),
+      ch('Welches Wort ist richtig geschrieben?', ['Zeit','Zeid'], 0, 'Zwielaut „ei": Zeit. Verlängere: die Zeiten – du hörst auch dort ein „t".', 'Zeit', 'zwielaut'),
+      ch('Welches Wort ist richtig geschrieben?', ['Räuber','Reuber'], 0, 'Zwielaut „äu", nicht „eu": Räuber.', 'Räuber', 'zwielaut'),
+      ch('Welches Wort ist richtig geschrieben?', ['Locke','Loke'], 0, '„ck" nach kurzem Vokal: Lo-cke.', 'Locke', 'doppelkonsonant'),
+      ch('Welches Wort ist richtig geschrieben?', ['Mücke','Müke'], 0, '„ck" nach kurzem Vokal: Mü-cke.', 'Mücke', 'doppelkonsonant'),
     ],
     3:[ // Stammprinzip: Dehnungs-h, ie, Auslautverhärtung, zusammengesetzte Wörter
-      ch('Welches Wort ist richtig geschrieben?', ['Bahn','Ban'], 0, 'Dehnungs-h macht den Vokal davor lang: Bahn.', 'Bahn'),
-      ch('Welches Wort ist richtig geschrieben?', ['fliegen','fligen'], 0, '„ie" ist die Regelschreibung für das lange „i": flie-gen.', 'fliegen'),
-      ch('Welches Wort ist richtig geschrieben?', ['Tag','Tak'], 0, 'Verlängere: die Tage. Jetzt hörst du das „g" – Auslautverhärtung.', 'Tag'),
-      ch('Welches Wort ist richtig geschrieben?', ['Fußball','Fusball'], 0, 'Zusammengesetztes Wort: Fuß + Ball, „ß" bleibt erhalten.', 'Fußball'),
-      ch('Welches Wort ist richtig geschrieben?', ['Schwein','Schwain'], 0, 'Der Zwielaut „ei" bleibt „ei", nicht „ai".', 'Schwein'),
-      ch('Welches Wort ist richtig geschrieben?', ['Sonnenschein','Sonnenshein'], 0, 'Zusammengesetztes Wort: Sonne + Schein.', 'Sonnenschein'),
-      ch('Welches Wort ist richtig geschrieben?', ['Hand','Hant'], 0, 'Verlängere: die Hände – du hörst das „d".', 'Hand'),
-      ch('Welches Wort ist richtig geschrieben?', ['Freundin','Freuntin'], 0, 'Von „Freund" abgeleitet – das „d" bleibt.', 'Freundin'),
-      ch('Welches Wort ist richtig geschrieben?', ['Frühstück','Frühstük'], 0, '„ck" nach kurzem Vokal am Wortende: Frühstück.', 'Frühstück'),
+      ch('Welches Wort ist richtig geschrieben?', ['Bahn','Ban'], 0, 'Dehnungs-h macht den Vokal davor lang: Bahn.', 'Bahn', 'dehnung_auslaut'),
+      ch('Welches Wort ist richtig geschrieben?', ['fliegen','fligen'], 0, '„ie" ist die Regelschreibung für das lange „i": flie-gen.', 'fliegen', 'dehnung_auslaut'),
+      ch('Welches Wort ist richtig geschrieben?', ['Tag','Tak'], 0, 'Verlängere: die Tage. Jetzt hörst du das „g" – Auslautverhärtung.', 'Tag', 'dehnung_auslaut'),
+      ch('Welches Wort ist richtig geschrieben?', ['Fußball','Fusball'], 0, 'Zusammengesetztes Wort: Fuß + Ball, „ß" bleibt erhalten.', 'Fußball', 'wortfamilie'),
+      ch('Welches Wort ist richtig geschrieben?', ['Schwein','Schwain'], 0, 'Der Zwielaut „ei" bleibt „ei", nicht „ai".', 'Schwein', 'zwielaut'),
+      ch('Welches Wort ist richtig geschrieben?', ['Sonnenschein','Sonnenshein'], 0, 'Zusammengesetztes Wort: Sonne + Schein.', 'Sonnenschein', 'wortfamilie'),
+      ch('Welches Wort ist richtig geschrieben?', ['Hand','Hant'], 0, 'Verlängere: die Hände – du hörst das „d".', 'Hand', 'dehnung_auslaut'),
+      ch('Welches Wort ist richtig geschrieben?', ['Freundin','Freuntin'], 0, 'Von „Freund" abgeleitet – das „d" bleibt.', 'Freundin', 'wortfamilie'),
+      ch('Welches Wort ist richtig geschrieben?', ['Frühstück','Frühstük'], 0, '„ck" nach kurzem Vokal am Wortende: Frühstück.', 'Frühstück', 'doppelkonsonant'),
     ],
   },
   // Vertiefung für leistungsstarke Kinder (Klasse 1-4-Spanne) - kein Teil der
@@ -887,6 +955,44 @@ const content = {
       dictate('Der Bäcker backt jeden Morgen frisches Brot.', 'Ein langer Satz: höre dir jeden Wortteil genau an.'),
     ],
   },
+  satzbau: {
+    1:[
+      satzRound([
+        {label:'Wer?', options:[{emoji:'👦',word:'Der Junge'},{emoji:'👧',word:'Das Mädchen'},{emoji:'🐶',word:'Der Hund'}]},
+        {label:'Was tut er?', options:[{emoji:'😄',word:'lacht'},{emoji:'🏃',word:'rennt'},{emoji:'😴',word:'schläft'}]},
+      ], 'Ein kurzer Satz: Wer? und Was tut er?'),
+      satzRound([
+        {label:'Wer?', options:[{emoji:'🐱',word:'Die Katze'},{emoji:'👦',word:'Der Junge'},{emoji:'👵',word:'Die Oma'}]},
+        {label:'Was tut er?', options:[{emoji:'🎵',word:'singt'},{emoji:'🍽️',word:'isst'},{emoji:'📖',word:'liest'}]},
+      ], 'Ein kurzer Satz: Wer? und Was tut er?'),
+    ],
+    2:[
+      satzRound([
+        {label:'Wer?', options:[{emoji:'👦',word:'Der Junge'},{emoji:'👧',word:'Das Mädchen'},{emoji:'🐱',word:'Die Katze'}]},
+        {label:'Was tut er?', options:[{emoji:'⚽',word:'spielt'},{emoji:'🍎',word:'isst'},{emoji:'📖',word:'liest'}]},
+        {label:'Wo?', options:[{emoji:'🌳',word:'im Garten'},{emoji:'🏫',word:'in der Schule'},{emoji:'🏠',word:'zu Hause'}]},
+      ], 'Jetzt kommt noch ein Wo? dazu.'),
+      satzRound([
+        {label:'Wer?', options:[{emoji:'👧',word:'Das Mädchen'},{emoji:'👴',word:'Der Opa'},{emoji:'🐶',word:'Der Hund'}]},
+        {label:'Was tut er?', options:[{emoji:'🎨',word:'malt'},{emoji:'🚶',word:'spaziert'},{emoji:'😴',word:'schläft'}]},
+        {label:'Wo?', options:[{emoji:'🛏️',word:'im Bett'},{emoji:'🌳',word:'im Park'},{emoji:'🏠',word:'zu Hause'}]},
+      ], 'Jetzt kommt noch ein Wo? dazu.'),
+    ],
+    3:[
+      satzRound([
+        {label:'Wer?', options:[{emoji:'👦',word:'Der Junge'},{emoji:'👧',word:'Das Mädchen'},{emoji:'👴',word:'Der Opa'}]},
+        {label:'Was tut er?', options:[{emoji:'🧱',word:'baut'},{emoji:'🎨',word:'malt'},{emoji:'🍰',word:'backt'}]},
+        {label:'Wie?', options:[{emoji:'😊',word:'fröhlich'},{emoji:'😤',word:'geduldig'},{emoji:'🤩',word:'aufgeregt'}]},
+        {label:'Wo?', options:[{emoji:'🏠',word:'im Zimmer'},{emoji:'🌳',word:'im Park'},{emoji:'🍳',word:'in der Küche'}]},
+      ], 'Ein langer Satz mit vier Bausteinen.'),
+      satzRound([
+        {label:'Wer?', options:[{emoji:'👧',word:'Das Mädchen'},{emoji:'👦',word:'Der Junge'},{emoji:'👨',word:'Der Papa'}]},
+        {label:'Was tut er?', options:[{emoji:'🎵',word:'singt'},{emoji:'📖',word:'liest'},{emoji:'🍰',word:'backt'}]},
+        {label:'Wie?', options:[{emoji:'😊',word:'glücklich'},{emoji:'😌',word:'ruhig'},{emoji:'🙂',word:'stolz'}]},
+        {label:'Wo?', options:[{emoji:'🏠',word:'zu Hause'},{emoji:'🚗',word:'im Auto'},{emoji:'🏫',word:'in der Schule'}]},
+      ], 'Ein langer Satz mit vier Bausteinen.'),
+    ],
+  },
 };
 
 // Diagnostik nutzt gezielt: erstes Item aus Stufe 2 (Einstieg), dann
@@ -908,7 +1014,7 @@ let state = {
   diag:{domainIndex:0, stage:'mid', midCorrect:null, current:null, answeredThisStep:false},
   levels:{}, stars:{}, diagDone:false, history:[], errorCounts:{}, attemptLogs:{},
   mastery:{}, selfChecks:[], pendingSelfCheck:null, pendingReview:false,
-  wordStore:[],
+  wordStore:[], onboardStep:0, errorProfile:{},
   needsBasicLetterDrill:false, drill:null,
   practice:{domainId:null, level:1, attemptLog:[], queue:[], current:null, itemsDone:0, answered:false, lastCorrect:null},
   showTeacher:false, showInfo:false, pendingDomain:null,
@@ -946,7 +1052,7 @@ function saveProgress(){
       errorCounts: state.errorCounts, attemptLogs: state.attemptLogs,
       mastery: state.mastery, selfChecks: state.selfChecks,
       needsBasicLetterDrill: state.needsBasicLetterDrill,
-      diagReports: state.diagReports, wordStore: state.wordStore,
+      diagReports: state.diagReports, wordStore: state.wordStore, errorProfile: state.errorProfile,
     }));
   }catch(e){}
 }
@@ -966,14 +1072,73 @@ function loadProgress(){
       state.needsBasicLetterDrill = !!d.needsBasicLetterDrill;
       state.diagReports = d.diagReports || [];
       state.wordStore = d.wordStore || [];
+      state.errorProfile = d.errorProfile || {};
     }
   }catch(e){}
 }
+
+window.exportData = function(){
+  const payload = {
+    levels: state.levels, stars: state.stars, diagDone: !!state.diagDone, history: state.history,
+    errorCounts: state.errorCounts, attemptLogs: state.attemptLogs,
+    mastery: state.mastery, selfChecks: state.selfChecks,
+    needsBasicLetterDrill: state.needsBasicLetterDrill,
+    diagReports: state.diagReports, wordStore: state.wordStore, errorProfile: state.errorProfile,
+    exportedAt: new Date().toISOString(),
+  };
+  try{
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'buchstabenhafen-sicherung-' + todayStr() + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url), 2000);
+  }catch(e){
+    alert('Export fehlgeschlagen: ' + e.message);
+  }
+};
+
+window.importData = function(file){
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const d = JSON.parse(e.target.result);
+      if(!d || typeof d !== 'object' || !d.levels){
+        alert('Diese Datei sieht nicht wie eine Buchstabenhafen-Sicherung aus.');
+        return;
+      }
+      state.levels = d.levels || {};
+      state.stars = d.stars || {};
+      state.diagDone = !!d.diagDone;
+      state.history = d.history || [];
+      state.errorCounts = d.errorCounts || {};
+      state.attemptLogs = d.attemptLogs || {};
+      state.mastery = d.mastery || {};
+      state.selfChecks = d.selfChecks || [];
+      state.needsBasicLetterDrill = !!d.needsBasicLetterDrill;
+      state.diagReports = d.diagReports || [];
+      state.wordStore = d.wordStore || [];
+      state.errorProfile = d.errorProfile || {};
+      saveProgress();
+      alert('Daten erfolgreich importiert!');
+      state.screen = 'start';
+      render();
+    }catch(err){
+      alert('Diese Datei konnte nicht gelesen werden: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+};
+
 window.confirmReset = function(){
   if(confirm('Fortschritt wirklich löschen und neu starten?')){
     state.levels={}; state.stars={}; state.diagDone=false; state.history=[];
     state.errorCounts={}; state.attemptLogs={}; state.mastery={}; state.selfChecks=[];
-    state.needsBasicLetterDrill=false; state.diagReports=[]; state.wordStore=[];
+    state.needsBasicLetterDrill=false; state.diagReports=[]; state.wordStore=[]; state.onboardStep=0; state.errorProfile={};
     try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
     state.showTeacher=false;
     state.screen='start';
@@ -993,7 +1158,16 @@ if('speechSynthesis' in window){
     window.speechSynthesis.onvoiceschanged = refreshVoices;
   }catch(e){}
 }
+// Silbentrennungs-Bindestriche (z.B. "Schmet-ter-ling") sind zum SEHEN
+// gedacht, sollen aber nicht mitgesprochen werden - sonst verfälscht das
+// die Aussprache. Der Gedankenstrich "–" (z.B. "Löwe – Löffel") bleibt
+// unangetastet, das ist ein anderes Zeichen.
+function stripSyllableHyphens(text){
+  return (text||'').replace(/([a-zA-ZäöüÄÖÜß])-(?=[a-zA-ZäöüÄÖÜß])/g, '$1');
+}
+
 function speak(text, rate){
+  text = stripSyllableHyphens(text);
   if(!('speechSynthesis' in window) || typeof SpeechSynthesisUtterance === 'undefined'){
     warnNoTts();
     return;
@@ -1036,7 +1210,8 @@ window.speakCurrent = function(){
     const instr = taskInstructions[item.taskIcon] || '';
     speak(instr + (instr ? '. ' : '') + item.speak);
   } else if(item.type==='input'){
-    speak(item.prompt + '. ' + item.speak);
+    speak(item.prompt);
+    speak(item.speak, 0.7);
   } else {
     speak(item.speak);
   }
@@ -1046,6 +1221,7 @@ window.speakCurrent = function(){
 function checkAnswer(item, given){
   if(item.type==='choice' || item.type==='pic' || item.type==='flash') return given===item.answer;
   if(item.type==='dictate') return given===0;
+  if(item.type==='satzbau') return given===0;
   const norm = s => (s||'').toString().trim().toLowerCase().replace(/ß/g,'ss');
   return norm(given)===norm(item.answer).replace(/ß/g,'ss');
 }
@@ -1091,19 +1267,68 @@ function topbar(title, sub, showBack){
   </div>`;
 }
 
+const onboardPages = [
+  { text: 'Hallo! Schön, dass du da bist. Mein Name ist Lumi und ich nehme dich mit auf ein kleines Lernabenteuer. Ich helfe dir, Fortschritte beim Lesen und Schreiben zu machen. Dafür passe ich die Aufgaben so an, dass sie zu dir passen.' },
+  { text: 'Zuerst schauen wir gemeinsam, wo du gerade stehst. Dazu gibt es verschiedene Übungen – manche ganz leicht, manche etwas schwerer. Zeig einfach, was du schon alles kannst!' },
+  { text: 'Weißt du eine Lösung mal nicht, tippe auf das Schulter-zuck-Symbol „Weiß ich nicht". Bei jeder Station siehst du außerdem Anker – die zeigen, wie weit du schon bist – und Sterne, die du beim Üben sammelst.', showSymbols:true },
+  { text: 'Und mit diesem Weiter-Button geht es immer einen Schritt voran – so wie gerade eben! Bereit? Dann schippern wir los!' },
+];
+
+window.onboardNext = function(){
+  state.onboardStep = (state.onboardStep||0) + 1;
+  render();
+  speakOnboard();
+};
+
+window.speakOnboard = function(){
+  const page = onboardPages[state.onboardStep||0];
+  if(page) speak(page.text);
+};
+
 function screenStart(){
-  const primaryLabel = state.diagDone ? '▶️ Weiter üben' : '🧭 Los geht’s';
-  const primaryAction = state.diagDone ? 'goMap()' : 'startDiagnose()';
+  if(state.diagDone){
+    return `
+    ${topbar('Buchstabenhafen', null, false)}
+    <main>
+      <div class="hero" style="text-align:center;">
+        <div class="lighthouse">🗼</div>
+        <div style="margin-top:4px;">${mascotIcon(84)}</div>
+      </div>
+      <div style="margin-top:18px;">
+        <button class="btn btn-primary btn-block" style="font-size:1.35rem;padding:22px;" onclick="goMap()">▶️ Weiter üben</button>
+      </div>
+      <div style="text-align:center;margin-top:14px;"><button class="btn btn-ghost" onclick="confirmReset()">🔄 Neu starten</button></div>
+      <div style="text-align:center;margin-top:22px;">
+        <button class="btn btn-ghost" onclick="toggleInfo()">ℹ️ Für Erwachsene</button>
+      </div>
+    </main>`;
+  }
+  const step = state.onboardStep || 0;
+  const page = onboardPages[step];
+  const isLast = step >= onboardPages.length-1;
+  const symbolsHtml = page.showSymbols ? `
+    <div style="display:flex;justify-content:center;gap:20px;margin:14px 0;">
+      <div style="text-align:center;"><div style="font-size:1.8rem;">🤷</div><div style="font-size:0.72rem;color:#4B6473;">Weiß ich nicht</div></div>
+      <div style="text-align:center;"><div style="font-size:1.8rem;">⚓</div><div style="font-size:0.72rem;color:#4B6473;">Deine Stufe</div></div>
+      <div style="text-align:center;"><div style="font-size:1.8rem;">⭐</div><div style="font-size:0.72rem;color:#4B6473;">Deine Sterne</div></div>
+    </div>` : '';
   return `
   ${topbar('Buchstabenhafen', null, false)}
   <main>
-    <div class="hero">
+    <div class="hero lumi-sail" style="text-align:center;">
       <div class="lighthouse">🗼</div>
+      <div style="margin-top:4px;">${mascotIcon(84)} <span style="font-size:2.2rem;vertical-align:middle;">⛵</span></div>
     </div>
-    <div style="margin-top:14px;">
-      <button class="btn btn-primary btn-block" style="font-size:1.35rem;padding:22px;" onclick="${primaryAction}">${primaryLabel}</button>
+    <div class="card" style="margin-top:14px;">
+      <p style="font-size:1.05rem;line-height:1.55;color:var(--harbor-dark);font-family:'Baloo 2';font-weight:600;text-align:center;margin:0;">${page.text}</p>
+      ${symbolsHtml}
+      <div style="text-align:center;margin-top:10px;"><button class="speak-btn" onclick="speakOnboard()">🔊</button></div>
     </div>
-    ${state.diagDone ? `<div style="text-align:center;margin-top:14px;"><button class="btn btn-ghost" onclick="confirmReset()">🔄 Neu starten</button></div>` : ''}
+    <div style="margin-top:18px;">
+      ${isLast
+        ? `<button class="btn btn-primary btn-block" style="font-size:1.35rem;padding:22px;" onclick="startDiagnose()">🧭 Los geht's</button>`
+        : `<button class="btn btn-primary btn-block" style="font-size:1.2rem;padding:18px;" onclick="onboardNext()">Weiter →</button>`}
+    </div>
     <div style="text-align:center;margin-top:22px;">
       <button class="btn btn-ghost" onclick="toggleInfo()">ℹ️ Für Erwachsene</button>
     </div>
@@ -1133,9 +1358,7 @@ function screenDiagnose(){
   const doneSteps = state.diag.domainIndex*3 + (stepOf[state.diag.stage]||0);
   const pct = Math.round((doneSteps/totalSteps)*100);
 
-  const skipBtn = (state.diag.currentLevel||1) >= 2
-    ? `<button class="btn btn-ghost" style="margin-top:14px;font-size:0.95rem;" onclick="diagDontKnow()">🤷 Weiß ich nicht</button>`
-    : '';
+  const skipBtn = `<button class="btn btn-ghost" style="margin-top:14px;font-size:0.95rem;" onclick="diagDontKnow()">🤷 Weiß ich nicht</button>`;
 
   return `
   ${topbar('Lotsen-Check','Finde deinen Startpunkt', false)}
@@ -1150,6 +1373,69 @@ function screenDiagnose(){
 }
 
 function renderItemBody(item, handlerName){
+  if(item.type==='satzbau'){
+    const p = state.practice;
+    if(p.sbStep==='build'){
+      const basket = item.baskets[p.sbBasketIndex];
+      const chosenSoFar = p.sbSelections.map(s=>s.word).join(' ');
+      return `
+        ${chosenSoFar ? `<p style="text-align:center;font-size:1rem;color:#4B6473;margin-bottom:10px;">${chosenSoFar} …</p>` : ''}
+        <div class="task-instr">🧩 ${basket.label}</div>
+        <div class="pic-options">${basket.options.map((opt,i)=>
+          `<button class="pic-opt-btn" onclick="satzbauPick(${i})">${opt.emoji}<div style="font-size:0.82rem;margin-top:4px;">${opt.word}</div></button>`
+        ).join('')}</div>`;
+    }
+    if(p.sbStep==='sentence'){
+      return `
+        <div class="task-instr">📖 Das ist dein Satz!</div>
+        <p style="font-size:1.35rem;font-family:'Baloo 2';font-weight:700;text-align:center;color:var(--harbor-dark);margin:14px 0;">${currentSentence()}</p>
+        <button class="speak-btn" onclick="speakSatzSentence()">🔊</button>
+        <button class="btn btn-primary btn-block" style="margin-top:14px;" onclick="satzbauToWrite()">✏️ Aufschreiben</button>`;
+    }
+    if(p.sbStep==='write'){
+      return `
+        <div class="task-instr">📝 Schreibe den Satz auf ein Blatt Papier.</div>
+        <p style="font-size:1.15rem;font-family:'Baloo 2';font-weight:600;text-align:center;color:var(--harbor-dark);margin:10px 0;">${currentSentence()}</p>
+        <button class="speak-btn" onclick="speakSatzSentenceSlow()">🔊</button>
+        <p style="font-size:0.88rem;color:#4B6473;margin:10px 0;">Nimm dir Zeit. Danach schauen wir uns jedes Wort einzeln an.</p>
+        <button class="btn btn-primary btn-block" style="margin-top:10px;" onclick="satzbauNextWord()">▶️ Wort für Wort üben</button>`;
+    }
+    if(p.sbStep==='word'){
+      const words = sentenceWords();
+      const word = words[p.sbWordIndex];
+      const syllables = syllablesFor(word);
+      const letterBoxW = 44; // Breite pro Buchstabenkästchen inkl. Rand, fürs Bogen-Maß
+      const syllableGroups = syllables.map(syl=>{
+        const letterBoxes = syl.split('').map(l=>`
+          <span style="display:inline-block;position:relative;margin:2px;width:36px;height:44px;border:2px solid var(--line);border-radius:10px;font-size:1.3rem;font-family:'Atkinson Hyperlegible';font-weight:700;background:var(--sand);line-height:40px;text-align:center;">
+            ${isVowel(l) ? `<span style="position:absolute;top:-15px;left:50%;transform:translateX(-50%);font-size:0.95rem;">👑</span>` : ''}
+            ${l}
+          </span>`).join('');
+        const arcWidth = syl.length * letterBoxW;
+        return `<span style="display:inline-block;vertical-align:top;margin:0 4px;">
+            <div>${letterBoxes}</div>
+            ${syllableArcSpan(arcWidth)}
+          </span>`;
+      }).join('');
+      const isLastWord = p.sbWordIndex >= words.length-1;
+      return `
+        <div class="task-instr">🔤 Wort ${p.sbWordIndex+1} von ${words.length}</div>
+        <div style="text-align:center;margin:20px 0 10px;">${syllableGroups}</div>
+        <button class="speak-btn" onclick="speakSatzWord()">🔊</button>
+        <p style="font-size:0.85rem;color:#4B6473;margin:10px 0;">Schreibe dieses Wort auf. Höre es dir so oft an, wie du magst. 👑 zeigt den Königsbuchstaben (Vokal) in jeder Silbe.</p>
+        <button class="btn btn-primary btn-block" style="margin-top:10px;" onclick="satzbauWordDone()">${isLastWord ? '👀 Jetzt vergleichen' : '▶️ Nächstes Wort'}</button>`;
+    }
+    // sbStep === 'compare'
+    const words = sentenceWords();
+    const wordBtns = words.map((w,i)=>{
+      const marked = p.sbMarked && p.sbMarked[i];
+      return `<button onclick="satzbauToggleWord(${i})" style="margin:4px;padding:9px 13px;border-radius:10px;border:2px solid var(--line);font-size:1.1rem;font-family:'Atkinson Hyperlegible';font-weight:700;background:${marked?'#F1A38B':'var(--sand)'};color:${marked?'#fff':'var(--ink)'};">${w}</button>`;
+    }).join('');
+    return `
+      <div class="task-instr">👀 Vergleiche mit deinem Blatt. Tippe die Wörter an, die du anders geschrieben hast.</div>
+      <div style="text-align:center;line-height:2.4;margin:10px 0;">${wordBtns}</div>
+      <button class="btn btn-primary btn-block" style="margin-top:10px;" onclick="satzbauSubmit()">✅ Fertig</button>`;
+  }
   if(item.type==='dictate'){
     const p = state.practice;
     if(!p.dictatePhase || p.dictatePhase==='listen'){
@@ -1222,6 +1508,9 @@ window.diagAnswer = function(given){
   const d = diagDomains[state.diag.domainIndex];
   const item = state.diag.current;
   const correct = checkAnswer(item, given);
+  if(given==='__SKIP__' && d.id==='buchstabe'){
+    state.diag.buchstabeSkipped = true;
+  }
   const dr = state.diag.domainResults[d.id] = state.diag.domainResults[d.id] || {};
 
   if(state.diag.stage==='mid'){
@@ -1260,7 +1549,7 @@ window.diagAnswer = function(given){
   state.diag.domainIndex++;
   if(state.diag.domainIndex>=diagDomains.length){
     state.diagDone = true;
-    if(state.levels.buchstabe === 1){
+    if(state.levels.buchstabe === 1 || state.diag.buchstabeSkipped){
       state.needsBasicLetterDrill = true;
     }
     state.diagReports = state.diagReports || [];
@@ -1368,6 +1657,16 @@ function screenMap(){
       <button class="btn btn-primary" style="padding:10px 20px;" onclick="startWordReview()">▶️ Jetzt üben</button>
     </div>` : '';
 
+  const dueCategories = Object.keys(ERROR_CATEGORIES).filter(cat => (state.errorProfile[cat]||0) >= 3);
+  const categoryBanner = dueCategories.length>0 ? `
+    <div class="prompt-card" style="text-align:center;border-color:#B24C2F;margin-bottom:16px;">
+      ${mascotIcon(44)}
+      <div style="font-size:0.95rem;color:var(--harbor-dark);font-family:'Baloo 2';font-weight:700;margin-top:4px;">🎯 Gezielt üben lohnt sich</div>
+      <p style="font-size:0.88rem;color:#4B6473;margin:6px 0 10px;">Bei diesen Rechtschreibmustern gab es zuletzt mehrere Fehler:</p>
+      ${dueCategories.map(cat=>`<button class="btn btn-primary" style="padding:8px 16px;margin:4px;font-size:0.88rem;" onclick="startCategoryReview('${cat}')">${ERROR_CATEGORIES[cat]}</button>`).join('')}
+    </div>` : '';
+
+
   return `
   ${topbar('Deine Hafenkarte','Wähle eine Station', false)}
   <main>
@@ -1376,6 +1675,7 @@ function screenMap(){
     ${drillBanner}
     ${vertiefungBanner}
     ${wordStoreBanner}
+    ${categoryBanner}
     <div class="map-wrap">${rows}</div>
     <p class="footnote">⚓ zeigt deine aktuelle Übungsstufe (1–3), ⭐ deine gesammelten Sterne, 🏆 einen gefestigten Bereich, 🔒 einen Bereich, der noch etwas wartet.</p>
   </main>`;
@@ -1387,7 +1687,7 @@ window.startDiagnose = function(){
   const firstItem = diagItem(firstId, 2, used);
   state.diag = {
     domainIndex:0, stage:'mid', midCorrect:null, tentativeLevel:null, currentLevel:2,
-    current: shuffleOptions(firstItem), usedItems: used, domainResults: {},
+    current: shuffleOptions(firstItem), usedItems: used, domainResults: {}, buchstabeSkipped:false,
   };
   state.screen='diagnose';
   render();
@@ -1420,7 +1720,7 @@ window.startPracticeSession = function(){
   }
   state.practice = {
     domainId, level, isReview,
-    sessionTarget: isReview ? 4 : 6, sessionErrors:0,
+    sessionTarget: isReview ? 4 : (domainId==='satzbau' ? 2 : 6), sessionErrors:0,
     attemptLog: saved.log, queue:[],
     itemsDone:0, answered:false, lastCorrect:null, current:null,
     levelUpMsg:null, levelDownMsg:null,
@@ -1529,6 +1829,13 @@ function pickPracticeItem(){
     p.dictatePhase = 'listen';
     p.markedWords = p.current.sentence.split(' ').map(()=>false);
   }
+  if(p.current && p.current.type==='satzbau'){
+    p.sbStep = 'build';
+    p.sbSelections = [];
+    p.sbBasketIndex = 0;
+    p.sbWordIndex = 0;
+    p.sbMarked = [];
+  }
 }
 
 function screenPractice(){
@@ -1542,6 +1849,8 @@ function screenPractice(){
       feedback = `<div class="feedback-box feedback-good">✅ Richtig! ${p.levelUpMsg||'Weiter so!'}</div>`;
     } else if(item.type==='dictate'){
       feedback = `<div class="feedback-box feedback-tip">💡 Okay, dieses Wort hast du noch nicht ganz richtig geschrieben. Das üben wir einfach noch mal.${p.levelDownMsg?('<br><br>'+p.levelDownMsg):''}</div>`;
+    } else if(item.type==='satzbau'){
+      feedback = `<div class="feedback-box feedback-tip">💡 Okay, dein Satz war noch nicht ganz richtig geschrieben. Das üben wir einfach noch mal.${p.levelDownMsg?('<br><br>'+p.levelDownMsg):''}</div>`;
     } else if(p.lastGiven==='__SKIP__'){
       feedback = `<div class="feedback-box feedback-tip">💡 Kein Problem, das lernst du noch! Hier die Erklärung:<br><br>${item.tip}${p.levelDownMsg?('<br><br>'+p.levelDownMsg):''}</div>`;
     } else {
@@ -1552,7 +1861,7 @@ function screenPractice(){
   }
 
   const bodyHtml = p.answered ? renderItemBodyStatic(item, p.lastGiven) : renderItemBody(item, 'practiceAnswer');
-  const skipBtn = (!p.answered && item.type!=='flash' && p.level>=2)
+  const skipBtn = (!p.answered && !['flash','dictate','satzbau'].includes(item.type) && p.level>=2)
     ? `<button class="btn btn-ghost" style="margin-top:14px;font-size:0.95rem;" onclick="practiceDontKnow()">🤷 Weiß ich nicht</button>`
     : '';
 
@@ -1606,6 +1915,90 @@ window.speakDictateSlow = function(){
   if(p.current && p.current.type==='dictate') speak(p.current.speak, 0.65);
 };
 
+// --- Satzwerft: Hilfsfunktionen und Handler ---
+
+function currentSentence(){
+  const p = state.practice;
+  const words = (p.sbSelections||[]).map(s=>s.word);
+  if(words.length === 0) return '';
+  const raw = words.join(' ') + '.';
+  return raw.charAt(0).toUpperCase() + raw.slice(1);
+}
+
+function sentenceWords(){
+  return currentSentence().replace(/\.$/,'').split(' ');
+}
+
+window.satzbauPick = function(i){
+  const p = state.practice;
+  const item = p.current;
+  const basket = item.baskets[p.sbBasketIndex];
+  p.sbSelections.push(basket.options[i]);
+  if(p.sbBasketIndex < item.baskets.length - 1){
+    p.sbBasketIndex++;
+  } else {
+    p.sbStep = 'sentence';
+  }
+  render();
+  if(p.sbStep === 'sentence') speak(currentSentence());
+};
+
+window.speakSatzSentence = function(){
+  speak(currentSentence());
+};
+
+window.speakSatzSentenceSlow = function(){
+  speak(currentSentence(), 0.65);
+};
+
+window.satzbauToWrite = function(){
+  state.practice.sbStep = 'write';
+  render();
+};
+
+window.satzbauNextWord = function(){
+  const p = state.practice;
+  p.sbStep = 'word';
+  p.sbWordIndex = 0;
+  render();
+  window.speakSatzWord();
+};
+
+window.speakSatzWord = function(){
+  const p = state.practice;
+  const words = sentenceWords();
+  const w = words[p.sbWordIndex];
+  if(w) speak(w, 0.7);
+};
+
+window.satzbauWordDone = function(){
+  const p = state.practice;
+  const words = sentenceWords();
+  if(p.sbWordIndex < words.length - 1){
+    p.sbWordIndex++;
+    render();
+    window.speakSatzWord();
+  } else {
+    p.sbStep = 'compare';
+    p.sbMarked = sentenceWords().map(()=>false);
+    render();
+  }
+};
+
+window.satzbauToggleWord = function(i){
+  const p = state.practice;
+  if(!p.sbMarked) return;
+  p.sbMarked[i] = !p.sbMarked[i];
+  render();
+};
+
+window.satzbauSubmit = function(){
+  const p = state.practice;
+  const wrongCount = (p.sbMarked||[]).filter(Boolean).length;
+  window.practiceAnswer(wrongCount);
+};
+
+
 window.practiceDontKnow = function(){
   window.practiceAnswer('__SKIP__');
 };
@@ -1630,7 +2023,42 @@ window.startWordReview = function(){
   speak('Wiederholung: Wörter, die du dir schon einmal gemerkt hast.');
 };
 
+window.startCategoryReview = function(category){
+  const pool = [];
+  ['schreib2','grundwortschatz'].forEach(domId=>{
+    [1,2,3].forEach(lvl=>{
+      (content[domId][lvl]||[]).forEach(it=>{
+        if(it.errorCategory === category) pool.push(it);
+      });
+    });
+  });
+  if(pool.length === 0) return;
+  const items = shuffle(pool).slice(0, Math.min(6, pool.length));
+  state.practice = {
+    domainId:'schreib2', level: state.levels.schreib2||1, isWordReview:true,
+    sessionTarget: items.length, sessionErrors:0,
+    attemptLog:[], queue: items.slice(1),
+    itemsDone:0, answered:false, lastCorrect:null, current: shuffleOptions(items[0]),
+    levelUpMsg:null, levelDownMsg:null, reviewCategory: category,
+  };
+  state.errorProfile[category] = 0; // frisch beginnen, sobald gezielt geübt wird
+  state.screen='practice';
+  render();
+  speak('Gezieltes Üben: ' + (ERROR_CATEGORIES[category]||category));
+};
+
 function renderItemBodyStatic(item, given){
+  if(item.type==='satzbau'){
+    const p = state.practice;
+    const words = sentenceWords();
+    const wordSpans = words.map((w,i)=>{
+      const marked = p.sbMarked && p.sbMarked[i];
+      return marked ? `<span style="color:var(--coral-dark);text-decoration:underline;">${w}</span>` : w;
+    }).join(' ');
+    return `
+      <div class="task-instr">📝 Dein Vergleich:</div>
+      <p style="font-size:1.3rem;font-family:'Baloo 2';font-weight:600;margin-top:10px;line-height:1.6;">${wordSpans}</p>`;
+  }
   if(item.type==='dictate'){
     const words = item.sentence.split(' ');
     const p = state.practice;
@@ -1745,6 +2173,9 @@ window.practiceAnswer = function(given){
       state.stars[p.domainId] = (state.stars[p.domainId]||0)+1;
     } else {
       state.errorCounts[p.domainId] = (state.errorCounts[p.domainId]||0)+1;
+      if(item.errorCategory){
+        state.errorProfile[item.errorCategory] = (state.errorProfile[item.errorCategory]||0) + 1;
+      }
     }
 
     let levelChanged = false;
@@ -1782,6 +2213,8 @@ window.practiceAnswer = function(given){
     speak('Richtig! ' + (p.levelUpMsg || 'Weiter so!'));
   } else if(item.type==='dictate'){
     speak('Okay, dieses Wort hast du noch nicht ganz richtig geschrieben. Das üben wir einfach noch mal.' + (p.levelDownMsg ? ' ' + p.levelDownMsg : ''));
+  } else if(item.type==='satzbau'){
+    speak('Okay, dein Satz war noch nicht ganz richtig geschrieben. Das üben wir einfach noch mal.' + (p.levelDownMsg ? ' ' + p.levelDownMsg : ''));
   } else if(given==='__SKIP__'){
     speak('Kein Problem, das lernst du noch! ' + item.tip + (p.levelDownMsg ? ' ' + p.levelDownMsg : ''));
   } else if(item.type==='input'){
@@ -1895,7 +2328,10 @@ function screenDrillOffer(){
 window.skipLetterDrill = function(){ state.screen='map'; render(); };
 
 window.startLetterDrill = function(){
-  const pool = shuffle(drillPool());
+  const all = drillPool();
+  const nikoWords = shuffle(all.filter(i=>i.niko));
+  const otherWords = shuffle(all.filter(i=>!i.niko));
+  const pool = [...nikoWords, ...otherWords];
   state.drill = {
     queue: pool, current:null, answered:false, lastGiven:null, lastCorrect:null,
     initialCount: pool.length, doneCount:0, wrongAttempts:{}, flagged:[],
@@ -2054,6 +2490,44 @@ window.speakDrillDone = function(){
 };
 
 /* ---------- Lehrkraft-Ansicht ---------- */
+// Kleines SVG-Balkendiagramm für den Stufenverlauf - bewusst minimalistisch,
+// keine Bibliothek nötig.
+function historyBarChart(levels, color){
+  const w = 150, h = 36;
+  const barW = Math.max(5, Math.floor(w/levels.length) - 3);
+  const bars = levels.map((lvl,i)=>{
+    const val = lvl || 0;
+    const barH = Math.max(2, (val/3)*h);
+    const x = i*(barW+3);
+    const y = h-barH;
+    return `<rect x="${x}" y="${y}" width="${barW}" height="${barH}" fill="${color||'#1B6E7F'}" rx="1.5"/>`;
+  }).join('');
+  return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" style="display:block;">${bars}</svg>`;
+}
+
+function renderErrorProfileSection(){
+  const entries = Object.keys(ERROR_CATEGORIES)
+    .map(cat => ({cat, name: ERROR_CATEGORIES[cat], count: state.errorProfile[cat]||0}))
+    .filter(e => e.count > 0)
+    .sort((a,b) => b.count - a.count);
+  if(entries.length === 0){
+    return `<h3 style="font-size:1rem;margin-top:18px;">Fehlerprofil</h3><p style="font-size:0.85rem;color:#6B7F8C;margin-top:4px;">Noch keine kategorisierten Fehler erfasst (Leuchtturm/Speicherstadt).</p>`;
+  }
+  const maxCount = Math.max(...entries.map(e=>e.count));
+  const rows = entries.map(e => {
+    const barW = Math.round((e.count/maxCount)*140);
+    return `<tr>
+      <td style="font-size:0.85rem;">${e.name}</td>
+      <td><svg viewBox="0 0 140 16" width="140" height="16"><rect x="0" y="2" width="${barW}" height="12" fill="#B24C2F" rx="3"/></svg></td>
+      <td style="font-size:0.85rem;text-align:center;">${e.count}</td>
+    </tr>`;
+  }).join('');
+  return `
+    <h3 style="font-size:1rem;margin-top:18px;">Fehlerprofil (Leuchtturm &amp; Speicherstadt)</h3>
+    <p style="font-size:0.8rem;color:#6B7F8C;margin-top:2px;">Zeigt, bei welchen Rechtschreibmustern noch Unsicherheit besteht - nicht nur wie viele, sondern welche Art von Fehlern.</p>
+    <table class="teacher-panel"><tr><th>Muster</th><th>Häufigkeit</th><th>Anzahl</th></tr>${rows}</table>`;
+}
+
 function renderHistorySection(){
   const history = state.history || [];
   const wk = weekKey(new Date());
@@ -2069,8 +2543,9 @@ function renderHistorySection(){
     return `<p style="font-size:0.85rem;color:#6B7F8C;margin-top:14px;">Noch kein Wochenverlauf – der baut sich automatisch auf, sobald über mehrere Wochen geübt wird (ein Eintrag pro Kalenderwoche).</p>${noteForm}`;
   }
   const rows = domains.map(d=>{
+    const levelsArr = history.map(h => h.levels[d.id] || 1);
     const trend = history.map(h => h.levels[d.id] || '–').join(' → ');
-    return `<tr><td>${d.icon} ${d.name}</td><td style="font-family:monospace;font-size:0.85rem;">${trend}</td></tr>`;
+    return `<tr><td>${d.icon} ${d.name}</td><td>${historyBarChart(levelsArr, d.color)}</td><td style="font-family:monospace;font-size:0.8rem;">${trend}</td></tr>`;
   }).join('');
   const notedWeeks = history.filter(h => h.note);
   const notesList = notedWeeks.length ? `
@@ -2081,7 +2556,7 @@ function renderHistorySection(){
   return `
     <h3 style="font-size:1rem;margin-top:18px;">Verlauf über die Wochen</h3>
     <p style="font-size:0.8rem;color:#6B7F8C;margin-top:2px;">${history[0].date} bis ${history[history.length-1].date} · ${history.length} Woche(n) erfasst</p>
-    <table class="teacher-panel"><tr><th>Bereich</th><th>Stufe je Woche</th></tr>${rows}</table>
+    <table class="teacher-panel"><tr><th>Bereich</th><th>Verlauf</th><th>Stufe je Woche</th></tr>${rows}</table>
     ${notesList}
     ${noteForm}
     <p style="font-size:0.8rem;color:#6B7F8C;line-height:1.5;margin-top:8px;">Zum externen Protokollieren: Werte einfach ablesen und ins Förderprotokoll übertragen. Ein neuer Wert kommt automatisch dazu, sobald in einer neuen Kalenderwoche geübt wird.</p>`;
@@ -2139,12 +2614,16 @@ function renderTeacherOverlay(){
         <tr><th>Bereich</th><th>Stufe</th><th>Sterne</th><th>Fehler</th></tr>
         ${rows}
       </table>
+      ${renderErrorProfileSection()}
       ${renderHistorySection()}
       ${renderSelfCheckSection()}
       <p style="font-size:0.82rem;color:#6B7F8C;line-height:1.5;margin-top:16px;">
       Funktionsweise: Der Lotsen-Check testet jeden Bereich jetzt mit drei zufällig gewählten Aufgaben statt zwei – Einstiegsitem, ein leichteres oder schwereres Folgeitem, und ein Bestätigungsitem auf der so ermittelten Stufe. Fällt die Bestätigung negativ aus, wird eine Stufe zurückgestuft – das fängt Ausrutscher und Zufallstreffer ab. Jede Diagnose wird als Bericht gespeichert (Testergebnis je Aufgabe, aktueller Lernstand als „Ich kann"-Aussage, nächster Lernschritt) und dient bei einer Wiederholung (z. B. nach einem halben Jahr) automatisch als Vergleichsbasis. Ein Aufstieg passiert erst, wenn mindestens 8 Versuche auf der aktuellen Stufe protokolliert sind UND von den letzten 6 Versuchen höchstens 1 falsch war (über mehrere Sitzungen hinweg gespeichert) – reines Raten reicht damit nicht für einen Aufstieg. Sind von den letzten 4 Versuchen mindestens 3 falsch, geht es eine Stufe zurück. Die Fehlerzahl je Bereich wird fortlaufend gezählt. Nach jeder Sitzung schätzt das Kind anhand einer „Ich kann..."-Aussage zum konkreten Lernziel der Stufe seine eigene Beherrschung ein – dargestellt als wachsende Pflanze in drei selbst gezeichneten Stufen (Keim, kleine Blätter, blühend) statt als Gesichtsausdruck, damit nicht die Person, sondern der noch wachsende Lernstand bewertet wird – sichtbar oben in der Tabelle, mit Warnhinweis bei auffälliger Abweichung von der tatsächlichen Fehlerzahl. Ein gemeisterter Bereich (🏆) wird nach 14 Tagen automatisch zur kurzen Auffrischung (🔁, 4 Aufgaben aus Stufe 2+3 gemischt) wieder vorgelegt; läuft die Auffrischung gut, verlängert sich die Frist um weitere 14 Tage, bei Schwierigkeiten schon nach 3 Tagen erneut oder mit Rückstufung. Lesefahrrinne/Schreibwerft schalten sich erst frei, wenn Lauthafen, Buchstabenbrücke & Silbendock mindestens Stufe 2 erreicht haben; Leuchtturm/Speicherstadt entsprechend erst nach Lesefahrrinne/Schreibwerft – angelehnt an die alphabetische-vor-orthografischer-Strategie-Abfolge, damit kein Kind mit Aufgaben konfrontiert wird, für die die Grundlage fehlt. Der Fortschritt wird ausschließlich lokal auf diesem Gerät gespeichert (kein Server, keine Übertragung von Kinderdaten). Dies ist ein Funktionsprototyp; für den Realeinsatz braucht es größere, psychometrisch abgesicherte Aufgabenpools sowie eine Anbindung an die schulische Dokumentation (z. B. DiViS/Förderplan, SCHNABEL-Ergebnisse).</p>
       ${(state.diagReports&&state.diagReports.length) ? `<button class="btn btn-ghost" style="margin-top:16px;" onclick="viewDiagReport()">📋 Diagnosebericht ansehen</button>` : ''}
       <button class="btn btn-ghost" style="margin-top:10px;" onclick="toggleTeacher(); startDiagnose();">🔁 Diagnose erneut durchführen (z. B. nach 6 Monaten)</button>
+      <button class="btn btn-ghost" style="margin-top:10px;" onclick="exportData()">📤 Daten exportieren (Sicherung)</button>
+      <button class="btn btn-ghost" style="margin-top:10px;" onclick="document.getElementById('importFileInput').click()">📥 Daten importieren</button>
+      <input type="file" id="importFileInput" accept="application/json" style="display:none;" onchange="importData(this.files[0])">
       <button class="btn btn-ghost" style="margin-top:10px;" onclick="confirmReset()">🔄 Fortschritt dieses Geräts zurücksetzen</button>
     </div>
   </div>`;
