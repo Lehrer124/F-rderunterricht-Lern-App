@@ -1526,11 +1526,10 @@ function renderItemBody(item, handlerName){
     }
     if(p.sbStep==='write'){
       return `
-        <div class="task-instr">📝 Schreibe den Satz auf ein Blatt Papier.</div>
-        <p style="font-size:1.15rem;font-family:'Baloo 2';font-weight:600;text-align:center;color:var(--harbor-dark);margin:10px 0;">${currentSentence()}</p>
-        <button class="speak-btn" onclick="speakSatzSentenceSlow()">🔊</button>
-        <p style="font-size:0.88rem;color:#4B6473;margin:10px 0;">Nimm dir Zeit. Danach schauen wir uns jedes Wort einzeln an.</p>
-        <button class="btn btn-primary btn-block" style="margin-top:10px;" onclick="satzbauNextWord()">▶️ Wort für Wort üben</button>`;
+        <div class="task-instr">✏️ Jetzt schreiben wir den Satz gemeinsam auf.</div>
+        <p style="font-size:1.15rem;font-family:'Baloo 2';font-weight:600;text-align:center;color:var(--harbor-dark);margin:14px 0;">Dazu schreiben wir den Satz Wort für Wort auf. Los geht's!</p>
+        <button class="speak-btn" onclick="speakSatzWriteIntro()">🔊</button>
+        <button class="btn btn-primary btn-block" style="margin-top:14px;" onclick="satzbauNextWord()">Weiter →</button>`;
     }
     if(p.sbStep==='word'){
       const words = sentenceWords();
@@ -1541,8 +1540,9 @@ function renderItemBody(item, handlerName){
       const syllableGroups = groups.map(group=>{
         const boxes = group.map(tok=>{
           const idx = globalIdx++;
+          const playing = state.practice.sbPlayingIdx === idx;
           return `
-          <button onclick="satzbauPlayToken(${idx})" style="display:inline-block;position:relative;margin:2px;min-width:36px;height:44px;padding:0 6px;border:2px solid var(--line);border-radius:10px;font-size:1.25rem;font-family:'Atkinson Hyperlegible';font-weight:700;background:var(--sand);line-height:40px;text-align:center;">
+          <button onclick="satzbauPlayToken(${idx})" style="display:inline-block;position:relative;margin:2px;min-width:36px;height:44px;padding:0 6px;border:2px solid ${playing?'var(--foam)':'var(--line)'};border-radius:10px;font-size:1.25rem;font-family:'Atkinson Hyperlegible';font-weight:700;background:${playing?'var(--foam)33':'var(--sand)'};line-height:40px;text-align:center;transition:background 0.15s;">
             ${isVowelSoundKey(tok.key) ? `<span style="position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:0.95rem;">👑</span>` : ''}
             ${tok.text}
           </button>`;
@@ -2095,17 +2095,68 @@ window.speakSatzSentenceSlow = function(){
   speak(currentSentence(), 0.65);
 };
 
+const SATZ_WRITE_INTRO = "Jetzt schreiben wir den Satz gemeinsam auf. Dazu schreiben wir den Satz Wort für Wort auf. Los geht's!";
+window.speakSatzWriteIntro = function(){ speak(SATZ_WRITE_INTRO); };
+
 window.satzbauToWrite = function(){
   state.practice.sbStep = 'write';
   render();
+  speakSatzWriteIntro();
 };
+
+// Spielt einen Laut ab (echte Aufnahme, sonst TTS-Rückfall auf das ganze
+// Wort) und ruft danach onDone auf - damit sich mehrere Laute nacheinander
+// automatisch abspielen lassen ("Laut für Laut").
+function playTokenSequenced(key, wholeWord, onDone){
+  if(!key){ speakSequenced(wholeWord, onDone); return; }
+  try{
+    const audio = new Audio(key + '.m4a');
+    let handled = false;
+    audio.addEventListener('error', ()=>{ if(!handled){ handled=true; speakSequenced(wholeWord, onDone); } });
+    audio.addEventListener('ended', ()=>{ if(!handled){ handled=true; if(onDone) onDone(); } });
+    const p = audio.play();
+    if(p && typeof p.catch === 'function'){ p.catch(()=>{ if(!handled){ handled=true; speakSequenced(wholeWord, onDone); } }); }
+  }catch(e){ speakSequenced(wholeWord, onDone); }
+}
+function speakSequenced(text, onDone){
+  if(!('speechSynthesis' in window) || typeof SpeechSynthesisUtterance === 'undefined'){
+    warnNoTts(); if(onDone) onDone(); return;
+  }
+  try{
+    const u = new SpeechSynthesisUtterance(stripSyllableHyphens(text));
+    u.lang='de-DE'; u.rate=0.75;
+    const deVoices = cachedVoices.filter(v=>v.lang && v.lang.toLowerCase().startsWith('de'));
+    const enhancedVoice = deVoices.find(v=>/enhanced|premium|neural/i.test(v.name||''));
+    if(enhancedVoice) u.voice = enhancedVoice;
+    let done = false;
+    const finish = ()=>{ if(!done){ done=true; if(onDone) onDone(); } };
+    u.onend = finish; u.onerror = finish;
+    window.speechSynthesis.speak(u);
+    setTimeout(finish, 4000); // Sicherheitsnetz, falls onend nie feuert
+  }catch(e){ if(onDone) onDone(); }
+}
+
+// Spielt bei einem neuen Wort automatisch jeden Laut nacheinander ab und
+// liest danach das ganze Wort einmal am Stück vor.
+function autoPlayWordSounds(){
+  const p = state.practice;
+  const tokens = p.sbTokens || [];
+  const wholeWord = sentenceWords()[p.sbWordIndex] || '';
+  let i = 0;
+  function playNext(){
+    if(i >= tokens.length){ speak(wholeWord); return; }
+    const tok = tokens[i]; i++;
+    playTokenSequenced(tok.key, wholeWord, playNext);
+  }
+  playNext();
+}
 
 window.satzbauNextWord = function(){
   const p = state.practice;
   p.sbStep = 'word';
   p.sbWordIndex = 0;
   render();
-  window.speakSatzWord();
+  autoPlayWordSounds();
 };
 
 window.speakSatzWord = function(){
@@ -2120,7 +2171,11 @@ window.satzbauPlayToken = function(idx){
   const tok = p.sbTokens && p.sbTokens[idx];
   const words = sentenceWords();
   const wholeWord = words[p.sbWordIndex] || '';
-  if(tok) window.playSoundToken(tok.key, wholeWord);
+  if(!tok) return;
+  p.sbPlayingIdx = idx;
+  render();
+  window.playSoundToken(tok.key, wholeWord);
+  setTimeout(()=>{ p.sbPlayingIdx = null; render(); }, 500);
 };
 
 window.satzbauWordDone = function(){
@@ -2129,7 +2184,7 @@ window.satzbauWordDone = function(){
   if(p.sbWordIndex < words.length - 1){
     p.sbWordIndex++;
     render();
-    window.speakSatzWord();
+    autoPlayWordSounds();
   } else {
     p.sbStep = 'compare';
     p.sbMarked = sentenceWords().map(()=>false);
