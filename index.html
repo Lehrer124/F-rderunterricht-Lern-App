@@ -337,6 +337,28 @@ function syllableArcSpan(width){
   </svg>`;
 }
 
+// Kein Standard-Emoji zeigt "nur eine Gabel" (🍴 ist immer Gabel+Messer) oder
+// "einen Tisch" als Möbelstück - deshalb eigene, einfache Strichzeichnungen.
+function forkIcon(size){
+  size = size || 44;
+  return `<svg viewBox="0 0 40 60" width="${size}" height="${Math.round(size*1.3)}" style="display:inline-block;vertical-align:middle;">
+    <rect x="17" y="24" width="6" height="34" rx="2" fill="#5A6B7A"/>
+    <rect x="8" y="2" width="4" height="20" rx="2" fill="#5A6B7A"/>
+    <rect x="14" y="2" width="4" height="20" rx="2" fill="#5A6B7A"/>
+    <rect x="20" y="2" width="4" height="20" rx="2" fill="#5A6B7A"/>
+    <rect x="26" y="2" width="4" height="20" rx="2" fill="#5A6B7A"/>
+    <path d="M8 22 Q8 30 20 30 Q32 30 32 22" fill="none" stroke="#5A6B7A" stroke-width="4"/>
+  </svg>`;
+}
+function tableIcon(size){
+  size = size || 44;
+  return `<svg viewBox="0 0 60 50" width="${size}" height="${Math.round(size*0.83)}" style="display:inline-block;vertical-align:middle;">
+    <rect x="4" y="8" width="52" height="8" rx="2" fill="#8B5A2B"/>
+    <rect x="8" y="16" width="6" height="28" fill="#8B5A2B"/>
+    <rect x="46" y="16" width="6" height="28" fill="#8B5A2B"/>
+  </svg>`;
+}
+
 // Kindgerechte Lernziel-Erklärung je Bereich und Stufe – wird vor jeder
 // Übungssitzung gezeigt, damit klar ist, warum gerade das geübt wird.
 // "Ich kann..."-Aussagen für die echte Selbsteinschätzung nach der Sitzung -
@@ -346,56 +368,67 @@ const iCanStatements = {
     1:'Ich kann hören, ob sich zwei Wörter reimen, wie viele Silben ein Wort hat und wie es anfängt.',
     2:'Ich kann auch bei kniffligeren Wörtern Reime, Silben und Anfangslaute erkennen.',
     3:'Ich kann schwierige Reime und Anlaute ganz genau heraushören.',
+    4:'Ich kann auch bei mehrsilbigen Wörtern und ähnlichen Anlauten wie „Bl" und „Br" genau hinhören.',
   },
   buchstabe: {
     1:'Ich kann hören, mit welchem Buchstaben ein Wort beginnt oder endet.',
     2:'Ich kann ein Wort in seine Buchstaben zerlegen.',
     3:'Ich kann Buchstaben unterscheiden, die leicht verwechselt werden (b, d, p) oder besonders klingen (Qu, Pf, St).',
+    4:'Ich kann auch lange, zusammengesetzte Wörter mit mehreren Konsonantenverbindungen sicher lesen.',
   },
   silbendock: {
     1:'Ich kann den ersten Laut eines Wortes aufschreiben.',
     2:'Ich kann den letzten Laut eines Wortes aufschreiben.',
     3:'Ich kann eine Silbe aus einem Wort heraushören und aufschreiben.',
+    4:'Ich kann die ersten zwei Silben eines Wortes heraushören und aufschreiben.',
   },
   lesen: {
     1:'Ich kann ähnlich klingende Wörter beim Lesen genau unterscheiden.',
     2:'Ich kann einen kurzen Satz lesen und das passende Wort für die Lücke finden.',
     3:'Ich kann einen längeren Satz lesen und seinen Sinn verstehen.',
+    4:'Ich kann auch Sätze mit einem Nebensatz lesen und ihren Sinn verstehen.',
   },
   schreib1: {
     1:'Ich kann einfache Wörter so aufschreiben, wie ich sie höre.',
     2:'Ich kann auch Wörter mit neuen Buchstaben lautgetreu aufschreiben.',
     3:'Ich kann Wörter mit mehreren Konsonanten hintereinander aufschreiben.',
+    4:'Ich kann Wörter mit Konsonantenhäufungen am Anfang UND am Ende aufschreiben.',
   },
   schreib2: {
     1:'Ich kann mit dem Schwingen-Trick herausfinden, ob ein Buchstabe verdoppelt wird.',
     2:'Ich kann mit dem Verlängern-Trick den richtigen Buchstaben am Wortende finden.',
     3:'Ich kann mit dem Ableiten-Trick schwierige Wortbausteine richtig schreiben.',
+    4:'Ich kann auch lange zusammengesetzte Wörter und einige Merkwörter richtig schreiben.',
   },
   grundwortschatz: {
     1:'Ich kann wichtige Wörter aus dem Grundwortschatz richtig schreiben.',
     2:'Ich kann Wörter mit Doppellauten oder doppelten Buchstaben richtig schreiben.',
     3:'Ich kann auch kniffligere Grundwortschatz-Wörter mit meinen Tricks richtig schreiben.',
+    4:'Ich kann auch längere Wörter und die das/dass-Regel richtig anwenden.',
   },
   blitzlesen: {
     1:'Ich kann kurze, bekannte Wörter blitzschnell erkennen.',
     2:'Ich kann auch längere, zusammengesetzte Wörter schnell lesen.',
     3:'Ich kann auch lange und ungewöhnliche Wörter blitzschnell erfassen.',
+    4:'Ich kann auch sehr lange Wörter in kürzester Zeit erfassen.',
   },
   lesekompetenz: {
     1:'Ich kann eine kurze Geschichte lesen und eine direkte Frage dazu beantworten.',
     2:'Ich kann aus dem Gelesenen schließen, was als Nächstes passiert.',
     3:'Ich kann längere Texte lesen und auch versteckte Zusammenhänge verstehen.',
+    4:'Ich kann längere Texte mit mehreren Gedankenschritten sicher verstehen.',
   },
   diktat: {
     1:'Ich kann einen kurzen, einfachen Satz nach dem Hören auf Papier aufschreiben.',
     2:'Ich kann etwas längere Sätze aufschreiben und meine Schreibung selbst überprüfen.',
     3:'Ich kann auch längere, kniffligere Sätze sicher aufschreiben.',
+    4:'Ich kann auch sehr lange Sätze mit mehreren Teilen sicher aufschreiben.',
   },
   satzbau: {
-    1:'Ich kann mir einen eigenen kurzen Satz ausdenken und aufschreiben.',
-    2:'Ich kann einen eigenen Satz mit mehr Bausteinen bauen und aufschreiben.',
-    3:'Ich kann einen längeren, eigenen Satz bauen und Wort für Wort sicher aufschreiben.',
+    1:'Ich kann mir ein Wort mit Bild gut einprägen und aus dem Kopf aufschreiben.',
+    2:'Ich kann mir einen eigenen kurzen Satz ausdenken und aufschreiben.',
+    3:'Ich kann einen eigenen Satz mit mehr Bausteinen bauen und aufschreiben.',
+    4:'Ich kann einen langen, eigenen Satz mit vier Bausteinen bauen und aufschreiben.',
   },
 };
 
@@ -404,56 +437,67 @@ const levelGoals = {
     1:'Hier trainierst du dein Ohr: Reime, Silben und Anfangslaute hören. Das hilft dir später beim Lesen und Schreiben!',
     2:'Weiter geht es mit Reimen, Silben und Anlauten – jetzt ein bisschen kniffliger.',
     3:'Jetzt wird genau hingehört: schwierigere Reime und Anlaute, damit dein Ohr richtig fit wird.',
+    4:'Profi-Stufe: mehrsilbige Wörter und feine Unterschiede bei ähnlichen Anlauten wie „Bl" und „Br".',
   },
   buchstabe: {
     1:'Hier lernst du, welcher Buchstabe zu welchem Laut gehört – die Basis für Lesen und Schreiben.',
     2:'Du verbindest jetzt schon ganze Wörter mit ihren Buchstaben.',
     3:'Kniffliger: Buchstaben, die leicht verwechselt werden (b, d, p) oder besonders klingen (Qu, Pf, St).',
+    4:'Profi-Stufe: mehrere Konsonantenverbindungen und zusammengesetzte Wörter in einem Wort.',
   },
   silbendock: {
     1:'Hier übst du, einen einzelnen Laut aufzuschreiben – der erste Schritt zum Wörter-Schreiben. Wir starten mit dem ersten Laut, weil man den beim Zuhören am leichtesten heraushört.',
     2:'Jetzt schreibst du den letzten Laut eines Wortes. Das ist schwerer als der erste Laut, weil du dir erst das ganze Wort merken musst, bevor du weißt, welcher Laut zuletzt kommt.',
     3:'Jetzt baust du ganze Silben: ein Konsonant plus ein Vokal. Das ist noch schwerer, weil du jetzt nicht nur einen Laut heraushörst, sondern zwei Laute richtig zusammensetzt.',
+    4:'Jetzt schreibst du gleich die ersten ZWEI Silben eines Wortes – das ist noch anspruchsvoller.',
   },
   lesen: {
     1:'Hier trainierst du genaues Lesen: Wörter, die sich ähnlich anhören, sicher unterscheiden.',
     2:'Du liest jetzt kurze Sätze und findest das passende Wort für die Lücke.',
     3:'Längere Sätze – du übst, den Sinn genau zu verstehen.',
+    4:'Jetzt kommen Sätze mit einem Nebensatz dazu (weil, nachdem, als, damit) – lies genau.',
   },
   schreib1: {
     1:'Hier schreibst du deine ersten ganzen Wörter – ganz einfache, die genauso klingen, wie sie geschrieben werden.',
     2:'Jetzt kommen neue Buchstaben dazu, aber die Wörter bleiben einfach aufgebaut.',
     3:'Jetzt übst du Wörter mit mehreren Buchstaben direkt hintereinander – schon Profi-Level!',
+    4:'Profi-Stufe: Konsonantenhäufungen am Anfang UND am Ende desselben Wortes.',
   },
   schreib2: {
     1:'Trick Nummer 1: Schwinge das Wort in Silben. Klingt der Vokal davor kurz und knackig, wird der Buchstabe danach oft verdoppelt (Ba-ll, nicht Ba-l). Dieser Trick heißt „Schwingen".',
     2:'Trick Nummer 2 heißt „Verlängern": Mach aus dem Wort ein längeres (Hund → Hunde). Jetzt hörst du genau, welcher Buchstabe am Ende wirklich steht.',
     3:'Trick Nummer 3 heißt „Ableiten": Überlege, von welchem Wort dein Wort kommt (Fahrrad kommt von fahren). Das verrät dir die richtige Schreibweise.',
+    4:'Profi-Stufe: noch längere zusammengesetzte Wörter, kombinierte Regeln und ein paar echte Merkwörter.',
   },
   grundwortschatz: {
     1:'Hier übst du wichtige Wörter aus dem Hamburger Grundwortschatz – Wörter, die du oft brauchst. Manche enden auf ein leises, unbetontes „e", das man trotzdem immer mitschreibt.',
     2:'Denk an den Schwingen-Trick: Klingt der Vokal kurz, wird der Buchstabe danach oft verdoppelt.',
     3:'Jetzt hilft dir der Verlängern-Trick und der Ableiten-Trick bei kniffligeren Wörtern.',
+    4:'Profi-Stufe: längere Wörter, die ß-Regel und die das/dass-Unterscheidung.',
   },
   blitzlesen: {
     1:'Hier übst du, Wörter blitzschnell zu erkennen – bevor die Zeit abläuft, musst du das passende Bild finden. Das trainiert automatisiertes Lesen.',
     2:'Jetzt werden die Wörter länger und die Zeit knapper – echtes Lese-Tempo.',
     3:'Kniffligere, längere Wörter in kurzer Zeit – Profi-Blitzlesen!',
+    4:'Ganz kurze Zeit, ganz lange Wörter – die Profi-Profi-Stufe!',
   },
   lesekompetenz: {
     1:'Hier liest du eine kurze Geschichte und beantwortest eine Frage dazu – die Antwort steht direkt im Text.',
     2:'Jetzt musst du zwischen den Zeilen lesen: Die Antwort steht nicht wörtlich da, du musst sie erschließen.',
     3:'Längere Texte, mehr Zusammenhänge – du liest wie ein Profi-Leser.',
+    4:'Noch längere Texte mit mehreren Gedankenschritten – volle Konzentration!',
   },
   diktat: {
     1:'Hier schreibst du kurze Sätze auf, die du hörst – auf einem echten Blatt Papier! Danach vergleichst du selbst mit der Lösung.',
     2:'Die Sätze werden etwas länger – schreib in deinem eigenen Tempo.',
     3:'Jetzt kommen längere, kniffligere Sätze dran.',
+    4:'Sehr lange Sätze – höre jedes Wort ganz genau!',
   },
   satzbau: {
-    1:'Hier baust du dir deinen eigenen Satz aus Bildern zusammen – wähle einfach aus, was du magst! Dann schreibst du ihn Wort für Wort auf.',
-    2:'Jetzt kommt noch ein Baustein dazu – dein Satz wird etwas länger.',
-    3:'Vier Bausteine – dein längster eigener Satz. Wort für Wort schaffst du das!',
+    1:'Hier prägst du dir ein Wort mit Bild gut ein – du siehst es in Lautbausteine zerlegt. Dann schreibst du es auf der nächsten Seite aus dem Kopf auf. Du kannst es dir jederzeit noch mal anhören.',
+    2:'Jetzt baust du dir deinen eigenen Satz aus Bildern zusammen – wähle einfach aus, was du magst! Dann schreibst du ihn Wort für Wort auf.',
+    3:'Ein Baustein mehr – dein Satz wird etwas länger.',
+    4:'Vier Bausteine – dein längster eigener Satz. Wort für Wort schaffst du das!',
   },
 };
 
@@ -543,6 +587,12 @@ function flash(word, options, answerIdx, tip){
 // grammatisch gültigen, individuellen Satz.
 function satzRound(baskets, tip){
   return {type:'satzbau', baskets, tip};
+}
+
+// Wortstudie: Bild + Wort + Lautbausteine zum Einprägen, dann auf der
+// nächsten Seite aus dem Kopf aufschreiben (mit Hör- und Bild-Wiederholung).
+function wordstudy(word, emoji, tip){
+  return {type:'wordstudy', word, emoji, answer: word, tip, speak: word};
 }
 
 // Diktat: Satz wird langsam vorgelesen, auf Papier geschrieben, dann selbst
@@ -652,17 +702,37 @@ function isVowelSoundKey(key){
 // Ordnet die Lautbausteine eines Wortes den (handgeprüften) Silben zu, damit
 // der Silbenbogen weiterhin über der richtigen Buchstabengruppe sitzt.
 
-// Spielt den Laut-Baustein ab; schlägt die Aufnahme fehl, wird sicherheitshalber
-// das ganze Wort normal vorgelesen (nie ein geratener Einzellaut per TTS).
+// Zentrale, robuste Audio-Wiedergabe für alle aufgenommenen Laute: probiert
+// zuerst die Schreibweise genau wie übergeben, dann komplett klein - GitHub
+// unterscheidet bei Dateinamen Groß-/Kleinschreibung, das fängt eine
+// abweichende Schreibweise beim Hochladen automatisch ab. onDone(true) heißt
+// "hat abgespielt" (Ende abgewartet), onDone(false) heißt "beide Versuche
+// fehlgeschlagen, nichts wurde abgespielt".
+function playAudioKey(key, onDone){
+  const variants = [key + '.m4a', key.toLowerCase() + '.m4a'];
+  let i = 0;
+  function tryNext(){
+    if(i >= variants.length){ if(onDone) onDone(false); return; }
+    const src = variants[i]; i++;
+    try{
+      const audio = new Audio(src);
+      currentAudioEl = audio;
+      let handled = false;
+      audio.addEventListener('error', ()=>{ if(!handled){ handled=true; tryNext(); } });
+      audio.addEventListener('ended', ()=>{ if(!handled){ handled=true; if(onDone) onDone(true); } });
+      const p = audio.play();
+      if(p && typeof p.catch === 'function'){ p.catch(()=>{ if(!handled){ handled=true; tryNext(); } }); }
+    }catch(e){ tryNext(); }
+  }
+  tryNext();
+}
+
+// Spielt den Laut-Baustein ab; probiert dabei automatisch beide
+// Schreibweisen des Dateinamens (GitHub ist groß-/kleinschreibungsempfindlich),
+// bevor sicherheitshalber das ganze Wort normal vorgelesen wird.
 window.playSoundToken = function(key, wholeWord){
   if(!key){ speak(wholeWord); return; }
-  try{
-    const audio = new Audio(key + '.m4a');
-    let handled = false;
-    audio.addEventListener('error', ()=>{ if(!handled){ handled=true; speak(wholeWord); } });
-    const p = audio.play();
-    if(p && typeof p.catch === 'function'){ p.catch(()=>{ if(!handled){ handled=true; speak(wholeWord); } }); }
-  }catch(e){ speak(wholeWord); }
+  playAudioKey(key, (ok)=>{ if(!ok) speak(wholeWord); });
 };
 
 // Handgeprüfte Tipps für Wörter aus den Flaschenpost-Sätzen, die ein echtes
@@ -720,6 +790,14 @@ const content = {
       pic('🔁','🏺','Vase', ['👃','⚽','🌳'], 0, 'Vase – Nase: reimt sich!'),
       pic('🎯','⭐','Stern', ['🪑','🌳','🐟'], 0, 'Stern – Stuhl: gleicher Anlaut „St".'),
     ],
+    4:[ // Profi-Stufe: mehrsilbige Wörter, Konsonantenhäufungen im Anlaut
+      pic('👏','☂️','Regenschirm', [silbenbogen(2),silbenbogen(3),silbenbogen(4)], 1, 'Re-gen-schirm: drei Bögen.'),
+      pic('👏','🥔','Kartoffel', [silbenbogen(2),silbenbogen(3),silbenbogen(4)], 1, 'Kar-tof-fel: drei Bögen.'),
+      pic('🔁','❄️','Schnee', ['🦌','🌳','🐟'], 0, 'Schnee – Reh: reimt sich!'),
+      pic('🎯','🐊','Krokodil', ['👑','🐱','🌳'], 0, 'Krokodil – Krone: gleicher Anlaut „Kr", nicht nur „K"!'),
+      pic('🎯','👓','Brille', ['🍞','⚽','🌙'], 0, 'Brille – Brot: gleicher Anlaut „Br", nicht nur „B"!'),
+      pic('🔁','🪟','Fenster', ['👻','🌳','🐟'], 0, 'Fenster – Gespenster: reimt sich!'),
+    ],
   },
   buchstabe: {
     1:[
@@ -731,26 +809,39 @@ const content = {
       pic('🔡','⚽','Ball', ['B','D','P'], 0, 'B-all: erster Laut „B".', true),
       pic('🔡','🦔','Igel', ['I','E','O'], 0, 'I-gel: erster Laut „I".'),
       pic('🔚','⚽','Ball', ['L','N','M'], 0, 'Ba-LL: letzter Laut „L".'),
-      pic('🔡','🍴','Gabel', ['G','K','B'], 0, 'G-abel: erster Laut „G".', true),
-      pic('🔡','🪿','Gans', ['G','K','B'], 0, 'G-ans: erster Laut „G".'),
+      pic('🔡',forkIcon(),'Gabel', ['G','K','B'], 0, 'G-abel: erster Laut „G".', true),
       pic('🔡','🥫','Dose', ['D','B','P'], 0, 'D-ose: erster Laut „D".', true),
       pic('🔡','👃','Nase', ['N','M','H'], 0, 'N-ase: erster Laut „N".', true),
       pic('🔡','🚀','Rakete', ['R','L','W'], 0, 'R-akete: erster Laut „R".', true),
       pic('🔡','🪮','Kamm', ['K','G','T'], 0, 'K-amm: erster Laut „K".', true),
-      pic('🔡','🍽️','Tisch', ['T','D','P'], 0, 'T-isch: erster Laut „T".', true),
-      pic('🔡','🐯','Tiger', ['T','D','P'], 0, 'T-iger: erster Laut „T".'),
+      pic('🔡',tableIcon(),'Tisch', ['T','D','P'], 0, 'T-isch: erster Laut „T".', true),
       pic('🔡','☁️','Wolke', ['W','M','B'], 0, 'W-olke: erster Laut „W".', true),
       pic('🔡','🦓','Zebra', ['Z','S','T'], 0, 'Z-ebra: erster Laut „Z".', true),
-      pic('🔡','💡','Lampe', ['L','N','M'], 0, 'L-ampe: erster Laut „L".', true),
-      pic('🔡','🔍','Lupe', ['L','N','M'], 0, 'L-upe: erster Laut „L".'),
-      pic('🔡','🐱','Katze', ['K','G','T'], 0, 'K-atze: erster Laut „K".'),
+      pic('🔡','🪔','Lampe', ['L','N','M'], 0, 'L-ampe: erster Laut „L".', true),
       pic('🔡','🎩','Hut', ['H','F','W'], 0, 'H-ut: erster Laut „H".', true),
       pic('🔡','🥣','Joghurt', ['J','Y','G'], 0, 'J-oghurt: erster Laut „J".', true),
-      pic('🔡','🍊','Orange', ['O','A','U'], 0, 'O-range: erster Laut „O".'),
-      pic('🔡','🍄','Pilz', ['P','B','T'], 0, 'P-ilz: erster Laut „P".'),
-      pic('🔡','🦉','Uhu', ['U','O','A'], 0, 'U-hu: erster Laut „U".'),
+      pic('🔡','📁','Ordner', ['O','A','U'], 0, 'O-rdner: erster Laut „O".', true),
+      pic('🔡','🖌️','Pinsel', ['P','B','T'], 0, 'P-insel: erster Laut „P".', true),
+      pic('🔡','🛸','Ufo', ['U','O','A'], 0, 'U-fo: erster Laut „U".', true),
       pic('🔡','🐦','Vogel', ['V','F','W'], 0, 'V-ogel klingt wie „F", wird aber mit V geschrieben.', true, 'V1'),
       pic('🔡','🐃','Yak', ['Y','J','I'], 0, 'Y-ak: erster Laut „Y".', true),
+      // Sonderlaute & Lautverbindungen (Mehrbuchstaben-Laute)
+      pic('🔡','📖','Buch', ['ch','sch','k'], 0, 'Ach-Laut: „ch" nach „u" wie in Buch.', false, 'CH1'),
+      pic('🔡','🥛','Milch', ['ch','sch','k'], 0, 'Ich-Laut: „ch" wie in Milch.', false, 'CH2'),
+      pic('🔡','🕷️','Spinne', ['sp','st','sch'], 0, 'Am Wortanfang klingt „sp" wie „schp".', false, 'SP'),
+      pic('🔡','🍳','Pfanne', ['pf','p','f'], 0, 'Zwei Konsonanten zusammen: „pf".', false, 'PF'),
+      pic('🔡','🧥','Jacke', ['ck','k','g'], 0, '„ck" nach kurzem Vokal.', false, 'CK'),
+      pic('🔡','🪼','Qualle', ['qu','k','kw'], 0, '„qu" klingt wie „kw".', false, 'QU'),
+      pic('🔡','🐑','Schaf', ['sch','s','sp'], 0, 'Drei Buchstaben, ein Laut: „sch".', false, 'SCH'),
+      pic('🔡','🐈','Katze', ['tz','z','ts'], 0, '„tz" nach kurzem Vokal.', false, 'TZ'),
+      pic('🔡','🗄️','Schrank', ['ng','n','nk'], 0, '„ng" klingt anders als „n" allein.', false, 'NG'),
+      pic('🔡','🐝','Biene', ['ie','i','ei'], 0, '„ie" ist die Regelschreibung für das lange „i".', false, 'IE'),
+      pic('🔡','🚗','Auto', ['au','a','o'], 0, 'Zwielaut „au".', false, 'AU'),
+      pic('🔡','🍎','Äpfel', ['ä','a','e'], 0, 'Umlaut „ä".', false, 'AE'),
+      pic('🔡','🐭','Mäuse', ['äu','eu','au'], 0, '„äu" – von „Maus" abgeleitet.', false, 'AEU'),
+      pic('🔡','🧊','Eis', ['ei','ie','ai'], 0, 'Zwielaut „ei", nicht „ai".', false, 'EI'),
+      pic('🔡','🧸','Teddy', ['y','i','ie'], 0, 'Am Wortende klingt „y" wie ein kurzes „i".', false, 'Y1'),
+      pic('🔚','🌸','Blume', ['e','a','o'], 0, 'Blume endet auf ein unbetontes „-e".', false, '-E'),
       pic('🔠','X','X', ['x','y','k'], 0, 'Großes X und kleines x klingen gleich – nur die Form ist anders.'),
       pic('🔠','A','A', ['a','e','o'], 0, 'Großes A und kleines a klingen gleich – nur die Form ist anders.'),
       pic('🔠','M','M', ['m','n','w'], 0, 'Großes M und kleines m klingen gleich – nur die Form ist anders.'),
@@ -776,11 +867,19 @@ const content = {
       pic('🔤','🐦','Vogel', ['Vogel','Fogel','Wogel'], 0, 'Vogel klingt wie „Fogel", wird aber mit V geschrieben.'),
       pic('🔤','🐍','Schlange', ['Schlange','Slange','Schlamge'], 0, 'Schlange: „Schl" – drei Laute direkt hintereinander.'),
       pic('🔤','🕷️','Spinne', ['Spinne','Pinne','Schpinne'], 0, 'Sp klingt wie „Schp", geschrieben wird nur Sp-inne.'),
-      pic('🔡','💶','Euro', ['Eu','Ei','Au'], 0, 'Eu-ro: der Zwielaut „Eu".'),
-      pic('🔡','🛢️','Öl', ['Ö','O','U'], 0, 'Ö klingt anders als O – Ö-l.'),
-      pic('🔡','🥚','Überraschungsei', ['Ü','U','I'], 0, 'Ü klingt anders als U – Ü-berraschung.'),
+      pic('🔡','💶','Euro', ['Eu','Ei','Au'], 0, 'Eu-ro: der Zwielaut „Eu".', false, 'EU'),
+      pic('🔡','🛢️','Öl', ['Ö','O','U'], 0, 'Ö klingt anders als O – Ö-l.', false, 'OE'),
+      pic('🔡','🥚','Überraschungsei', ['Ü','U','I'], 0, 'Ü klingt anders als U – Ü-berraschung.', false, 'UE'),
       pic('🔤','🎺','Trompete', ['Trompete','Drompete','Tropete'], 0, 'Tr am Anfang: zwei Konsonanten.'),
       pic('🔤','🖍️','Kreide', ['Kreide','Kleide','Greide'], 0, 'Kr am Anfang: zwei Konsonanten.'),
+    ],
+    4:[ // Profi-Stufe: mehrere Konsonantenhäufungen, zusammengesetzte Wörter
+      pic('🔤','🌉','Brücke', ['Brücke','Prücke','Brügge'], 0, 'Br am Anfang, „ck" nach kurzem Vokal.'),
+      pic('🔤','🏰','Schloss', ['Schloss','Schlos','Sloss'], 0, 'Schl am Anfang, doppeltes „s" am Ende.'),
+      pic('🔤','🦷','Zahnbürste', ['Zahnbürste','Zahnbürzte','Sahnbürste'], 0, 'Zusammengesetztes Wort: Zahn + Bürste.'),
+      pic('🔤','🌪️','Sturm', ['Sturm','Sturn','Storm'], 0, 'St am Anfang.'),
+      pic('🔤','🧦','Strumpf', ['Strumpf','Strump','Ztrumpf'], 0, 'Str am Anfang UND mpf am Ende – gleich zwei Häufungen.'),
+      pic('🔤','🦅','Adler', ['Adler','Atler','Adla'], 0, 'Adler wird immer mit „d" geschrieben.'),
     ],
   },
   // Fehlende Zwischenstufe zwischen Lauthören und Wörter-Schreiben:
@@ -821,6 +920,14 @@ const content = {
       inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'ra', 'Ra-ke-te: ein Konsonant, ein Vokal – „ra".', 'Rakete', '🚀'),
       inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'ro', 'Ro-se: ein Konsonant, ein Vokal – „ro".', 'Rose', '🌹'),
     ],
+    4:[ // Profi-Stufe: die ersten ZWEI Silben schreiben (schwerer als nur eine)
+      inp('Schreibe die ersten zwei Silben des Wortes, das du hörst.', 'bana', 'Ba-na-ne: die ersten beiden Silben zusammen.', 'Banane', '🍌'),
+      inp('Schreibe die ersten zwei Silben des Wortes, das du hörst.', 'loko', 'Lo-ko-mo-ti-ve: die ersten beiden Silben zusammen.', 'Lokomotive', '🚂'),
+      inp('Schreibe die ersten zwei Silben des Wortes, das du hörst.', 'kame', 'Ka-me-ra: die ersten beiden Silben zusammen.', 'Kamera', '📷'),
+      inp('Schreibe die ersten zwei Silben des Wortes, das du hörst.', 'toma', 'To-ma-te: die ersten beiden Silben zusammen.', 'Tomate', '🍅'),
+      inp('Schreibe die ersten zwei Silben des Wortes, das du hörst.', 'gitar', 'Gi-tar-re: die ersten beiden Silben zusammen.', 'Gitarre', '🎸'),
+      inp('Schreibe die ersten zwei Silben des Wortes, das du hörst.', 'rake', 'Ra-ke-te: die ersten beiden Silben zusammen.', 'Rakete', '🚀'),
+    ],
   },
   lesen: {
     1:[
@@ -856,6 +963,14 @@ const content = {
       ch('Weil der Hund bellt, wacht das ganze Haus ___.', ['auf','ab','zu'], 0, 'Was passiert, wenn laut gebellt wird?'),
       ch('Damit die Pflanze wächst, braucht sie Wasser und ___.', ['Licht','Sand','Papier'], 0, 'Was brauchen Pflanzen zum Wachsen?'),
     ],
+    4:[ // Profi-Stufe: Sätze mit Nebensatz (nachdem/weil/als/damit)
+      ch('Nachdem der Regen aufgehört hatte, kamen die Kinder wieder aus dem ___.', ['Haus','Fluss','Himmel'], 0, 'Wo waren die Kinder wohl während des Regens?'),
+      ch('Weil Tom seine Hausaufgaben vergessen hatte, musste er sie in der Pause ___.', ['nachholen','verschenken','verstecken'], 0, 'Was macht man mit vergessenen Hausaufgaben?'),
+      ch('Als die Glocke läutete, rannten alle Schüler schnell in die ___.', ['Klasse','Küche','Garage'], 0, 'Wohin rennt man, wenn die Schulglocke läutet?'),
+      ch('Damit niemand nass wird, spannt Opa im Garten eine große ___ auf.', ['Regenplane','Kerze','Gitarre'], 0, 'Was schützt vor Regen im Garten?'),
+      ch('Weil die Straße glatt war, fuhr der Bus an diesem Morgen viel ___.', ['langsamer','schneller','lauter'], 0, 'Wie fährt man bei Glätte vorsichtig?'),
+      ch('Nachdem sie das Buch zu Ende gelesen hatte, stellte Emma es zurück ins ___.', ['Regal','Wasser','Feuer'], 0, 'Wohin stellt man ein Buch nach dem Lesen?'),
+    ],
   },
   // Nach dem Phonemstufen-Prinzip (Reuter-Liehr): Stufe 1 nutzt
   // ausschließlich Vokale, Zwielaute und "Dauerkonsonanten" (m,l,s,n,f,r,w,
@@ -870,8 +985,8 @@ const content = {
       inp('Schreibe das Wort, das du hörst.', 'reis', 'Rei-s: der Zwielaut „ei" bleibt beim Schreiben erhalten.', 'Reis', '🍚'),
       inp('Schreibe das Wort, das du hörst.', 'eule', 'Eu-le: Zwielaut „eu" am Wortanfang.', 'Eule', '🦉'),
       inp('Schreibe das Wort, das du hörst.', 'sofa', 'So-fa: zwei offene Silben, ganz lautgetreu.', 'Sofa', '🛋️'),
-      inp('Schreibe das Wort, das du hörst.', 'meer', 'Mee-r: nur Dauerlaute.', 'Meer', '🌊'),
-      inp('Schreibe das Wort, das du hörst.', 'waage', 'Waa-ge: nur Dauerlaute.', 'Waage', '⚖️'),
+      inp('Schreibe das Wort, das du hörst.', 'hase', 'Ha-se: zwei offene Silben, ganz lautgetreu.', 'Hase', '🐰'),
+      inp('Schreibe das Wort, das du hörst.', 'rasen', 'Ra-sen: zwei offene Silben, ganz lautgetreu.', 'Rasen', '🌱'),
     ],
     2:[ // Phonemstufe 2: + Stoppkonsonanten (b,d,g,t,p,k) und h,ch, weiterhin ohne Häufung
       inp('Schreibe das Wort, das du hörst.', 'hut', 'Hu-t: ganz lautgetreu geschrieben.', 'Hut', '🎩'),
@@ -894,6 +1009,14 @@ const content = {
       inp('Schreibe das Wort, das du hörst.', 'pflaume', 'Pfl am Anfang: drei Konsonanten hintereinander.', 'Pflaume'),
       inp('Schreibe das Wort, das du hörst.', 'bremse', 'Br am Anfang: zwei Konsonanten hintereinander.', 'Bremse'),
       inp('Schreibe das Wort, das du hörst.', 'trompete', 'Tr am Anfang: zwei Konsonanten hintereinander.', 'Trompete', '🎺'),
+    ],
+    4:[ // Profi-Stufe: Konsonantenhäufungen am Anfang UND am Ende desselben Wortes
+      inp('Schreibe das Wort, das du hörst.', 'strand', 'Str am Anfang, nd am Ende – zwei Häufungen in einem Wort.', 'Strand', '🏖️'),
+      inp('Schreibe das Wort, das du hörst.', 'frosch', 'Fr am Anfang, sch am Ende.', 'Frosch', '🐸'),
+      inp('Schreibe das Wort, das du hörst.', 'schrank', 'Schr am Anfang, nk am Ende.', 'Schrank', '🗄️'),
+      inp('Schreibe das Wort, das du hörst.', 'herbst', 'H am Anfang, rbst am Ende – vier Konsonanten hintereinander!', 'Herbst', '🍂'),
+      inp('Schreibe das Wort, das du hörst.', 'knopf', 'Kn am Anfang, pf am Ende.', 'Knopf', '🔘'),
+      inp('Schreibe das Wort, das du hörst.', 'fenster', 'F am Anfang, nst am Ende.', 'Fenster', '🪟'),
     ],
   },
   schreib2: {
@@ -929,6 +1052,14 @@ const content = {
       ch('Welches Wort ist richtig geschrieben?', ['Regenschirm','Regenschirrm'], 0, 'Zusammengesetztes Wort: Regen + Schirm.', 'Regenschirm', 'wortfamilie'),
       ch('Welches Wort ist richtig geschrieben?', ['verstehen','ferstehen'], 0, 'Die Vorsilbe „ver-" wird immer mit „v" geschrieben.', 'verstehen', 'wortfamilie'),
       ch('Welches Wort ist richtig geschrieben?', ['Freundlichkeit','Freuntlichkeit'], 0, 'Von „Freund" abgeleitet – das „d" bleibt erhalten.', 'Freundlichkeit', 'wortfamilie'),
+    ],
+    4:[ // Profi-Stufe: längere zusammengesetzte Wörter, kombinierte Regeln, echte Merkwörter
+      ch('Welches Wort ist richtig geschrieben?', ['Fahrradkette','Farradkette'], 0, 'Zusammengesetzt: fahren + Rad + Kette.', 'Fahrradkette', 'wortfamilie'),
+      ch('Welches Wort ist richtig geschrieben?', ['Vogelhäuschen','Fogelhäuschen'], 0, 'Von „Haus" abgeleitet: Häus-chen. Vogel klingt wie „F", wird aber mit V geschrieben.', 'Vogelhäuschen', 'wortfamilie'),
+      ch('Welches Wort ist richtig geschrieben?', ['Schneemann','Schneeman'], 0, 'Zusammengesetzt: Schnee + Mann, das doppelte „n" von Mann bleibt.', 'Schneemann', 'doppelkonsonant'),
+      ch('Welches Wort ist richtig geschrieben?', ['Vater','Fater'], 0, 'Merkwort: „Vater" wird immer mit V geschrieben, auch wenn man „F" hört.', 'Vater'),
+      ch('Welches Wort ist richtig geschrieben?', ['Unterschrift','Unterschrifft'], 0, 'Zusammengesetzt: unter + Schrift.', 'Unterschrift', 'wortfamilie'),
+      ch('Welches Wort ist richtig geschrieben?', ['vielleicht','fielleicht'], 0, 'Merkwort: „vielleicht" wird immer mit V geschrieben.', 'vielleicht'),
     ],
   },
   // Echte Wörter aus dem Hamburger Basiswortschatz (Behörde für Schule und
@@ -970,6 +1101,14 @@ const content = {
       ch('Welches Wort ist richtig geschrieben?', ['Freundin','Freuntin'], 0, 'Von „Freund" abgeleitet – das „d" bleibt.', 'Freundin', 'wortfamilie'),
       ch('Welches Wort ist richtig geschrieben?', ['Frühstück','Frühstük'], 0, '„ck" nach kurzem Vokal am Wortende: Frühstück.', 'Frühstück', 'doppelkonsonant'),
     ],
+    4:[ // Profi-Stufe: längere Wörter, ß-Regel, das/dass-Unterscheidung
+      ch('Welches Wort ist richtig geschrieben?', ['Fußballspiel','Fusballspiel'], 0, 'Zusammengesetzt: Fuß + Ball + Spiel, „ß" bleibt erhalten.', 'Fußballspiel', 'wortfamilie'),
+      ch('Welches Wort ist richtig geschrieben?', ['Werkzeugkasten','Werkzeugkasden'], 0, 'Zusammengesetzt: Werkzeug + Kasten.', 'Werkzeugkasten', 'wortfamilie'),
+      ch('Welches Wort ist richtig geschrieben?', ['Straße','Strasse'], 0, 'Nach einem langen Vokal oder Zwielaut schreibt man „ß": Stra-ße.', 'Straße'),
+      ch('Ich glaube, ___ es heute regnet.', ['dass','das'], 0, '„dass" leitet hier einen Nebensatz ein – nicht durch „welches" ersetzbar, also doppel-s.'),
+      ch('___ Buch, das ich lese, ist spannend.', ['Das','Dass'], 0, '„Das" bezieht sich auf „Buch" – man könnte „welches" einsetzen, also nur ein „s".'),
+      ch('Welches Wort ist richtig geschrieben?', ['Fahrradhelm','Farradhelm'], 0, 'Zusammengesetzt: fahren + Rad + Helm.', 'Fahrradhelm', 'wortfamilie'),
+    ],
   },
   // Vertiefung für leistungsstarke Kinder (Klasse 1-4-Spanne) - kein Teil der
   // regulären Stationsübersicht, erst sichtbar, wenn Lesefahrrinne sicher sitzt.
@@ -998,6 +1137,12 @@ const content = {
       flash('Kamera', ['📷','📱','💻'], 0, 'Ka-me-ra – ein bekanntes Fremdwort.'),
       flash('Sonnenblume', ['🌻','🌼','🌺'], 0, 'Son-nen-blu-me – ein zusammengesetztes Wort.'),
     ],
+    4:[ // Profi-Stufe: noch kürzere Zeit, noch längere Wörter
+      flash('Feuerwehrauto', ['🚒','🚑','🚓'], 0, 'Feu-er-wehr-au-to – fünf Silben.'),
+      flash('Schokoladenkuchen', ['🍫','🍞','🎂'], 0, 'Ein sehr langes zusammengesetztes Wort.'),
+      flash('Rettungswagen', ['🚑','🚒','🚓'], 0, 'Ret-tungs-wa-gen – vier Silben.'),
+      flash('Weltraumrakete', ['🚀','✈️','🛸'], 0, 'Welt-raum-ra-ke-te – fünf Silben.'),
+    ],
   },
   lesekompetenz: {
     1:[
@@ -1024,6 +1169,12 @@ const content = {
       ch('Emma übte jeden Tag Klavier, obwohl es ihr schwerfiel. Beim Vorspielabend bekam sie großen Applaus. Was zeigt diese Geschichte?', ['Übung zahlt sich aus','Emma mag kein Klavier','Der Applaus war ein Versehen'], 0, 'Was verbindet tägliches Üben mit dem Applaus am Ende?'),
       ch('Der Bauer sah dunkle Wolken aufziehen und brachte die Kühe schnell in den Stall. Kurz danach fing es an zu regnen. Warum brachte der Bauer die Kühe in den Stall?', ['Weil er merkte, dass Regen kommt','Weil die Kühe müde waren','Weil es Zeit zum Melken war'], 0, 'Was verraten die dunklen Wolken?'),
     ],
+    4:[ // Profi-Stufe: längere Texte, mehrere Gedankenschritte nötig
+      ch('Tom hatte seit Wochen für den Wettbewerb trainiert. Am Wettkampftag war sein Fahrrad plötzlich kaputt. Ein Nachbar lieh ihm spontan sein eigenes Rad. Warum konnte Tom trotzdem am Wettbewerb teilnehmen?', ['Weil der Nachbar ihm ein Fahrrad geliehen hat','Weil der Wettbewerb verschoben wurde','Weil Tom zu Fuß gegangen ist'], 0, 'Verknüpfe alle drei Sätze miteinander.'),
+      ch('Seit Tagen hustete die kleine Mia und hatte kaum Appetit. Die Eltern brachten sie zum Kinderarzt. Nach der Untersuchung bekam Mia Medizin und sollte im Bett bleiben. Warum bekam Mia Medizin?', ['Weil sie krank war','Weil sie Geburtstag hatte','Weil sie zur Schule musste'], 0, 'Welche Hinweise am Anfang zeigen, dass Mia krank ist?'),
+      ch('Die Ameisen liefen in einer langen Reihe zu einem Krümel. Jede trug ein winziges Stück davon zurück in ihren Bau. Nach einer Stunde war der Krümel verschwunden. Was ist mit dem Krümel passiert?', ['Die Ameisen haben ihn Stück für Stück weggetragen','Der Wind hat ihn weggeweht','Ein Vogel hat ihn gefressen'], 0, 'Was tun die Ameisen die ganze Zeit über?'),
+      ch('Paul übte jeden Tag Klavier, obwohl seine Finger oft schmerzten. Beim Schulkonzert spielte er ein schwieriges Stück fehlerfrei. Alle klatschten begeistert. Was zeigt diese Geschichte am ehesten?', ['Regelmäßiges Üben zahlt sich aus','Klavierspielen tut nie weh','Paul hatte einfach Glück'], 0, 'Was verbindet das tägliche Üben mit dem gelungenen Auftritt?'),
+    ],
   },
   diktat: {
     1:[
@@ -1044,9 +1195,22 @@ const content = {
       dictate('Wir fahren am Wochenende zu Oma und Opa.', 'Ein langer Satz: höre dir jeden Wortteil genau an.'),
       dictate('Der Bäcker backt jeden Morgen frisches Brot.', 'Ein langer Satz: höre dir jeden Wortteil genau an.'),
     ],
+    4:[ // Profi-Stufe: noch längere Sätze, teils mit Nebensatz
+      dictate('Am Wochenende fahren wir mit dem Zug zu meiner Oma nach Hamburg.', 'Ein sehr langer Satz: höre dir jeden Wortteil genau an.'),
+      dictate('Meine kleine Schwester hat gestern ihren ersten Kindergartentag gehabt.', 'Ein sehr langer Satz: höre dir jeden Wortteil genau an.'),
+      dictate('Nach dem Abendessen räumen alle gemeinsam die Küche auf.', 'Ein sehr langer Satz: höre dir jeden Wortteil genau an.'),
+      dictate('Weil es draußen so kalt war, zog Ben eine dicke Jacke an.', 'Ein Satz mit zwei Teilen – höre genau hin.'),
+    ],
   },
   satzbau: {
     1:[
+      wordstudy('Hund', '🐕', 'Präg dir Bild und Wort gut ein.'),
+      wordstudy('Katze', '🐈', 'Präg dir Bild und Wort gut ein.'),
+      wordstudy('Garten', '🌳', 'Präg dir Bild und Wort gut ein.'),
+      wordstudy('Schule', '🏫', 'Präg dir Bild und Wort gut ein.'),
+      wordstudy('Mädchen', '👧', 'Präg dir Bild und Wort gut ein.'),
+    ],
+    2:[
       satzRound([
         {label:'Wer?', options:[{emoji:'👦',word:'Der Junge'},{emoji:'👧',word:'Das Mädchen'},{emoji:'🐶',word:'Der Hund'}]},
         {label:'Was tut er?', options:[{emoji:'😄',word:'lacht'},{emoji:'🏃',word:'rennt'},{emoji:'😴',word:'schläft'}]},
@@ -1056,7 +1220,7 @@ const content = {
         {label:'Was tut er?', options:[{emoji:'🎵',word:'singt'},{emoji:'🍽️',word:'isst'},{emoji:'📖',word:'liest'}]},
       ], 'Ein kurzer Satz: Wer? und Was tut er?'),
     ],
-    2:[
+    3:[
       satzRound([
         {label:'Wer?', options:[{emoji:'👦',word:'Der Junge'},{emoji:'👧',word:'Das Mädchen'},{emoji:'🐱',word:'Die Katze'}]},
         {label:'Was tut er?', options:[{emoji:'⚽',word:'spielt'},{emoji:'🍎',word:'isst'},{emoji:'📖',word:'liest'}]},
@@ -1068,7 +1232,7 @@ const content = {
         {label:'Wo?', options:[{emoji:'🛏️',word:'im Bett'},{emoji:'🌳',word:'im Park'},{emoji:'🏠',word:'zu Hause'}]},
       ], 'Jetzt kommt noch ein Wo? dazu.'),
     ],
-    3:[
+    4:[ // Profi-Stufe: vier Bausteine, der längste eigene Satz
       satzRound([
         {label:'Wer?', options:[{emoji:'👦',word:'Der Junge'},{emoji:'👧',word:'Das Mädchen'},{emoji:'👴',word:'Der Opa'}]},
         {label:'Was tut er?', options:[{emoji:'🧱',word:'baut'},{emoji:'🎨',word:'malt'},{emoji:'🍰',word:'backt'}]},
@@ -1262,41 +1426,12 @@ function stripSyllableHyphens(text){
 // eine Datei oder schlägt die Wiedergabe fehl, fällt es automatisch auf die
 // normale Sprachausgabe (das ganze Wort) zurück - nichts bricht ab.
 // Spielt die Aufnahme des isolierten Lauts ab und spricht danach das ganze
-// Wort - wartet auf das tatsächliche Ende der Aufnahme (kein geratenes
-// Timing). Fehlt die Aufnahme, wird nur das Wort gesprochen.
+// Wort - wartet auf das tatsächliche Ende der Aufnahme (kein geratenes Timing).
 function playLetterSoundThenWord(key, word){
   if(!key){ speak(word); return; }
-  try{
-    const audio = new Audio(key + '.m4a');
-    let handled = false;
-    const finish = ()=>{ if(!handled){ handled = true; speak(word); } };
-    audio.addEventListener('error', finish);
-    audio.addEventListener('ended', finish);
-    const p = audio.play();
-    if(p && typeof p.catch === 'function'){ p.catch(finish); }
-  }catch(e){
-    speak(word);
-  }
+  playAudioKey(key, ()=>{ speak(word); });
 }
 
-function playLetterSound(key, fallbackText){
-  if(!key){ speak(fallbackText); return; }
-  try{
-    const audio = new Audio(key + '.m4a');
-    let handled = false;
-    audio.addEventListener('error', ()=>{
-      if(!handled){ handled = true; speak(fallbackText); }
-    });
-    const p = audio.play();
-    if(p && typeof p.catch === 'function'){
-      p.catch(()=>{
-        if(!handled){ handled = true; speak(fallbackText); }
-      });
-    }
-  }catch(e){
-    speak(fallbackText);
-  }
-}
 
 function speak(text, rate){
   text = stripSyllableHyphens(text);
@@ -1361,7 +1496,17 @@ function checkAnswer(item, given){
 /* ============================================================
    RENDER
    ============================================================ */
-function render(){
+// Läuft gerade eine Aufnahme (aufgenommener Laut)? Referenz, damit wir sie
+// bei Bedarf sofort stoppen können (z.B. bei "Weiter").
+let currentAudioEl = null;
+
+function stopAllAudio(){
+  try{ if('speechSynthesis' in window) window.speechSynthesis.cancel(); }catch(e){}
+  if(currentAudioEl){ try{ currentAudioEl.pause(); }catch(e){} currentAudioEl = null; }
+}
+
+function render(skipAudioStop){
+  if(!skipAudioStop) stopAllAudio();
   const app = document.getElementById('app');
   app.innerHTML = renderScreen();
   if(state.showTeacher) app.innerHTML += renderTeacherOverlay();
@@ -1505,6 +1650,49 @@ function screenDiagnose(){
 }
 
 function renderItemBody(item, handlerName){
+  if(item.type==='wordstudy'){
+    const p = state.practice;
+    if(!p.wsPhase || p.wsPhase==='study'){
+      const groups = tokenizeWordToSounds(item.word);
+      const boxW = 46;
+      let globalIdx = 0;
+      const syllableGroups = groups.map(group=>{
+        const boxes = group.map(tok=>{
+          const idx = globalIdx++;
+          return `
+          <button onclick="wordstudyPlayToken(${idx})" style="display:inline-block;position:relative;margin:2px;min-width:36px;height:44px;padding:0 6px;border:2px solid var(--line);border-radius:10px;font-size:1.25rem;font-family:'Atkinson Hyperlegible';font-weight:700;background:var(--sand);line-height:40px;text-align:center;">
+            ${isVowelSoundKey(tok.key) ? `<span style="position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:0.95rem;">👑</span>` : ''}
+            ${tok.text}
+          </button>`;
+        }).join('');
+        const arcWidth = group.length * boxW;
+        return `<span style="display:inline-block;vertical-align:top;margin:0 4px;">
+            <div>${boxes}</div>
+            ${syllableArcSpan(arcWidth)}
+          </span>`;
+      }).join('');
+      p.wsTokens = groups.reduce((a,g)=>a.concat(g),[]);
+      return `
+        <div class="task-instr">👀 Präg dir das Wort gut ein!</div>
+        <div style="font-size:3.2rem;text-align:center;margin:6px 0;">${item.emoji}</div>
+        <p style="font-size:1.5rem;font-family:'Baloo 2';font-weight:700;text-align:center;color:var(--harbor-dark);">${item.word}</p>
+        <div style="text-align:center;margin:14px 0 6px;">${syllableGroups}</div>
+        <button class="speak-btn" onclick="speakWordstudy()">🔊</button>
+        <button class="btn btn-primary btn-block" style="margin-top:14px;" onclick="wordstudyToRecall()">Weiter →</button>`;
+    }
+    // Phase 'recall': Wort & Lautbausteine verschwinden, nur noch aus dem Kopf
+    return `
+      <div class="task-instr">✏️ Schreibe das Wort jetzt aus dem Kopf auf!</div>
+      ${p.wsShowPicture ? `<div style="font-size:3rem;text-align:center;margin:8px 0;">${item.emoji}</div>` : ''}
+      <div style="text-align:center;margin:10px 0;">
+        <button class="speak-btn" onclick="speakWordstudy()">🔊 Nochmal hören</button>
+        <button class="btn btn-ghost" style="margin-left:8px;" onclick="wordstudyPeek()">🖼️ Bild noch mal zeigen</button>
+      </div>
+      <div class="text-input-row">
+        <input type="text" id="textAnswer" autocomplete="off" autocapitalize="off" placeholder="Wort eintippen …">
+        <button class="btn btn-primary" onclick="${handlerName}(document.getElementById('textAnswer').value)">✅ OK</button>
+      </div>`;
+  }
   if(item.type==='satzbau'){
     const p = state.practice;
     if(p.sbStep==='build'){
@@ -1712,7 +1900,7 @@ function screenVertiefung(){
   const rows = advancedDomains.map(d=>{
     const lvl = state.levels[d.id]||1;
     const st = state.stars[d.id]||0;
-    const anchors = '⚓'.repeat(lvl) + '·'.repeat(3-lvl);
+    const anchors = '⚓'.repeat(lvl) + '·'.repeat(4-lvl);
     return `
     <div class="station" onclick="openDomain('${d.id}')">
       <div class="station-icon" style="background:${d.color}22;">${d.icon}</div>
@@ -1741,7 +1929,7 @@ function screenMap(){
   const rows = sorted.map(({d,info})=>{
     const lvl = state.levels[d.id]||1;
     const st = state.stars[d.id]||0;
-    const anchors = '⚓'.repeat(lvl) + '·'.repeat(3-lvl);
+    const anchors = '⚓'.repeat(lvl) + '·'.repeat(4-lvl);
     const cls = 'station' + (info.status==='locked' ? ' locked' : info.status==='mastered' ? ' mastered' : info.status==='review' ? ' review' : '');
     const onclick = info.status==='locked' ? '' : `onclick="openDomain('${d.id}')"`;
     let badge = `<div class="stars-badge">⭐ ${st}</div>`;
@@ -1881,7 +2069,7 @@ function screenGoal(){
   ${topbar(d.name, state.pendingReview ? 'Kurze Auffrischung' : 'Dein Lernziel', true)}
   <main>
     <div class="prompt-card" style="margin-top:20px;">
-      <div class="domain-tag" style="background:${d.color}22;">${state.pendingReview ? '🔁 Auffrischen' : d.icon+' Stufe '+level+' von 3'}</div>
+      <div class="domain-tag" style="background:${d.color}22;">${state.pendingReview ? '🔁 Auffrischen' : d.icon+' Stufe '+level+' von 4'}</div>
       <div style="margin:8px 0;">${mascotIcon(72)}</div>
       <p style="font-size:1.1rem;line-height:1.55;color:var(--harbor-dark);font-family:'Baloo 2';font-weight:600;">${goal}</p>
       <button class="speak-btn" onclick="speakGoal()">🔊</button>
@@ -1933,7 +2121,7 @@ function clearFlashInterval(){
 function startFlashCountdown(){
   clearFlashInterval();
   const p = state.practice;
-  const durSec = {1:6, 2:4, 3:3}[p.level] || 4;
+  const durSec = {1:6, 2:4, 3:3, 4:2}[p.level] || 4;
   p.flashSecondsLeft = durSec;
   flashIntervalId = setInterval(()=>{
     const pp = state.practice;
@@ -1946,7 +2134,7 @@ function startFlashCountdown(){
       clearFlashInterval();
       window.practiceAnswer('__TIMEOUT__');
     } else {
-      render();
+      render(true);
     }
   }, 1000);
 }
@@ -1980,6 +2168,11 @@ function pickPracticeItem(){
     p.sbWordIndex = 0;
     p.sbMarked = [];
   }
+  if(p.current && p.current.type==='wordstudy'){
+    p.wsPhase = 'study';
+    p.wsShowPicture = false;
+    p.wsTokens = [];
+  }
 }
 
 function screenPractice(){
@@ -2005,7 +2198,7 @@ function screenPractice(){
   }
 
   const bodyHtml = p.answered ? renderItemBodyStatic(item, p.lastGiven) : renderItemBody(item, 'practiceAnswer');
-  const skipBtn = (!p.answered && !['flash','dictate','satzbau'].includes(item.type) && p.level>=2)
+  const skipBtn = (!p.answered && !['flash','dictate','satzbau','wordstudy'].includes(item.type) && p.level>=2)
     ? `<button class="btn btn-ghost" style="margin-top:14px;font-size:0.95rem;" onclick="practiceDontKnow()">🤷 Weiß ich nicht</button>`
     : '';
 
@@ -2014,7 +2207,7 @@ function screenPractice(){
   <main>
     <div class="progress-track"><div class="progress-fill" style="width:${Math.min(100,(p.itemsDone/6)*100)}%; background:${d.color};"></div></div>
     <div class="prompt-card">
-      <div class="domain-tag" style="background:${d.color}22;">${d.icon} Stufe ${p.level} von 3</div>
+      <div class="domain-tag" style="background:${d.color}22;">${d.icon} Stufe ${p.level} von 4</div>
       ${bodyHtml}
       ${skipBtn}
       ${feedback}
@@ -2057,6 +2250,29 @@ window.dictateSubmit = function(){
 window.speakDictateSlow = function(){
   const p = state.practice;
   if(p.current && p.current.type==='dictate') speak(p.current.speak, 0.65);
+};
+
+// --- Wortstudie: Hilfsfunktionen und Handler ---
+window.speakWordstudy = function(){
+  const p = state.practice;
+  if(p.current && p.current.type==='wordstudy') speak(p.current.speak, 0.75);
+};
+
+window.wordstudyPlayToken = function(idx){
+  const p = state.practice;
+  const tok = p.wsTokens && p.wsTokens[idx];
+  if(!tok || !p.current) return;
+  window.playSoundToken(tok.key, p.current.speak);
+};
+
+window.wordstudyToRecall = function(){
+  state.practice.wsPhase = 'recall';
+  render();
+};
+
+window.wordstudyPeek = function(){
+  state.practice.wsShowPicture = true;
+  render();
 };
 
 // --- Satzwerft: Hilfsfunktionen und Handler ---
@@ -2109,14 +2325,10 @@ window.satzbauToWrite = function(){
 // automatisch abspielen lassen ("Laut für Laut").
 function playTokenSequenced(key, wholeWord, onDone){
   if(!key){ speakSequenced(wholeWord, onDone); return; }
-  try{
-    const audio = new Audio(key + '.m4a');
-    let handled = false;
-    audio.addEventListener('error', ()=>{ if(!handled){ handled=true; speakSequenced(wholeWord, onDone); } });
-    audio.addEventListener('ended', ()=>{ if(!handled){ handled=true; if(onDone) onDone(); } });
-    const p = audio.play();
-    if(p && typeof p.catch === 'function'){ p.catch(()=>{ if(!handled){ handled=true; speakSequenced(wholeWord, onDone); } }); }
-  }catch(e){ speakSequenced(wholeWord, onDone); }
+  playAudioKey(key, (ok)=>{
+    if(ok){ if(onDone) onDone(); }
+    else { speakSequenced(wholeWord, onDone); }
+  });
 }
 function speakSequenced(text, onDone){
   if(!('speechSynthesis' in window) || typeof SpeechSynthesisUtterance === 'undefined'){
@@ -2175,7 +2387,6 @@ window.satzbauPlayToken = function(idx){
   p.sbPlayingIdx = idx;
   render();
   window.playSoundToken(tok.key, wholeWord);
-  setTimeout(()=>{ p.sbPlayingIdx = null; render(); }, 500);
 };
 
 window.satzbauWordDone = function(){
@@ -2255,6 +2466,13 @@ window.startCategoryReview = function(category){
 };
 
 function renderItemBodyStatic(item, given){
+  if(item.type==='wordstudy'){
+    return `
+      <div class="task-instr">👀 Dein Wort war:</div>
+      <div style="font-size:2.4rem;text-align:center;margin:6px 0;">${item.emoji}</div>
+      <div class="text-input-row"><input type="text" disabled value="${escHtml(given||'')}"></div>
+      <p style="font-size:0.95rem;color:#4B6473;text-align:center;margin-top:8px;">Richtig geschrieben: <strong>${item.answer}</strong></p>`;
+  }
   if(item.type==='satzbau'){
     const p = state.practice;
     const words = sentenceWords();
@@ -2389,7 +2607,7 @@ window.practiceAnswer = function(given){
     let levelChanged = false;
     // Aufstieg erst, wenn genug geübt wurde UND die Fehlerquote zuletzt
     // erkennbar niedrig ist – reines Raten reicht nicht mehr aus.
-    if(p.level<3 && p.attemptLog.length>=8){
+    if(p.level<4 && p.attemptLog.length>=8){
       const lastSix = p.attemptLog.slice(-6);
       if(lastSix.filter(x=>!x).length<=1){
         p.level++;
@@ -2641,7 +2859,7 @@ function screenDiagReport(){
       : `<div style="font-size:0.88rem;margin-top:4px;color:#4E9A4E;"><strong>Bereits auf der höchsten Startstufe.</strong></div>`;
     return `
       <div class="card" style="margin-top:12px;text-align:left;">
-        <div style="font-family:'Baloo 2';font-weight:700;">${d.icon} ${d.name} – Stufe ${level} von 3</div>
+        <div style="font-family:'Baloo 2';font-weight:700;">${d.icon} ${d.name} – Stufe ${level} von 4</div>
         <div style="font-size:0.82rem;color:#4B6473;margin-top:2px;">Testergebnis (3 Items): ${marks}</div>
         ${compareLine}
         <div style="font-size:0.88rem;margin-top:6px;"><strong>Das zeigt das Kind schon:</strong> ${current}</div>
