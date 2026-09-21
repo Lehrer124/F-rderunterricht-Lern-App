@@ -785,7 +785,7 @@ const content = {
       pic('🎯','🐉','Drache', ['🔺','🌳','🦆'], 0, 'Dr-ache, Dr-eieck: gleicher Anlaut.'),
       pic('🎯','🐍','Schlange', ['🚢','🐕','🌙'], 0, 'Schlange – Schiff: gleicher Anlaut „Sch".'),
       pic('🔁','🐄','Kuh', ['👞','🐟','🌳'], 0, 'Kuh – Schuh: reimt sich!'),
-      pic('🔁','🐐','Ziege', ['🎻','🐟','🌳'], 0, 'Ziege – Geige: reimt sich!'),
+      pic('🔁','🐐','Ziege', ['🪰','🐟','🌳'], 0, 'Ziege – Fliege: reimt sich!'),
       pic('🎯','🐫','Kamel', ['🐱','🐟','🌳'], 0, 'Kamel – Katze: gleicher Anlaut „K".'),
       pic('🔁','🏺','Vase', ['👃','⚽','🌳'], 0, 'Vase – Nase: reimt sich!'),
       pic('🎯','⭐','Stern', ['🪑','🌳','🐟'], 0, 'Stern – Stuhl: gleicher Anlaut „St".'),
@@ -1268,7 +1268,7 @@ let state = {
   diag:{domainIndex:0, stage:'mid', midCorrect:null, current:null, answeredThisStep:false},
   levels:{}, stars:{}, diagDone:false, history:[], errorCounts:{}, attemptLogs:{},
   mastery:{}, selfChecks:[], pendingSelfCheck:null, pendingReview:false,
-  wordStore:[], onboardStep:0, errorProfile:{},
+  wordStore:[], onboardStep:0, errorProfile:{}, discoverSeen:{},
   needsBasicLetterDrill:false, drill:null,
   practice:{domainId:null, level:1, attemptLog:[], queue:[], current:null, itemsDone:0, answered:false, lastCorrect:null},
   showTeacher:false, showInfo:false, pendingDomain:null,
@@ -1306,7 +1306,7 @@ function saveProgress(){
       errorCounts: state.errorCounts, attemptLogs: state.attemptLogs,
       mastery: state.mastery, selfChecks: state.selfChecks,
       needsBasicLetterDrill: state.needsBasicLetterDrill,
-      diagReports: state.diagReports, wordStore: state.wordStore, errorProfile: state.errorProfile,
+      diagReports: state.diagReports, wordStore: state.wordStore, errorProfile: state.errorProfile, discoverSeen: state.discoverSeen,
     }));
   }catch(e){}
 }
@@ -1327,6 +1327,7 @@ function loadProgress(){
       state.diagReports = d.diagReports || [];
       state.wordStore = d.wordStore || [];
       state.errorProfile = d.errorProfile || {};
+      state.discoverSeen = d.discoverSeen || {};
     }
   }catch(e){}
 }
@@ -1337,7 +1338,7 @@ window.exportData = function(){
     errorCounts: state.errorCounts, attemptLogs: state.attemptLogs,
     mastery: state.mastery, selfChecks: state.selfChecks,
     needsBasicLetterDrill: state.needsBasicLetterDrill,
-    diagReports: state.diagReports, wordStore: state.wordStore, errorProfile: state.errorProfile,
+    diagReports: state.diagReports, wordStore: state.wordStore, errorProfile: state.errorProfile, discoverSeen: state.discoverSeen,
     exportedAt: new Date().toISOString(),
   };
   try{
@@ -1377,6 +1378,7 @@ window.importData = function(file){
       state.diagReports = d.diagReports || [];
       state.wordStore = d.wordStore || [];
       state.errorProfile = d.errorProfile || {};
+      state.discoverSeen = d.discoverSeen || {};
       saveProgress();
       alert('Daten erfolgreich importiert!');
       state.screen = 'start';
@@ -1392,7 +1394,7 @@ window.confirmReset = function(){
   if(confirm('Fortschritt wirklich löschen und neu starten?')){
     state.levels={}; state.stars={}; state.diagDone=false; state.history=[];
     state.errorCounts={}; state.attemptLogs={}; state.mastery={}; state.selfChecks=[];
-    state.needsBasicLetterDrill=false; state.diagReports=[]; state.wordStore=[]; state.onboardStep=0; state.errorProfile={};
+    state.needsBasicLetterDrill=false; state.diagReports=[]; state.wordStore=[]; state.onboardStep=0; state.errorProfile={}; state.discoverSeen={};
     try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
     state.showTeacher=false;
     state.screen='start';
@@ -1526,6 +1528,7 @@ function renderScreen(){
   if(state.screen==='drilldone') return screenDrillDone();
   if(state.screen==='diagreport') return screenDiagReport();
   if(state.screen==='vertiefung') return screenVertiefung();
+  if(state.screen==='discover') return screenDiscover();
   return '';
 }
 
@@ -1555,6 +1558,13 @@ window.onboardNext = function(){
   state.onboardStep = (state.onboardStep||0) + 1;
   render();
   speakOnboard();
+};
+
+window.skipToMapAfterImport = function(){
+  state.diagDone = true;
+  saveProgress();
+  state.screen = 'map';
+  render();
 };
 
 window.speakOnboard = function(){
@@ -1608,6 +1618,9 @@ function screenStart(){
     </div>
     <div style="text-align:center;margin-top:22px;">
       <button class="btn btn-ghost" onclick="toggleInfo()">ℹ️ Für Erwachsene</button>
+      <div style="margin-top:8px;">
+        <button class="btn btn-ghost" style="font-size:0.82rem;color:#8A9BA8;" onclick="skipToMapAfterImport()">📥 Fortschritt schon importiert? Direkt zur Hafenkarte →</button>
+      </div>
     </div>
   </main>`;
 }
@@ -2028,9 +2041,48 @@ window.openDomain = function(domainId){
   if(info && info.status==='locked') return;
   state.pendingDomain = domainId;
   state.pendingReview = !!(info && info.status==='review');
+  const level = state.levels[domainId] || 1;
+  const discoverKey = domainId + ':' + level;
+  const needsDiscover = ['schreib2','grundwortschatz'].includes(domainId) && !state.pendingReview && !state.discoverSeen[discoverKey];
+  if(needsDiscover){
+    state.discoverIndex = 0;
+    state.screen = 'discover';
+    render();
+    speakDiscoverPair();
+    return;
+  }
   state.screen = 'goal';
   render();
   speakGoal();
+};
+
+window.speakDiscoverPair = function(){
+  const d = anyDomain(state.pendingDomain);
+  const level = state.levels[d.id] || 1;
+  const pairs = discoveryPairsFor(d.id, level);
+  const item = pairs[state.discoverIndex || 0];
+  if(!item) return;
+  const correct = item.options[item.answer];
+  const wrong = item.options[1-item.answer];
+  speak(wrong + ' und ' + correct + '. Klingen fast gleich, oder? Aber nur eins ist richtig: ' + correct + '. ' + item.tip);
+};
+
+window.discoverNext = function(){
+  const d = anyDomain(state.pendingDomain);
+  const level = state.levels[d.id] || 1;
+  const key = d.id + ':' + level;
+  const pairs = discoveryPairsFor(d.id, level);
+  if((state.discoverIndex||0) < pairs.length-1){
+    state.discoverIndex = (state.discoverIndex||0) + 1;
+    render();
+    speakDiscoverPair();
+  } else {
+    state.discoverSeen[key] = true;
+    saveProgress();
+    state.screen = 'goal';
+    render();
+    speakGoal();
+  }
 };
 
 const REVIEW_TEXT = 'Kurze Auffrischung: Zeig, dass du das hier immer noch sicher kannst!';
@@ -2060,6 +2112,49 @@ window.startPracticeSession = function(){
   state.screen='practice';
   render();
 };
+
+function discoveryPairsFor(domainId, level){
+  return (content[domainId][level]||[]).filter(it=>it.options && it.options.length===2).slice(0,3);
+}
+
+function screenDiscover(){
+  const d = anyDomain(state.pendingDomain);
+  const level = state.levels[d.id] || 1;
+  const pairs = discoveryPairsFor(d.id, level);
+  const idx = state.discoverIndex || 0;
+  const item = pairs[idx];
+  if(!item){
+    // Kein passendes Wortpaar auf dieser Stufe gefunden - Entdecker-Seite überspringen.
+    state.discoverSeen[d.id+':'+level] = true;
+    state.screen = 'goal';
+    return screenGoal();
+  }
+  const correct = item.options[item.answer];
+  const wrong = item.options[1-item.answer];
+  const isLast = idx >= pairs.length-1;
+  return `
+  ${topbar('Entdecken', null, false)}
+  <main>
+    <div class="prompt-card" style="text-align:center;margin-top:16px;">
+      ${mascotIcon(60)}
+      <div class="task-instr" style="margin-top:8px;">🔍 Entdecke die Besonderheit!</div>
+      <div style="display:flex;justify-content:center;gap:20px;margin:18px 0;">
+        <div style="padding:14px 18px;border-radius:14px;background:#E8F5EE;border:3px solid #4FA893;">
+          <div style="font-size:1.5rem;">✅</div>
+          <div style="font-size:1.3rem;font-family:'Baloo 2';font-weight:700;color:var(--harbor-dark);margin-top:2px;">${correct}</div>
+        </div>
+        <div style="padding:14px 18px;border-radius:14px;background:#FBEDE8;border:3px solid #D9A08C;">
+          <div style="font-size:1.5rem;">❌</div>
+          <div style="font-size:1.3rem;font-family:'Baloo 2';font-weight:700;color:var(--harbor-dark);margin-top:2px;text-decoration:line-through;">${wrong}</div>
+        </div>
+      </div>
+      <p style="font-size:0.95rem;color:#4B6473;">Beide klingen fast gleich. Aber nur eins ist richtig – und dafür gibt es einen Grund:</p>
+      <p style="font-size:1.05rem;font-family:'Baloo 2';font-weight:600;color:var(--harbor-dark);margin-top:6px;">${item.tip}</p>
+      <button class="speak-btn" onclick="speakDiscoverPair()">🔊</button>
+      <button class="btn btn-primary btn-block" style="margin-top:14px;" onclick="discoverNext()">${isLast ? 'Los geht’s! →' : 'Nächstes Beispiel →'}</button>
+    </div>
+  </main>`;
+}
 
 function screenGoal(){
   const d = anyDomain(state.pendingDomain);
