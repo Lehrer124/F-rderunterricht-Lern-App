@@ -343,7 +343,7 @@ function syllableArcSpan(width){
 // Kein Standard-Emoji zeigt "nur eine Gabel" (🍴 ist immer Gabel+Messer) oder
 // "einen Tisch" als Möbelstück - deshalb eigene, einfache Strichzeichnungen
 // (forkIcon/tableIcon). Für die Diktier-Aufgabe "Gabel" in Schreibwerft gibt
-// es zusätzlich ein eigenes Foto/Bild (images/gabel.png, siehe renderPicVal
+// es zusätzlich ein eigenes Foto/Bild (gabel.png, siehe renderPicVal
 // weiter unten) statt eines mehrdeutigen Emojis.
 function forkIcon(size){
   size = size || 44;
@@ -597,7 +597,8 @@ function flash(word, options, answerIdx, tip){
 
 // Rendert ein Bild-Feld (targetEmoji/pictureEmoji/pic-Option): normalerweise
 // ein einzelnes Emoji-Zeichen, aber wenn der Wert mit "img:" beginnt, wird
-// stattdessen ein eigenes Bild aus dem lokalen images/-Ordner angezeigt -
+// stattdessen ein eigenes Bild angezeigt (Datei liegt flach neben der
+// HTML-Datei, kein Unterordner - genau wie die .m4a-Lautdateien) -
 // eingebunden für Wörter, deren Emoji-Darstellung nicht eindeutig genug war
 // (z. B. Arm, Gabel, Lampe, Rasen, Segel, Strumpf, Traum, Überraschungsei).
 function renderPicVal(val){
@@ -799,7 +800,7 @@ const content = {
       pic('🔁','☀️','Sonne', ['🛢️','🐟','⭐'], 0, 'Sonne – Tonne: reimt sich!'),
       pic('👏','🦋','Schmetterling', [silbenbogen(2),silbenbogen(3),silbenbogen(4)], 1, 'Schwinge mit: Schmet-ter-ling. Drei Bögen!'),
       pic('🎯','🌸','Blume', ['⚡','🌙','🐱'], 0, 'Blume – Blitz: gleicher Anfang „Bl".'),
-      pic('🔁','🌳','Baum', ['img:images/traum.png','⚽','🐟'], 0, 'Baum – Traum: reimt sich!'),
+      pic('🔁','🌳','Baum', ['img:traum.png','⚽','🐟'], 0, 'Baum – Traum: reimt sich!'),
       pic('👏','🦓','Zebra', [silbenbogen(1),silbenbogen(2),silbenbogen(3)], 1, 'Ze-bra: zwei Bögen.'),
       pic('🎯','🦁','Löwe', ['🥄','🐟','🌳'], 0, 'Löwe – Löffel: gleicher Anlaut „L".'),
       pic('🎯','🚢','Schiff', ['🏫','🐕','🌙'], 0, 'Schiff – Schule: gleicher Anlaut „Sch".'),
@@ -843,7 +844,7 @@ const content = {
       pic('🔡',tableIcon(),'Tisch', ['T','D','P'], 0, 'T-isch: erster Laut „T".', true),
       pic('🔡','☁️','Wolke', ['W','M','B'], 0, 'W-olke: erster Laut „W".', true),
       pic('🔡','🦓','Zebra', ['Z','S','T'], 0, 'Z-ebra: erster Laut „Z".', true),
-      pic('🔡','img:images/lampe.png','Lampe', ['L','N','M'], 0, 'L-ampe: erster Laut „L".', true),
+      pic('🔡','img:lampe.png','Lampe', ['L','N','M'], 0, 'L-ampe: erster Laut „L".', true),
       pic('🔡','🎩','Hut', ['H','F','W'], 0, 'H-ut: erster Laut „H".', true),
       pic('🔡','🥣','Joghurt', ['J','Y','G'], 0, 'J-oghurt: erster Laut „J".', true),
       pic('🔡','📁','Ordner', ['O','A','U'], 0, 'O-rdner: erster Laut „O".', true),
@@ -883,7 +884,7 @@ const content = {
       pic('🔤','🐑','Schaf', ['Schaf','Schaaf','Chaf'], 0, 'Schaf: „Sch" ist ein eigener Laut.'),
       pic('🔤','🧥','Jacke', ['Jacke','Wacke','Nacke'], 0, 'J-acke: achte auf den ersten Laut.'),
       pic('🔤','☁️','Wolke', ['Wolke','Volke','Wolge'], 0, 'Wolke: W-o-l-ke.'),
-      pic('🔤','img:images/lampe.png','Lampe', ['Lampe','Rampe','Lambe'], 0, 'Lampe: L-a-m-pe.'),
+      pic('🔤','img:lampe.png','Lampe', ['Lampe','Rampe','Lambe'], 0, 'Lampe: L-a-m-pe.'),
     ],
     3:[
       pic('🔤','🏠','Dach', ['Dach','Bach','Pach'], 0, 'b, d und p sehen ähnlich aus – höre genau hin: D-ach.'),
@@ -895,7 +896,7 @@ const content = {
       pic('🔤','🕷️','Spinne', ['Spinne','Pinne','Schpinne'], 0, 'Sp klingt wie „Schp", geschrieben wird nur Sp-inne.'),
       pic('🔡','💶','Euro', ['Eu','Ei','Au'], 0, 'Eu-ro: der Zwielaut „Eu".', false, 'EU'),
       pic('🔡','🛢️','Öl', ['Ö','O','U'], 0, 'Ö klingt anders als O – Ö-l.', false, 'OE'),
-      pic('🔡','img:images/ueberraschungsei.png','Überraschungsei', ['Ü','U','I'], 0, 'Ü klingt anders als U – Ü-berraschung.', false, 'UE'),
+      pic('🔡','img:ueberraschungsei.png','Überraschungsei', ['Ü','U','I'], 0, 'Ü klingt anders als U – Ü-berraschung.', false, 'UE'),
       pic('🔤','🎺','Trompete', ['Trompete','Drompete','Tropete'], 0, 'Tr am Anfang: zwei Konsonanten.'),
       pic('🔤','🖍️','Kreide', ['Kreide','Kleide','Greide'], 0, 'Kr am Anfang: zwei Konsonanten.'),
     ],
@@ -904,7 +905,7 @@ const content = {
       pic('🔤','🏰','Schloss', ['Schloss','Schlos','Sloss'], 0, 'Schl am Anfang, doppeltes „s" am Ende.'),
       pic('🔤','🦷','Zahnbürste', ['Zahnbürste','Zahnbürzte','Sahnbürste'], 0, 'Zusammengesetztes Wort: Zahn + Bürste.'),
       pic('🔤','🌪️','Sturm', ['Sturm','Sturn','Storm'], 0, 'St am Anfang.'),
-      pic('🔤','img:images/strumpf.png','Strumpf', ['Strumpf','Strump','Ztrumpf'], 0, 'Str am Anfang UND mpf am Ende – gleich zwei Häufungen.'),
+      pic('🔤','img:strumpf.png','Strumpf', ['Strumpf','Strump','Ztrumpf'], 0, 'Str am Anfang UND mpf am Ende – gleich zwei Häufungen.'),
       pic('🔤','🦅','Adler', ['Adler','Atler','Adla'], 0, 'Adler wird immer mit „d" geschrieben.'),
     ],
   },
@@ -933,7 +934,7 @@ const content = {
       inp('Schreibe nur den letzten Laut, den du hörst.', 'r', 'To-r: der letzte Laut ist „r".', 'Tor', '🥅'),
       inp('Schreibe nur den letzten Laut, den du hörst.', 's', 'Bu-s: der letzte Laut ist „s".', 'Bus', '🚌'),
       inp('Schreibe nur den letzten Laut, den du hörst.', 'f', 'Wolf endet auf „f".', 'Wolf', '🐺'),
-      inp('Schreibe nur den letzten Laut, den du hörst.', 'm', 'Arm endet auf „m".', 'Arm', 'img:images/arm.png'),
+      inp('Schreibe nur den letzten Laut, den du hörst.', 'm', 'Arm endet auf „m".', 'Arm', 'img:arm.png'),
     ],
     3:[ // Offene Silben verschriften (Konsonant + Vokal)
       inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'ba', 'Ba-na-ne: Trick – jede Silbe braucht mindestens einen Vokal (a,e,i,o,u), hier das „a".', 'Banane', '🍌'),
@@ -942,7 +943,7 @@ const content = {
       inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'ka', 'Ka-me-ra: ein Konsonant, ein Vokal – „ka".', 'Kamera', '📷'),
       inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'to', 'To-ma-te: ein Konsonant, ein Vokal – „to".', 'Tomate', '🍅'),
       inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'gi', 'Gi-tar-re: ein Konsonant, ein Vokal – „gi".', 'Gitarre', '🎸'),
-      inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'se', 'Se-gel: ein Konsonant, ein Vokal – „se".', 'Segel', 'img:images/segel.png'),
+      inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'se', 'Se-gel: ein Konsonant, ein Vokal – „se".', 'Segel', 'img:segel.png'),
       inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'ra', 'Ra-ke-te: ein Konsonant, ein Vokal – „ra".', 'Rakete', '🚀'),
       inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'ro', 'Ro-se: ein Konsonant, ein Vokal – „ro".', 'Rose', '🌹'),
     ],
@@ -1012,7 +1013,7 @@ const content = {
       inp('Schreibe das Wort, das du hörst.', 'eule', 'Eu-le: Zwielaut „eu" am Wortanfang.', 'Eule', '🦉'),
       inp('Schreibe das Wort, das du hörst.', 'sofa', 'So-fa: zwei offene Silben, ganz lautgetreu.', 'Sofa', '🛋️'),
       inp('Schreibe das Wort, das du hörst.', 'hase', 'Ha-se: zwei offene Silben, ganz lautgetreu.', 'Hase', '🐰'),
-      inp('Schreibe das Wort, das du hörst.', 'rasen', 'Ra-sen: zwei offene Silben, ganz lautgetreu.', 'Rasen', 'img:images/rasen.png'),
+      inp('Schreibe das Wort, das du hörst.', 'rasen', 'Ra-sen: zwei offene Silben, ganz lautgetreu.', 'Rasen', 'img:rasen.png'),
     ],
     2:[ // Phonemstufe 2: + Stoppkonsonanten (b,d,g,t,p,k) und h,ch, weiterhin ohne Häufung
       inp('Schreibe das Wort, das du hörst.', 'hut', 'Hu-t: ganz lautgetreu geschrieben.', 'Hut', '🎩'),
@@ -1021,15 +1022,15 @@ const content = {
       inp('Schreibe das Wort, das du hörst.', 'fisch', 'Fi-sch: „sch" ist ein Laut aus drei Buchstaben.', 'Fisch', '🐟'),
       inp('Schreibe das Wort, das du hörst.', 'dose', 'Do-se: offene Silbe, ganz lautgetreu.', 'Dose', '🥫'),
       inp('Schreibe das Wort, das du hörst.', 'kuchen', 'Ku-chen: „ch" ist ein eigener Laut.', 'Kuchen', '🎂'),
-      inp('Schreibe das Wort, das du hörst.', 'gabel', 'Ga-bel: ganz lautgetreu.', 'Gabel', 'img:images/gabel.png'),
+      inp('Schreibe das Wort, das du hörst.', 'gabel', 'Ga-bel: ganz lautgetreu.', 'Gabel', 'img:gabel.png'),
       inp('Schreibe das Wort, das du hörst.', 'besen', 'Be-sen: ganz lautgetreu.', 'Besen', '🧹'),
     ],
     3:[ // Reine Konsonantenhäufungen (mehrere verschiedene, echt hörbare Konsonanten hintereinander) - bewusst OHNE Doppelkonsonanten, da die Verdopplung eine Rechtschreibregel ist, keine Hörwahrnehmung
       inp('Schreibe das Wort, das du hörst.', 'frosch', 'Fr am Anfang: zwei Konsonanten hintereinander.', 'Frosch', '🐸'),
-      inp('Schreibe das Wort, das du hörst.', 'traum', 'Tr am Anfang: zwei Konsonanten hintereinander.', 'Traum', 'img:images/traum.png'),
+      inp('Schreibe das Wort, das du hörst.', 'traum', 'Tr am Anfang: zwei Konsonanten hintereinander.', 'Traum', 'img:traum.png'),
       inp('Schreibe das Wort, das du hörst.', 'stern', 'St am Anfang – ein häufiger Wortbaustein.', 'Stern', '⭐'),
       inp('Schreibe das Wort, das du hörst.', 'schwein', 'Schw am Anfang: drei Buchstaben, zwei Laute direkt hintereinander.', 'Schwein', '🐷'),
-      inp('Schreibe das Wort, das du hörst.', 'strumpf', 'Str am Anfang, mpf am Ende – viele Konsonanten, aber alle einzeln hörbar.', 'Strumpf', 'img:images/strumpf.png'),
+      inp('Schreibe das Wort, das du hörst.', 'strumpf', 'Str am Anfang, mpf am Ende – viele Konsonanten, aber alle einzeln hörbar.', 'Strumpf', 'img:strumpf.png'),
       inp('Schreibe das Wort, das du hörst.', 'krake', 'Kr am Anfang: zwei Konsonanten hintereinander.', 'Krake', '🐙'),
       inp('Schreibe das Wort, das du hörst.', 'geschenk', 'Sch und nk: zwei Konsonantenhäufungen in einem Wort.', 'Geschenk', '🎁'),
       inp('Schreibe das Wort, das du hörst.', 'pflaume', 'Pfl am Anfang: drei Konsonanten hintereinander.', 'Pflaume'),
