@@ -1963,6 +1963,7 @@ function renderItemBody(item, handlerName){
     }).join('');
     return `
       <div class="task-instr">${item.prompt}</div>
+      <button class="speak-btn" onclick="speakCurrent()">🔊</button>
       <div style="text-align:center;margin:16px 0;">${optsHtml}</div>`;
   }
   if(item.type==='wordstudy'){
