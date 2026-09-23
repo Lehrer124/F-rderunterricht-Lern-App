@@ -849,7 +849,7 @@ const content = {
       pic('🔡','🦓','Zebra', ['Z','S','T'], 0, 'Z-ebra: erster Laut „Z".', true),
       pic('🔡','img:lampe.png','Lampe', ['L','N','M'], 0, 'L-ampe: erster Laut „L".', true),
       pic('🔡','🎩','Hut', ['H','F','W'], 0, 'H-ut: erster Laut „H".', true),
-      pic('🔡','img:joghurt.png','Joghurt', ['J','Y','G'], 0, 'J-oghurt: erster Laut „J".', true),
+      pic('🔡','img:Joghurt.png','Joghurt', ['J','Y','G'], 0, 'J-oghurt: erster Laut „J".', true),
       pic('🔡','📁','Ordner', ['O','A','U'], 0, 'O-rdner: erster Laut „O".', true),
       pic('🔡','🖌️','Pinsel', ['P','B','T'], 0, 'P-insel: erster Laut „P".', true),
       pic('🔡','🛸','Ufo', ['U','O','A'], 0, 'U-fo: erster Laut „U".', true),
@@ -1432,7 +1432,8 @@ window.exportData = function(){
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'buchstabenhafen-sicherung-' + todayStr() + '.json';
+    const namePart = (state.childLabel||'').trim().replace(/[^a-zA-Z0-9äöüÄÖÜß_-]+/g,'-');
+    a.download = 'buchstabenhafen-sicherung-' + (namePart ? namePart+'-' : '') + todayStr() + '.json';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
