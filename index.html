@@ -579,9 +579,11 @@ function inp(prompt, answer, tip, speakText, pictureEmoji, cutMs){
 
 // Wie inp(), aber zum Antippen statt Eintippen - für die Silbendock-Diagnostik,
 // damit ein Kind nicht an der Tastatureingabe scheitert, wenn es den Laut/die
-// Silbe eigentlich richtig erkannt hat. Jede Option bekommt einen Silbenbogen.
-function silbchoice(prompt, options, answerIdx, tip, speakText){
-  return {type:'silbchoice', prompt, options, answer:answerIdx, tip, speak:speakText};
+// Silbe eigentlich richtig erkannt hat. Ein Silbenbogen wird nur unter echten
+// Silben-Optionen gezeigt (mehr als ein Buchstabe), nicht unter einzelnen
+// Lauten - ein Bogen unter "f" allein ergibt keinen Sinn.
+function silbchoice(prompt, options, answerIdx, tip, speakText, pictureEmoji){
+  return {type:'silbchoice', prompt, options, answer:answerIdx, tip, speak:speakText, pictureEmoji};
 }
 // Bildbasierte Aufgabe: kein Lesen von Wörtern nötig, um die Aufgabe zu
 // verstehen. taskIcon zeigt den Aufgabentyp, targetEmoji das Zielwort als
@@ -1283,45 +1285,45 @@ const content = {
 // Laut-/Silben-Gehör misst. Die reguläre Übung bleibt bei freier Eingabe.
 const diagSilbendock = {
   1:[ // Anlaut - Distraktoren sind andere plausible Anlaute
-    silbchoice('Schreibe nur den ersten Laut, den du hörst.', ['m','n','w'], 0, 'M wie Maus.', 'Maus'),
-    silbchoice('Schreibe nur den ersten Laut, den du hörst.', ['s','z','f'], 0, 'S wie Sonne.', 'Sonne'),
-    silbchoice('Schreibe nur den ersten Laut, den du hörst.', ['f','w','s'], 0, 'F wie Fisch.', 'Fisch'),
-    silbchoice('Schreibe nur den ersten Laut, den du hörst.', ['b','d','p'], 0, 'B wie Baum.', 'Baum'),
-    silbchoice('Schreibe nur den ersten Laut, den du hörst.', ['l','n','r'], 0, 'L wie Löwe.', 'Löwe'),
-    silbchoice('Schreibe nur den ersten Laut, den du hörst.', ['w','m','f'], 0, 'W wie Wal.', 'Wal'),
-    silbchoice('Schreibe nur den ersten Laut, den du hörst.', ['t','d','k'], 0, 'T wie Tiger.', 'Tiger'),
-    silbchoice('Schreibe nur den ersten Laut, den du hörst.', ['g','k','d'], 0, 'G wie Giraffe.', 'Giraffe'),
-    silbchoice('Schreibe nur den ersten Laut, den du hörst.', ['d','t','b'], 0, 'D wie Delfin.', 'Delfin'),
+    silbchoice('Tippe den ersten Laut an, den du hörst.', ['m','n','w'], 0, 'M wie Maus.', 'Maus', '🐭'),
+    silbchoice('Tippe den ersten Laut an, den du hörst.', ['s','z','f'], 0, 'S wie Sonne.', 'Sonne', '☀️'),
+    silbchoice('Tippe den ersten Laut an, den du hörst.', ['f','w','s'], 0, 'F wie Fisch.', 'Fisch', '🐟'),
+    silbchoice('Tippe den ersten Laut an, den du hörst.', ['b','d','p'], 0, 'B wie Baum.', 'Baum', '🌳'),
+    silbchoice('Tippe den ersten Laut an, den du hörst.', ['l','n','r'], 0, 'L wie Löwe.', 'Löwe', '🦁'),
+    silbchoice('Tippe den ersten Laut an, den du hörst.', ['w','m','f'], 0, 'W wie Wal.', 'Wal', '🐋'),
+    silbchoice('Tippe den ersten Laut an, den du hörst.', ['t','d','k'], 0, 'T wie Tiger.', 'Tiger', '🐯'),
+    silbchoice('Tippe den ersten Laut an, den du hörst.', ['g','k','d'], 0, 'G wie Giraffe.', 'Giraffe', '🦒'),
+    silbchoice('Tippe den ersten Laut an, den du hörst.', ['d','t','b'], 0, 'D wie Delfin.', 'Delfin', '🐬'),
   ],
   2:[ // Endlaut - Distraktoren sind andere plausible Endlaute
-    silbchoice('Schreibe nur den letzten Laut, den du hörst.', ['m','n','l'], 0, 'Bau-m: der letzte Laut ist „m".', 'Baum'),
-    silbchoice('Schreibe nur den letzten Laut, den du hörst.', ['l','r','n'], 0, 'Ba-ll: der letzte Laut ist „l".', 'Ball'),
-    silbchoice('Schreibe nur den letzten Laut, den du hörst.', ['t','d','p'], 0, 'Hu-t: der letzte Laut ist „t".', 'Hut'),
-    silbchoice('Schreibe nur den letzten Laut, den du hörst.', ['sch','s','ch'], 0, 'Fi-sch: drei Buchstaben, ein Laut.', 'Fisch'),
-    silbchoice('Schreibe nur den letzten Laut, den du hörst.', ['n','m','l'], 0, 'Mann endet auf „n".', 'Mann'),
-    silbchoice('Schreibe nur den letzten Laut, den du hörst.', ['r','l','n'], 0, 'To-r: der letzte Laut ist „r".', 'Tor'),
-    silbchoice('Schreibe nur den letzten Laut, den du hörst.', ['s','f','t'], 0, 'Bu-s: der letzte Laut ist „s".', 'Bus'),
-    silbchoice('Schreibe nur den letzten Laut, den du hörst.', ['f','l','w'], 0, 'Wolf endet auf „f".', 'Wolf'),
-    silbchoice('Schreibe nur den letzten Laut, den du hörst.', ['m','n','l'], 0, 'Arm endet auf „m".', 'Arm'),
+    silbchoice('Tippe den letzten Laut an, den du hörst.', ['m','n','l'], 0, 'Bau-m: der letzte Laut ist „m".', 'Baum', '🌳'),
+    silbchoice('Tippe den letzten Laut an, den du hörst.', ['l','r','n'], 0, 'Ba-ll: der letzte Laut ist „l".', 'Ball', '⚽'),
+    silbchoice('Tippe den letzten Laut an, den du hörst.', ['t','d','p'], 0, 'Hu-t: der letzte Laut ist „t".', 'Hut', '🎩'),
+    silbchoice('Tippe den letzten Laut an, den du hörst.', ['sch','s','ch'], 0, 'Fi-sch: drei Buchstaben, ein Laut.', 'Fisch', '🐟'),
+    silbchoice('Tippe den letzten Laut an, den du hörst.', ['n','m','l'], 0, 'Mann endet auf „n".', 'Mann', '👨'),
+    silbchoice('Tippe den letzten Laut an, den du hörst.', ['r','l','n'], 0, 'To-r: der letzte Laut ist „r".', 'Tor', '🥅'),
+    silbchoice('Tippe den letzten Laut an, den du hörst.', ['s','f','t'], 0, 'Bu-s: der letzte Laut ist „s".', 'Bus', '🚌'),
+    silbchoice('Tippe den letzten Laut an, den du hörst.', ['f','l','w'], 0, 'Wolf endet auf „f".', 'Wolf', '🐺'),
+    silbchoice('Tippe den letzten Laut an, den du hörst.', ['m','n','l'], 0, 'Arm endet auf „m".', 'Arm', 'img:arm.png'),
   ],
   3:[ // Erste Silbe - Distraktoren sind andere echte Silben AUS DEMSELBEN Wort
-    silbchoice('Welche ist die erste Silbe des Wortes, das du hörst?', ['ba','na','ne'], 0, 'Ba-na-ne: die erste Silbe ist „ba".', 'Banane'),
-    silbchoice('Welche ist die erste Silbe des Wortes, das du hörst?', ['mu','si','ik'], 0, 'Mu-sik: die erste Silbe ist „mu".', 'Musik'),
-    silbchoice('Welche ist die erste Silbe des Wortes, das du hörst?', ['lo','ko','ti'], 0, 'Lo-ko-mo-ti-ve: die erste Silbe ist „lo".', 'Lokomotive'),
-    silbchoice('Welche ist die erste Silbe des Wortes, das du hörst?', ['ka','me','ra'], 0, 'Ka-me-ra: die erste Silbe ist „ka".', 'Kamera'),
-    silbchoice('Welche ist die erste Silbe des Wortes, das du hörst?', ['to','ma','te'], 0, 'To-ma-te: die erste Silbe ist „to".', 'Tomate'),
-    silbchoice('Welche ist die erste Silbe des Wortes, das du hörst?', ['gi','tar','re'], 0, 'Gi-tar-re: die erste Silbe ist „gi".', 'Gitarre'),
-    silbchoice('Welche ist die erste Silbe des Wortes, das du hörst?', ['se','gel','el'], 0, 'Se-gel: die erste Silbe ist „se".', 'Segel'),
-    silbchoice('Welche ist die erste Silbe des Wortes, das du hörst?', ['ra','ke','te'], 0, 'Ra-ke-te: die erste Silbe ist „ra".', 'Rakete'),
-    silbchoice('Welche ist die erste Silbe des Wortes, das du hörst?', ['ro','se','os'], 0, 'Ro-se: die erste Silbe ist „ro".', 'Rose'),
+    silbchoice('Welche ist die erste Silbe des Wortes, das du hörst?', ['ba','na','ne'], 0, 'Ba-na-ne: die erste Silbe ist „ba".', 'Banane', '🍌'),
+    silbchoice('Welche ist die erste Silbe des Wortes, das du hörst?', ['mu','si','ik'], 0, 'Mu-sik: die erste Silbe ist „mu".', 'Musik', '🎵'),
+    silbchoice('Welche ist die erste Silbe des Wortes, das du hörst?', ['lo','ko','ti'], 0, 'Lo-ko-mo-ti-ve: die erste Silbe ist „lo".', 'Lokomotive', '🚂'),
+    silbchoice('Welche ist die erste Silbe des Wortes, das du hörst?', ['ka','me','ra'], 0, 'Ka-me-ra: die erste Silbe ist „ka".', 'Kamera', '📷'),
+    silbchoice('Welche ist die erste Silbe des Wortes, das du hörst?', ['to','ma','te'], 0, 'To-ma-te: die erste Silbe ist „to".', 'Tomate', '🍅'),
+    silbchoice('Welche ist die erste Silbe des Wortes, das du hörst?', ['gi','tar','re'], 0, 'Gi-tar-re: die erste Silbe ist „gi".', 'Gitarre', '🎸'),
+    silbchoice('Welche ist die erste Silbe des Wortes, das du hörst?', ['se','gel','el'], 0, 'Se-gel: die erste Silbe ist „se".', 'Segel', 'img:segel.png'),
+    silbchoice('Welche ist die erste Silbe des Wortes, das du hörst?', ['ra','ke','te'], 0, 'Ra-ke-te: die erste Silbe ist „ra".', 'Rakete', '🚀'),
+    silbchoice('Welche ist die erste Silbe des Wortes, das du hörst?', ['ro','se','os'], 0, 'Ro-se: die erste Silbe ist „ro".', 'Rose', '🌹'),
   ],
   4:[ // Erste ZWEI Silben - Distraktoren sind andere echte Silbenkombinationen aus demselben Wort
-    silbchoice('Welches sind die ersten zwei Silben des Wortes, das du hörst?', ['bana','nane','bane'], 0, 'Ba-na-ne: die ersten beiden Silben sind „bana".', 'Banane'),
-    silbchoice('Welches sind die ersten zwei Silben des Wortes, das du hörst?', ['loko','komo','motiv'], 0, 'Lo-ko-mo-ti-ve: die ersten beiden Silben sind „loko".', 'Lokomotive'),
-    silbchoice('Welches sind die ersten zwei Silben des Wortes, das du hörst?', ['kame','amera','mera'], 0, 'Ka-me-ra: die ersten beiden Silben sind „kame".', 'Kamera'),
-    silbchoice('Welches sind die ersten zwei Silben des Wortes, das du hörst?', ['toma','omate','mate'], 0, 'To-ma-te: die ersten beiden Silben sind „toma".', 'Tomate'),
-    silbchoice('Welches sind die ersten zwei Silben des Wortes, das du hörst?', ['gitar','itarre','tarre'], 0, 'Gi-tar-re: die ersten beiden Silben sind „gitar".', 'Gitarre'),
-    silbchoice('Welches sind die ersten zwei Silben des Wortes, das du hörst?', ['rake','akete','kete'], 0, 'Ra-ke-te: die ersten beiden Silben sind „rake".', 'Rakete'),
+    silbchoice('Welches sind die ersten zwei Silben des Wortes, das du hörst?', ['bana','nane','bane'], 0, 'Ba-na-ne: die ersten beiden Silben sind „bana".', 'Banane', '🍌'),
+    silbchoice('Welches sind die ersten zwei Silben des Wortes, das du hörst?', ['loko','komo','motiv'], 0, 'Lo-ko-mo-ti-ve: die ersten beiden Silben sind „loko".', 'Lokomotive', '🚂'),
+    silbchoice('Welches sind die ersten zwei Silben des Wortes, das du hörst?', ['kame','amera','mera'], 0, 'Ka-me-ra: die ersten beiden Silben sind „kame".', 'Kamera', '📷'),
+    silbchoice('Welches sind die ersten zwei Silben des Wortes, das du hörst?', ['toma','omate','mate'], 0, 'To-ma-te: die ersten beiden Silben sind „toma".', 'Tomate', '🍅'),
+    silbchoice('Welches sind die ersten zwei Silben des Wortes, das du hörst?', ['gitar','itarre','tarre'], 0, 'Gi-tar-re: die ersten beiden Silben sind „gitar".', 'Gitarre', '🎸'),
+    silbchoice('Welches sind die ersten zwei Silben des Wortes, das du hörst?', ['rake','akete','kete'], 0, 'Ra-ke-te: die ersten beiden Silben sind „rake".', 'Rakete', '🚀'),
   ],
 };
 
@@ -1960,11 +1962,12 @@ function renderItemBody(item, handlerName){
       return `
       <span style="display:inline-block;vertical-align:top;margin:6px 10px;">
         <button onclick="${handlerName}(${i})" style="display:block;min-width:${arcWidth-8}px;padding:10px 12px;border:2px solid var(--line);border-radius:12px;font-size:1.3rem;font-family:'Atkinson Hyperlegible';font-weight:700;background:var(--sand);">${opt}</button>
-        ${syllableArcSpan(arcWidth)}
+        ${opt.length>1 ? syllableArcSpan(arcWidth) : ''}
       </span>`;
     }).join('');
     return `
       <div class="task-instr">${item.prompt}</div>
+      ${item.pictureEmoji ? `<div class="pic-target">${renderPicVal(item.pictureEmoji)}</div>` : ''}
       <button class="speak-btn" onclick="speakCurrent()">🔊</button>
       <div style="text-align:center;margin:16px 0;">${optsHtml}</div>`;
   }
@@ -3065,7 +3068,7 @@ window.practiceAnswer = function(given){
   }
 
   saveProgress();
-  render();
+  render(true); // true = laufende Sprachausgabe der Rückmeldung NICHT abbrechen (siehe render())
 };
 
 window.nextPracticeItem = function(){
@@ -3229,7 +3232,7 @@ window.drillAnswer = function(given){
       d.flagged.push(letter + ' (' + item.speak + ')');
     }
   }
-  render();
+  render(true); // true = laufende Laut-Wiedergabe NICHT abbrechen (siehe render())
 };
 
 window.nextDrillItem = function(){
