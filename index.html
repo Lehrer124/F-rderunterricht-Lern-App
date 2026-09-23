@@ -41,6 +41,7 @@
     body{font-size:1.15rem;}
     .prompt-text{font-size:1.5rem;}
     .pic-target{font-size:5.6rem;}
+    .pic-target .pic-img{width:5.6rem;height:5.6rem;}
     .task-instr{font-size:1.25rem;}
     .opt-btn, .pic-opt-btn{font-size:1.3rem;min-height:96px;}
     .btn{font-size:1.2rem;padding:16px 30px;}
@@ -157,6 +158,8 @@
     line-height:1.3;margin-bottom:4px;
   }
   .pic-target{font-size:4.6rem;line-height:1;margin:2px 0 6px;}
+  .pic-img{width:4.6rem;height:4.6rem;object-fit:contain;display:block;margin:0 auto;}
+  .pic-opt-btn .pic-img{width:2.6rem;height:2.6rem;}
   .pic-options{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:16px;}
   .pic-options.two{grid-template-columns:1fr 1fr;}
   .pic-opt-btn{
@@ -338,7 +341,10 @@ function syllableArcSpan(width){
 }
 
 // Kein Standard-Emoji zeigt "nur eine Gabel" (🍴 ist immer Gabel+Messer) oder
-// "einen Tisch" als Möbelstück - deshalb eigene, einfache Strichzeichnungen.
+// "einen Tisch" als Möbelstück - deshalb eigene, einfache Strichzeichnungen
+// (forkIcon/tableIcon). Für die Diktier-Aufgabe "Gabel" in Schreibwerft gibt
+// es zusätzlich ein eigenes Foto/Bild (images/gabel.png, siehe renderPicVal
+// weiter unten) statt eines mehrdeutigen Emojis.
 function forkIcon(size){
   size = size || 44;
   return `<svg viewBox="0 0 40 60" width="${size}" height="${Math.round(size*1.3)}" style="display:inline-block;vertical-align:middle;">
@@ -569,6 +575,13 @@ function ch(prompt, options, answerIdx, tip, speakText, errorCategory){
 function inp(prompt, answer, tip, speakText, pictureEmoji, cutMs){
   return {type:'input', prompt, answer, tip, speak:speakText||prompt, pictureEmoji, cutMs};
 }
+
+// Wie inp(), aber zum Antippen statt Eintippen - für die Silbendock-Diagnostik,
+// damit ein Kind nicht an der Tastatureingabe scheitert, wenn es den Laut/die
+// Silbe eigentlich richtig erkannt hat. Jede Option bekommt einen Silbenbogen.
+function silbchoice(prompt, options, answerIdx, tip, speakText){
+  return {type:'silbchoice', prompt, options, answer:answerIdx, tip, speak:speakText};
+}
 // Bildbasierte Aufgabe: kein Lesen von Wörtern nötig, um die Aufgabe zu
 // verstehen. taskIcon zeigt den Aufgabentyp, targetEmoji das Zielwort als
 // Bild, options sind große Symbole/Buchstaben/Wörter zum Antippen.
@@ -580,6 +593,19 @@ function pic(taskIcon, targetEmoji, targetWord, options, answerIdx, tip, niko, a
 // Bild muss angetippt werden, bevor die Zeit abläuft.
 function flash(word, options, answerIdx, tip){
   return {type:'flash', word, options, answer:answerIdx, tip, speak:word};
+}
+
+// Rendert ein Bild-Feld (targetEmoji/pictureEmoji/pic-Option): normalerweise
+// ein einzelnes Emoji-Zeichen, aber wenn der Wert mit "img:" beginnt, wird
+// stattdessen ein eigenes Bild aus dem lokalen images/-Ordner angezeigt -
+// eingebunden für Wörter, deren Emoji-Darstellung nicht eindeutig genug war
+// (z. B. Arm, Gabel, Lampe, Rasen, Segel, Strumpf, Traum, Überraschungsei).
+function renderPicVal(val){
+  if(typeof val==='string' && val.indexOf('img:')===0){
+    const src = val.slice(4);
+    return `<img src="${src}" alt="" class="pic-img" draggable="false" ondragstart="return false;">`;
+  }
+  return val;
 }
 
 // Satzwerft: freie Konstruktion aus Körben (Wer? Was tut er? Wo? Wie?) statt
@@ -773,7 +799,7 @@ const content = {
       pic('🔁','☀️','Sonne', ['🛢️','🐟','⭐'], 0, 'Sonne – Tonne: reimt sich!'),
       pic('👏','🦋','Schmetterling', [silbenbogen(2),silbenbogen(3),silbenbogen(4)], 1, 'Schwinge mit: Schmet-ter-ling. Drei Bögen!'),
       pic('🎯','🌸','Blume', ['⚡','🌙','🐱'], 0, 'Blume – Blitz: gleicher Anfang „Bl".'),
-      pic('🔁','🌳','Baum', ['💤','⚽','🐟'], 0, 'Baum – Traum: reimt sich!'),
+      pic('🔁','🌳','Baum', ['img:images/traum.png','⚽','🐟'], 0, 'Baum – Traum: reimt sich!'),
       pic('👏','🦓','Zebra', [silbenbogen(1),silbenbogen(2),silbenbogen(3)], 1, 'Ze-bra: zwei Bögen.'),
       pic('🎯','🦁','Löwe', ['🥄','🐟','🌳'], 0, 'Löwe – Löffel: gleicher Anlaut „L".'),
       pic('🎯','🚢','Schiff', ['🏫','🐕','🌙'], 0, 'Schiff – Schule: gleicher Anlaut „Sch".'),
@@ -817,7 +843,7 @@ const content = {
       pic('🔡',tableIcon(),'Tisch', ['T','D','P'], 0, 'T-isch: erster Laut „T".', true),
       pic('🔡','☁️','Wolke', ['W','M','B'], 0, 'W-olke: erster Laut „W".', true),
       pic('🔡','🦓','Zebra', ['Z','S','T'], 0, 'Z-ebra: erster Laut „Z".', true),
-      pic('🔡','🪔','Lampe', ['L','N','M'], 0, 'L-ampe: erster Laut „L".', true),
+      pic('🔡','img:images/lampe.png','Lampe', ['L','N','M'], 0, 'L-ampe: erster Laut „L".', true),
       pic('🔡','🎩','Hut', ['H','F','W'], 0, 'H-ut: erster Laut „H".', true),
       pic('🔡','🥣','Joghurt', ['J','Y','G'], 0, 'J-oghurt: erster Laut „J".', true),
       pic('🔡','📁','Ordner', ['O','A','U'], 0, 'O-rdner: erster Laut „O".', true),
@@ -857,7 +883,7 @@ const content = {
       pic('🔤','🐑','Schaf', ['Schaf','Schaaf','Chaf'], 0, 'Schaf: „Sch" ist ein eigener Laut.'),
       pic('🔤','🧥','Jacke', ['Jacke','Wacke','Nacke'], 0, 'J-acke: achte auf den ersten Laut.'),
       pic('🔤','☁️','Wolke', ['Wolke','Volke','Wolge'], 0, 'Wolke: W-o-l-ke.'),
-      pic('🔤','💡','Lampe', ['Lampe','Rampe','Lambe'], 0, 'Lampe: L-a-m-pe.'),
+      pic('🔤','img:images/lampe.png','Lampe', ['Lampe','Rampe','Lambe'], 0, 'Lampe: L-a-m-pe.'),
     ],
     3:[
       pic('🔤','🏠','Dach', ['Dach','Bach','Pach'], 0, 'b, d und p sehen ähnlich aus – höre genau hin: D-ach.'),
@@ -869,7 +895,7 @@ const content = {
       pic('🔤','🕷️','Spinne', ['Spinne','Pinne','Schpinne'], 0, 'Sp klingt wie „Schp", geschrieben wird nur Sp-inne.'),
       pic('🔡','💶','Euro', ['Eu','Ei','Au'], 0, 'Eu-ro: der Zwielaut „Eu".', false, 'EU'),
       pic('🔡','🛢️','Öl', ['Ö','O','U'], 0, 'Ö klingt anders als O – Ö-l.', false, 'OE'),
-      pic('🔡','🥚','Überraschungsei', ['Ü','U','I'], 0, 'Ü klingt anders als U – Ü-berraschung.', false, 'UE'),
+      pic('🔡','img:images/ueberraschungsei.png','Überraschungsei', ['Ü','U','I'], 0, 'Ü klingt anders als U – Ü-berraschung.', false, 'UE'),
       pic('🔤','🎺','Trompete', ['Trompete','Drompete','Tropete'], 0, 'Tr am Anfang: zwei Konsonanten.'),
       pic('🔤','🖍️','Kreide', ['Kreide','Kleide','Greide'], 0, 'Kr am Anfang: zwei Konsonanten.'),
     ],
@@ -878,7 +904,7 @@ const content = {
       pic('🔤','🏰','Schloss', ['Schloss','Schlos','Sloss'], 0, 'Schl am Anfang, doppeltes „s" am Ende.'),
       pic('🔤','🦷','Zahnbürste', ['Zahnbürste','Zahnbürzte','Sahnbürste'], 0, 'Zusammengesetztes Wort: Zahn + Bürste.'),
       pic('🔤','🌪️','Sturm', ['Sturm','Sturn','Storm'], 0, 'St am Anfang.'),
-      pic('🔤','🧦','Strumpf', ['Strumpf','Strump','Ztrumpf'], 0, 'Str am Anfang UND mpf am Ende – gleich zwei Häufungen.'),
+      pic('🔤','img:images/strumpf.png','Strumpf', ['Strumpf','Strump','Ztrumpf'], 0, 'Str am Anfang UND mpf am Ende – gleich zwei Häufungen.'),
       pic('🔤','🦅','Adler', ['Adler','Atler','Adla'], 0, 'Adler wird immer mit „d" geschrieben.'),
     ],
   },
@@ -907,7 +933,7 @@ const content = {
       inp('Schreibe nur den letzten Laut, den du hörst.', 'r', 'To-r: der letzte Laut ist „r".', 'Tor', '🥅'),
       inp('Schreibe nur den letzten Laut, den du hörst.', 's', 'Bu-s: der letzte Laut ist „s".', 'Bus', '🚌'),
       inp('Schreibe nur den letzten Laut, den du hörst.', 'f', 'Wolf endet auf „f".', 'Wolf', '🐺'),
-      inp('Schreibe nur den letzten Laut, den du hörst.', 'm', 'Arm endet auf „m".', 'Arm', '💪'),
+      inp('Schreibe nur den letzten Laut, den du hörst.', 'm', 'Arm endet auf „m".', 'Arm', 'img:images/arm.png'),
     ],
     3:[ // Offene Silben verschriften (Konsonant + Vokal)
       inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'ba', 'Ba-na-ne: Trick – jede Silbe braucht mindestens einen Vokal (a,e,i,o,u), hier das „a".', 'Banane', '🍌'),
@@ -916,7 +942,7 @@ const content = {
       inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'ka', 'Ka-me-ra: ein Konsonant, ein Vokal – „ka".', 'Kamera', '📷'),
       inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'to', 'To-ma-te: ein Konsonant, ein Vokal – „to".', 'Tomate', '🍅'),
       inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'gi', 'Gi-tar-re: ein Konsonant, ein Vokal – „gi".', 'Gitarre', '🎸'),
-      inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'se', 'Se-gel: ein Konsonant, ein Vokal – „se".', 'Segel', '⛵'),
+      inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'se', 'Se-gel: ein Konsonant, ein Vokal – „se".', 'Segel', 'img:images/segel.png'),
       inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'ra', 'Ra-ke-te: ein Konsonant, ein Vokal – „ra".', 'Rakete', '🚀'),
       inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'ro', 'Ro-se: ein Konsonant, ein Vokal – „ro".', 'Rose', '🌹'),
     ],
@@ -986,7 +1012,7 @@ const content = {
       inp('Schreibe das Wort, das du hörst.', 'eule', 'Eu-le: Zwielaut „eu" am Wortanfang.', 'Eule', '🦉'),
       inp('Schreibe das Wort, das du hörst.', 'sofa', 'So-fa: zwei offene Silben, ganz lautgetreu.', 'Sofa', '🛋️'),
       inp('Schreibe das Wort, das du hörst.', 'hase', 'Ha-se: zwei offene Silben, ganz lautgetreu.', 'Hase', '🐰'),
-      inp('Schreibe das Wort, das du hörst.', 'rasen', 'Ra-sen: zwei offene Silben, ganz lautgetreu.', 'Rasen', '🌱'),
+      inp('Schreibe das Wort, das du hörst.', 'rasen', 'Ra-sen: zwei offene Silben, ganz lautgetreu.', 'Rasen', 'img:images/rasen.png'),
     ],
     2:[ // Phonemstufe 2: + Stoppkonsonanten (b,d,g,t,p,k) und h,ch, weiterhin ohne Häufung
       inp('Schreibe das Wort, das du hörst.', 'hut', 'Hu-t: ganz lautgetreu geschrieben.', 'Hut', '🎩'),
@@ -995,15 +1021,15 @@ const content = {
       inp('Schreibe das Wort, das du hörst.', 'fisch', 'Fi-sch: „sch" ist ein Laut aus drei Buchstaben.', 'Fisch', '🐟'),
       inp('Schreibe das Wort, das du hörst.', 'dose', 'Do-se: offene Silbe, ganz lautgetreu.', 'Dose', '🥫'),
       inp('Schreibe das Wort, das du hörst.', 'kuchen', 'Ku-chen: „ch" ist ein eigener Laut.', 'Kuchen', '🎂'),
-      inp('Schreibe das Wort, das du hörst.', 'gabel', 'Ga-bel: ganz lautgetreu.', 'Gabel', '🍴'),
+      inp('Schreibe das Wort, das du hörst.', 'gabel', 'Ga-bel: ganz lautgetreu.', 'Gabel', 'img:images/gabel.png'),
       inp('Schreibe das Wort, das du hörst.', 'besen', 'Be-sen: ganz lautgetreu.', 'Besen', '🧹'),
     ],
     3:[ // Reine Konsonantenhäufungen (mehrere verschiedene, echt hörbare Konsonanten hintereinander) - bewusst OHNE Doppelkonsonanten, da die Verdopplung eine Rechtschreibregel ist, keine Hörwahrnehmung
       inp('Schreibe das Wort, das du hörst.', 'frosch', 'Fr am Anfang: zwei Konsonanten hintereinander.', 'Frosch', '🐸'),
-      inp('Schreibe das Wort, das du hörst.', 'traum', 'Tr am Anfang: zwei Konsonanten hintereinander.', 'Traum', '💭'),
+      inp('Schreibe das Wort, das du hörst.', 'traum', 'Tr am Anfang: zwei Konsonanten hintereinander.', 'Traum', 'img:images/traum.png'),
       inp('Schreibe das Wort, das du hörst.', 'stern', 'St am Anfang – ein häufiger Wortbaustein.', 'Stern', '⭐'),
       inp('Schreibe das Wort, das du hörst.', 'schwein', 'Schw am Anfang: drei Buchstaben, zwei Laute direkt hintereinander.', 'Schwein', '🐷'),
-      inp('Schreibe das Wort, das du hörst.', 'strumpf', 'Str am Anfang, mpf am Ende – viele Konsonanten, aber alle einzeln hörbar.', 'Strumpf', '🧦'),
+      inp('Schreibe das Wort, das du hörst.', 'strumpf', 'Str am Anfang, mpf am Ende – viele Konsonanten, aber alle einzeln hörbar.', 'Strumpf', 'img:images/strumpf.png'),
       inp('Schreibe das Wort, das du hörst.', 'krake', 'Kr am Anfang: zwei Konsonanten hintereinander.', 'Krake', '🐙'),
       inp('Schreibe das Wort, das du hörst.', 'geschenk', 'Sch und nk: zwei Konsonantenhäufungen in einem Wort.', 'Geschenk', '🎁'),
       inp('Schreibe das Wort, das du hörst.', 'pflaume', 'Pfl am Anfang: drei Konsonanten hintereinander.', 'Pflaume'),
@@ -1249,10 +1275,58 @@ const content = {
   },
 };
 
+// Eigener Diagnostik-Pool NUR für Silbendock: dieselben Wörter/Fähigkeiten
+// wie die reguläre Übung, aber zum Antippen statt Eintippen - damit die
+// Diagnose nicht an der Tastatureingabe scheitert, sondern wirklich das
+// Laut-/Silben-Gehör misst. Die reguläre Übung bleibt bei freier Eingabe.
+const diagSilbendock = {
+  1:[ // Anlaut - Distraktoren sind andere plausible Anlaute
+    silbchoice('Schreibe nur den ersten Laut, den du hörst.', ['m','n','w'], 0, 'M wie Maus.', 'Maus'),
+    silbchoice('Schreibe nur den ersten Laut, den du hörst.', ['s','z','f'], 0, 'S wie Sonne.', 'Sonne'),
+    silbchoice('Schreibe nur den ersten Laut, den du hörst.', ['f','w','s'], 0, 'F wie Fisch.', 'Fisch'),
+    silbchoice('Schreibe nur den ersten Laut, den du hörst.', ['b','d','p'], 0, 'B wie Baum.', 'Baum'),
+    silbchoice('Schreibe nur den ersten Laut, den du hörst.', ['l','n','r'], 0, 'L wie Löwe.', 'Löwe'),
+    silbchoice('Schreibe nur den ersten Laut, den du hörst.', ['w','m','f'], 0, 'W wie Wal.', 'Wal'),
+    silbchoice('Schreibe nur den ersten Laut, den du hörst.', ['t','d','k'], 0, 'T wie Tiger.', 'Tiger'),
+    silbchoice('Schreibe nur den ersten Laut, den du hörst.', ['g','k','d'], 0, 'G wie Giraffe.', 'Giraffe'),
+    silbchoice('Schreibe nur den ersten Laut, den du hörst.', ['d','t','b'], 0, 'D wie Delfin.', 'Delfin'),
+  ],
+  2:[ // Endlaut - Distraktoren sind andere plausible Endlaute
+    silbchoice('Schreibe nur den letzten Laut, den du hörst.', ['m','n','l'], 0, 'Bau-m: der letzte Laut ist „m".', 'Baum'),
+    silbchoice('Schreibe nur den letzten Laut, den du hörst.', ['l','r','n'], 0, 'Ba-ll: der letzte Laut ist „l".', 'Ball'),
+    silbchoice('Schreibe nur den letzten Laut, den du hörst.', ['t','d','p'], 0, 'Hu-t: der letzte Laut ist „t".', 'Hut'),
+    silbchoice('Schreibe nur den letzten Laut, den du hörst.', ['sch','s','ch'], 0, 'Fi-sch: drei Buchstaben, ein Laut.', 'Fisch'),
+    silbchoice('Schreibe nur den letzten Laut, den du hörst.', ['n','m','l'], 0, 'Mann endet auf „n".', 'Mann'),
+    silbchoice('Schreibe nur den letzten Laut, den du hörst.', ['r','l','n'], 0, 'To-r: der letzte Laut ist „r".', 'Tor'),
+    silbchoice('Schreibe nur den letzten Laut, den du hörst.', ['s','f','t'], 0, 'Bu-s: der letzte Laut ist „s".', 'Bus'),
+    silbchoice('Schreibe nur den letzten Laut, den du hörst.', ['f','l','w'], 0, 'Wolf endet auf „f".', 'Wolf'),
+    silbchoice('Schreibe nur den letzten Laut, den du hörst.', ['m','n','l'], 0, 'Arm endet auf „m".', 'Arm'),
+  ],
+  3:[ // Erste Silbe - Distraktoren sind andere echte Silben AUS DEMSELBEN Wort
+    silbchoice('Welche ist die erste Silbe des Wortes, das du hörst?', ['ba','na','ne'], 0, 'Ba-na-ne: die erste Silbe ist „ba".', 'Banane'),
+    silbchoice('Welche ist die erste Silbe des Wortes, das du hörst?', ['mu','si','ik'], 0, 'Mu-sik: die erste Silbe ist „mu".', 'Musik'),
+    silbchoice('Welche ist die erste Silbe des Wortes, das du hörst?', ['lo','ko','ti'], 0, 'Lo-ko-mo-ti-ve: die erste Silbe ist „lo".', 'Lokomotive'),
+    silbchoice('Welche ist die erste Silbe des Wortes, das du hörst?', ['ka','me','ra'], 0, 'Ka-me-ra: die erste Silbe ist „ka".', 'Kamera'),
+    silbchoice('Welche ist die erste Silbe des Wortes, das du hörst?', ['to','ma','te'], 0, 'To-ma-te: die erste Silbe ist „to".', 'Tomate'),
+    silbchoice('Welche ist die erste Silbe des Wortes, das du hörst?', ['gi','tar','re'], 0, 'Gi-tar-re: die erste Silbe ist „gi".', 'Gitarre'),
+    silbchoice('Welche ist die erste Silbe des Wortes, das du hörst?', ['se','gel','el'], 0, 'Se-gel: die erste Silbe ist „se".', 'Segel'),
+    silbchoice('Welche ist die erste Silbe des Wortes, das du hörst?', ['ra','ke','te'], 0, 'Ra-ke-te: die erste Silbe ist „ra".', 'Rakete'),
+    silbchoice('Welche ist die erste Silbe des Wortes, das du hörst?', ['ro','se','os'], 0, 'Ro-se: die erste Silbe ist „ro".', 'Rose'),
+  ],
+  4:[ // Erste ZWEI Silben - Distraktoren sind andere echte Silbenkombinationen aus demselben Wort
+    silbchoice('Welches sind die ersten zwei Silben des Wortes, das du hörst?', ['bana','nane','bane'], 0, 'Ba-na-ne: die ersten beiden Silben sind „bana".', 'Banane'),
+    silbchoice('Welches sind die ersten zwei Silben des Wortes, das du hörst?', ['loko','komo','motiv'], 0, 'Lo-ko-mo-ti-ve: die ersten beiden Silben sind „loko".', 'Lokomotive'),
+    silbchoice('Welches sind die ersten zwei Silben des Wortes, das du hörst?', ['kame','amera','mera'], 0, 'Ka-me-ra: die ersten beiden Silben sind „kame".', 'Kamera'),
+    silbchoice('Welches sind die ersten zwei Silben des Wortes, das du hörst?', ['toma','omate','mate'], 0, 'To-ma-te: die ersten beiden Silben sind „toma".', 'Tomate'),
+    silbchoice('Welches sind die ersten zwei Silben des Wortes, das du hörst?', ['gitar','itarre','tarre'], 0, 'Gi-tar-re: die ersten beiden Silben sind „gitar".', 'Gitarre'),
+    silbchoice('Welches sind die ersten zwei Silben des Wortes, das du hörst?', ['rake','akete','kete'], 0, 'Ra-ke-te: die ersten beiden Silben sind „rake".', 'Rakete'),
+  ],
+};
+
 // Diagnostik nutzt gezielt: erstes Item aus Stufe 2 (Einstieg), dann
 // Stufe 3 (bei Erfolg) bzw. Stufe 1 (bei Misserfolg) zur Einordnung.
 function diagItem(domainId, level, usedSet){
-  const pool = content[domainId][level] || [];
+  const pool = (domainId==='silbendock' ? diagSilbendock[level] : content[domainId][level]) || [];
   const candidates = usedSet ? pool.filter(i => !usedSet.has(i)) : pool;
   const choices = candidates.length ? candidates : pool;
   const original = choices[Math.floor(Math.random()*choices.length)];
@@ -1269,6 +1343,7 @@ let state = {
   levels:{}, stars:{}, diagDone:false, history:[], errorCounts:{}, attemptLogs:{},
   mastery:{}, selfChecks:[], pendingSelfCheck:null, pendingReview:false,
   wordStore:[], onboardStep:0, errorProfile:{}, discoverSeen:{},
+  childLabel:'', className:'',
   needsBasicLetterDrill:false, drill:null,
   practice:{domainId:null, level:1, attemptLog:[], queue:[], current:null, itemsDone:0, answered:false, lastCorrect:null},
   showTeacher:false, showInfo:false, pendingDomain:null,
@@ -1281,6 +1356,9 @@ function weekKey(date){
   return 'W' + Math.floor(localMs/86400000/7);
 }
 function todayStr(){ return new Date().toISOString().slice(0,10); }
+function escapeHtml(s){
+  return String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
 function addDays(dateStr, n){
   const d = new Date(dateStr+'T00:00:00');
   d.setDate(d.getDate()+n);
@@ -1307,6 +1385,7 @@ function saveProgress(){
       mastery: state.mastery, selfChecks: state.selfChecks,
       needsBasicLetterDrill: state.needsBasicLetterDrill,
       diagReports: state.diagReports, wordStore: state.wordStore, errorProfile: state.errorProfile, discoverSeen: state.discoverSeen,
+      childLabel: state.childLabel, className: state.className,
     }));
   }catch(e){}
 }
@@ -1328,6 +1407,8 @@ function loadProgress(){
       state.wordStore = d.wordStore || [];
       state.errorProfile = d.errorProfile || {};
       state.discoverSeen = d.discoverSeen || {};
+      state.childLabel = d.childLabel || '';
+      state.className = d.className || '';
     }
   }catch(e){}
 }
@@ -1339,6 +1420,7 @@ window.exportData = function(){
     mastery: state.mastery, selfChecks: state.selfChecks,
     needsBasicLetterDrill: state.needsBasicLetterDrill,
     diagReports: state.diagReports, wordStore: state.wordStore, errorProfile: state.errorProfile, discoverSeen: state.discoverSeen,
+    childLabel: state.childLabel, className: state.className,
     exportedAt: new Date().toISOString(),
   };
   try{
@@ -1379,6 +1461,8 @@ window.importData = function(file){
       state.wordStore = d.wordStore || [];
       state.errorProfile = d.errorProfile || {};
       state.discoverSeen = d.discoverSeen || {};
+      state.childLabel = d.childLabel || '';
+      state.className = d.className || '';
       saveProgress();
       alert('Daten erfolgreich importiert!');
       state.screen = 'start';
@@ -1388,6 +1472,210 @@ window.importData = function(file){
     }
   };
   reader.readAsText(file);
+};
+
+window.updateChildInfo = function(){
+  const nameEl = document.getElementById('childLabelInput');
+  const classEl = document.getElementById('classNameInput');
+  state.childLabel = nameEl ? nameEl.value : state.childLabel;
+  state.className = classEl ? classEl.value : state.className;
+  saveProgress();
+};
+
+/* ============================================================
+   FÖRDERPLAN-EXPORT
+   Erzeugt einen druckbaren Auszug entlang der in Kap. 6.3 der
+   Hamburger Handreichung "Förderung und Unterstützung von
+   Schülerinnen und Schülern" genannten Pflichtinhalte eines
+   diagnosegestützten Förderplans:
+   (1) individuelle Lernausgangslage und Förderbereiche,
+   (2) konkrete Ziele und Maßnahmen inkl. Zuständigkeiten,
+   (3) ggf. Nachteilsausgleich, (4) ggf. Notenschutz,
+   (5) Auswertung der Lernentwicklung und Anpassung der Maßnahmen.
+   Liefert bewusst keinen fertigen Förderplan: Buchstabenhafen
+   kennt weder SCHNABEL/SLS-Ergebnisse noch Zuständigkeiten oder
+   Entscheidungen der Zeugniskonferenz. Der Export ist eine
+   Arbeitsgrundlage zum Ausdrucken/Ausfüllen von Hand, keine
+   automatisierte Rechtsdokumentation.
+   ============================================================ */
+
+const STATUS_LABELS = {
+  locked:'noch gesperrt (Voraussetzung fehlt)',
+  active:'in Bearbeitung',
+  review:'gefestigt – Auffrischung fällig',
+  mastered:'gefestigt',
+};
+
+function foerderplanDomainRow(d){
+  const status = domainStatus(d).status;
+  const lvl = state.levels[d.id] || 1;
+  const stmts = iCanStatements[d.id] || {};
+  const current = stmts[lvl] || '–';
+  const nextLvl = lvl + 1;
+  const next = stmts[nextLvl] || 'Zielstufen im Prototyp erreicht – Bereich fortlaufend auffrischen.';
+  const stars = state.stars[d.id] || 0;
+  const err = state.errorCounts[d.id] || 0;
+  return {d, status, lvl, current, next, stars, err};
+}
+
+function buildFoerderplanHTML(){
+  const activeAdvanced = advancedDomains.filter(d => (state.levels[d.id]||0) > 0 || (state.stars[d.id]||0) > 0);
+  const allDomains = domains.concat(activeAdvanced);
+  const rows = allDomains.map(foerderplanDomainRow);
+
+  const lernausgangTable = rows.map(r => `
+    <tr>
+      <td>${r.d.icon} ${escapeHtml(r.d.name)}<br><span class="fp-sub">${escapeHtml(r.d.sub)}</span></td>
+      <td>${escapeHtml(STATUS_LABELS[r.status]||r.status)}</td>
+      <td style="text-align:center;">${r.lvl}</td>
+      <td>${escapeHtml(r.current)}</td>
+      <td style="text-align:center;">${r.stars}</td>
+      <td style="text-align:center;">${r.err}</td>
+    </tr>`).join('');
+
+  const zieleRows = rows.filter(r => r.status!=='locked' && r.status!=='mastered').map(r => `
+    <tr>
+      <td>${r.d.icon} ${escapeHtml(r.d.name)}</td>
+      <td>${escapeHtml(r.next)}</td>
+      <td>Adaptives Üben in Buchstabenhafen (Station „${escapeHtml(r.d.name)}"), ca. 1x wöchentlich Lernförderstunde<br>&nbsp;<br><em>Ergänzende Maßnahme(n) außerhalb der App:</em> ____________________________</td>
+      <td>____________________________</td>
+    </tr>`).join('');
+
+  const errorEntries = Object.keys(ERROR_CATEGORIES)
+    .map(cat => ({name: ERROR_CATEGORIES[cat], count: state.errorProfile[cat]||0}))
+    .filter(e => e.count > 0).sort((a,b)=>b.count-a.count);
+  const errorHtml = errorEntries.length ? `
+    <table class="fp-table">
+      <tr><th>Fehlerschwerpunkt (Rechtschreibmuster)</th><th>Häufigkeit erfasst</th></tr>
+      ${errorEntries.map(e=>`<tr><td>${escapeHtml(e.name)}</td><td style="text-align:center;">${e.count}</td></tr>`).join('')}
+    </table>` : '<p class="fp-muted">Noch keine kategorisierten Rechtschreib-Fehlerschwerpunkte erfasst.</p>';
+
+  const history = state.history || [];
+  const historyHtml = history.length ? `
+    <p class="fp-muted">Erfasster Zeitraum: ${history[0].date} bis ${history[history.length-1].date} (${history.length} Woche(n))</p>
+    <table class="fp-table">
+      <tr><th>Bereich</th><th>Stufe je erfasster Woche</th></tr>
+      ${allDomains.map(d => {
+        const trend = history.map(h => (h.levels && h.levels[d.id]) || '–').join(' → ');
+        return `<tr><td>${d.icon} ${escapeHtml(d.name)}</td><td class="fp-mono">${trend}</td></tr>`;
+      }).join('')}
+    </table>
+    ${history.some(h=>h.note) ? `
+    <p class="fp-muted" style="margin-top:10px;"><strong>Notizen aus dem Wochenverlauf:</strong></p>
+    <ul>${history.filter(h=>h.note).map(h=>`<li>${escapeHtml(h.date)}: ${escapeHtml(h.note)}</li>`).join('')}</ul>` : ''}
+    ` : '<p class="fp-muted">Noch kein wochenweiser Verlauf erfasst.</p>';
+
+  const lastDiag = (state.diagReports && state.diagReports.length) ? state.diagReports[state.diagReports.length-1].date : null;
+
+  const today = todayStr();
+  const child = escapeHtml(state.childLabel||'') || '____________________';
+  const klass = escapeHtml(state.className||'') || '______';
+
+  return `<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Förderplan-Auszug – ${child !== '____________________' ? child : 'Buchstabenhafen'}</title>
+<style>
+  body{font-family:Arial,Helvetica,sans-serif;color:#173142;max-width:900px;margin:0 auto;padding:28px 30px 60px;line-height:1.45;}
+  h1{font-size:1.4rem;margin-bottom:2px;}
+  h2{font-size:1.05rem;margin-top:30px;border-bottom:2px solid #173142;padding-bottom:4px;}
+  .fp-meta{font-size:0.92rem;margin-top:4px;color:#334;}
+  .fp-meta div{margin:2px 0;}
+  .fp-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:0.86rem;}
+  .fp-table th, .fp-table td{border:1px solid #B9C4CC;padding:6px 8px;text-align:left;vertical-align:top;}
+  .fp-table th{background:#EEF2F4;}
+  .fp-sub{font-size:0.78rem;color:#617685;}
+  .fp-muted{font-size:0.85rem;color:#5A6B76;}
+  .fp-mono{font-family:'Courier New',monospace;font-size:0.8rem;}
+  .fp-fill{border-bottom:1px solid #173142;display:inline-block;min-width:220px;}
+  .fp-note{background:#FFF7E6;border:1px solid #E8C77E;border-radius:6px;padding:10px 14px;font-size:0.86rem;margin-top:10px;}
+  .fp-sig{margin-top:14px;font-size:0.86rem;}
+  .fp-sig .line{display:inline-block;width:260px;border-bottom:1px solid #173142;margin-right:24px;}
+  @media print{ .no-print{display:none;} body{padding:10px 14px;} }
+</style>
+</head>
+<body>
+  <div class="no-print" style="text-align:right;margin-bottom:10px;">
+    <button onclick="window.print()" style="font-family:Arial;font-weight:bold;padding:10px 18px;border-radius:8px;border:none;background:#1B6E7F;color:#fff;cursor:pointer;">🖨️ Drucken / Als PDF speichern</button>
+  </div>
+
+  <h1>Diagnosegestützter Förderplan – Auszug (Entwurf)</h1>
+  <p class="fp-meta">Bereich: Lesen und/oder Rechtschreiben · erzeugt mit Buchstabenhafen am ${today}</p>
+  <div class="fp-meta" style="margin-top:12px;">
+    <div>Name/Kürzel: <strong>${child}</strong> &nbsp;&nbsp; Klasse: <strong>${klass}</strong></div>
+    <div>Schule: <span class="fp-fill">&nbsp;</span> &nbsp;&nbsp; Förderzeitraum: <span class="fp-fill">&nbsp;</span></div>
+    ${lastDiag ? `<div>Letzte Einstiegs-/Wiederholungsdiagnostik in Buchstabenhafen: ${lastDiag}</div>` : ''}
+  </div>
+
+  <div class="fp-note">Dieser Auszug fasst den digitalen Übungsverlauf aus Buchstabenhafen zusammen. Er ersetzt weder die schulisch-verbindliche Testung (SCHNABEL/SLS) noch die pädagogische Einschätzung der Lehrkraft und ist kein rechtsgültiger Förderplan nach § 5 VO Notenschutz. Er dient als Arbeitsgrundlage, die von der zuständigen Lehrkraft geprüft, ergänzt und in den Schülerbogen sowie in DiViS übertragen werden muss.</div>
+
+  <h2>1. Individuelle Lernausgangslage und Förderbereiche</h2>
+  <table class="fp-table">
+    <tr><th>Förderbereich</th><th>Status</th><th>Stufe</th><th>Lernstand (aktuelle „Ich kann"-Aussage)</th><th>Sterne</th><th>Fehler</th></tr>
+    ${lernausgangTable}
+  </table>
+  <p class="fp-muted" style="margin-top:8px;">Ergänzend einzutragen – schulische Testergebnisse (Verfahren, Datum, Prozentrang): <span class="fp-fill">&nbsp;</span></p>
+
+  <h2>2. Konkrete Ziele und Maßnahmen (einschließlich Zuständigkeiten)</h2>
+  ${zieleRows ? `
+  <table class="fp-table">
+    <tr><th>Förderbereich</th><th>Nächstes Förderziel</th><th>Maßnahme</th><th>Zuständigkeit</th></tr>
+    ${zieleRows}
+  </table>` : '<p class="fp-muted">Aktuell kein Bereich mit offenem Förderziel erfasst.</p>'}
+  <h3 style="font-size:0.95rem;margin-top:16px;">Fehlerschwerpunkte Rechtschreiben (Leuchtturm &amp; Speicherstadt)</h3>
+  ${errorHtml}
+
+  <h2>3. Nachteilsausgleich</h2>
+  <p class="fp-muted">Wird von Buchstabenhafen nicht ermittelt – Prüfung/Entscheidung erfolgt durch die Zeugniskonferenz nach § 6 VO Notenschutz (frühestens nach sechsmonatiger schulischer Förderung).</p>
+  <div class="fp-meta">
+    <div>☐ nicht erforderlich &nbsp;&nbsp; ☐ Prüfung eingeleitet am <span class="fp-fill">&nbsp;</span> &nbsp;&nbsp; ☐ gewährt ab <span class="fp-fill">&nbsp;</span></div>
+    <div>Art und Umfang: <span class="fp-fill" style="min-width:420px;">&nbsp;</span></div>
+  </div>
+
+  <h2>4. Notenschutz (Lesen und/oder Rechtschreiben)</h2>
+  <p class="fp-muted">Wird von Buchstabenhafen nicht ermittelt – setzt mindestens zwölfmonatige schulische Förderung und Nachteilsausgleich voraus (§ 7 VO Notenschutz).</p>
+  <div class="fp-meta">
+    <div>☐ nicht erforderlich &nbsp;&nbsp; ☐ Sorgeberechtigte informiert am <span class="fp-fill">&nbsp;</span> &nbsp;&nbsp; ☐ gewährt ab <span class="fp-fill">&nbsp;</span></div>
+    <div>Art und Umfang: <span class="fp-fill" style="min-width:420px;">&nbsp;</span></div>
+  </div>
+
+  <h2>5. Auswertung der Lernentwicklung und Anpassung der Maßnahmen</h2>
+  ${historyHtml}
+  <div class="fp-meta" style="margin-top:12px;">
+    <div>Auswertung/Fortschreibung erfolgt zum Ende des Schulhalbjahres bzw. Schuljahres. Nächste geplante Auswertung am: <span class="fp-fill">&nbsp;</span></div>
+    <div>Besprochen mit den Sorgeberechtigten am: <span class="fp-fill">&nbsp;</span></div>
+    <div>Anpassung der Maßnahmen: <span class="fp-fill" style="min-width:500px;">&nbsp;</span></div>
+  </div>
+
+  <div class="fp-sig">
+    <span class="line">&nbsp;</span> Unterschrift Förder-/Klassenlehrkraft, Datum
+  </div>
+  <div class="fp-sig" style="margin-top:26px;">
+    <span class="line">&nbsp;</span> Kenntnisnahme Sorgeberechtigte, Datum
+  </div>
+
+  <p class="fp-muted" style="margin-top:30px;border-top:1px solid #D8C9A8;padding-top:10px;">Buchstabenhafen ist ein schulischer Übungs- und Beobachtungsprototyp (lokale Gerätespeicherung, keine Datenübertragung). Dieser Auszug wurde am ${today} automatisch erzeugt und ist vor Verwendung im Förderplan/DiViS durch die zuständige Lehrkraft zu prüfen.</p>
+</body>
+</html>`;
+}
+
+window.exportFoerderplan = function(){
+  try{
+    const html = buildFoerderplanHTML();
+    const blob = new Blob([html], {type:'text/html'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const namePart = (state.childLabel||'').trim().replace(/[^a-zA-Z0-9äöüÄÖÜß_-]+/g,'-') || 'kind';
+    a.download = 'foerderplan-auszug-' + namePart + '-' + todayStr() + '.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url), 2000);
+  }catch(e){
+    alert('Förderplan-Export fehlgeschlagen: ' + e.message);
+  }
 };
 
 window.confirmReset = function(){
@@ -1478,7 +1766,7 @@ window.speakCurrent = function(){
   if(item.type==='pic'){
     const instr = taskInstructions[item.taskIcon] || '';
     speak(instr + (instr ? '. ' : '') + item.speak);
-  } else if(item.type==='input'){
+  } else if(item.type==='input' || item.type==='silbchoice'){
     speak(item.prompt);
     speak(item.speak, 0.7);
   } else {
@@ -1488,7 +1776,7 @@ window.speakCurrent = function(){
 
 
 function checkAnswer(item, given){
-  if(item.type==='choice' || item.type==='pic' || item.type==='flash') return given===item.answer;
+  if(item.type==='choice' || item.type==='pic' || item.type==='flash' || item.type==='silbchoice') return given===item.answer;
   if(item.type==='dictate') return given===0;
   if(item.type==='satzbau') return given===0;
   const norm = s => (s||'').toString().trim().toLowerCase().replace(/ß/g,'ss');
@@ -1635,7 +1923,7 @@ function renderInfoOverlay(){
       Der Lotsen-Check (kurze Bildaufgaben, kein Lesen nötig) findet den Startpunkt in sieben Bereichen.
       Danach öffnet sich die Hafenkarte mit sieben Stationen. In jeder Station passen sich die Aufgaben automatisch an:
       läuft es gut, wird es eine Stufe schwerer; läuft es schwer, geht es eine Stufe zurück – die Zone der nächsten Entwicklung.</p>
-      <p class="footnote" style="margin-top:14px;">Aufgebaut auf Grundlagen der evidenzbasierten LRS-Diagnostik und -Förderung (u. a. phonologische Bewusstheit, Graphem-Phonem-Zuordnung, Silben- und Morphemstrategien). Kein Ersatz für eine fachärztliche oder schulpsychologische Diagnostik. Der Fortschritt wird nur lokal auf diesem Gerät gespeichert.</p>
+      <p class="footnote" style="margin-top:14px;">Aufgebaut auf Grundlagen der evidenzbasierten LRS-Diagnostik und -Förderung (u. a. phonologische Bewusstheit, Graphem-Phonem-Zuordnung, Silben- und Morphemstrategien). Kein Ersatz für die schulisch-verbindliche Testung (SCHNABEL/SLS) oder eine fachärztliche bzw. schulpsychologische Diagnostik. Der Fortschritt wird nur lokal auf diesem Gerät gespeichert.</p>
     </div>
   </div>`;
 }
@@ -1663,6 +1951,20 @@ function screenDiagnose(){
 }
 
 function renderItemBody(item, handlerName){
+  if(item.type==='silbchoice'){
+    const boxW = 58;
+    const optsHtml = item.options.map((opt,i)=>{
+      const arcWidth = Math.max(opt.length,1) * boxW;
+      return `
+      <span style="display:inline-block;vertical-align:top;margin:6px 10px;">
+        <button onclick="${handlerName}(${i})" style="display:block;min-width:${arcWidth-8}px;padding:10px 12px;border:2px solid var(--line);border-radius:12px;font-size:1.3rem;font-family:'Atkinson Hyperlegible';font-weight:700;background:var(--sand);">${opt}</button>
+        ${syllableArcSpan(arcWidth)}
+      </span>`;
+    }).join('');
+    return `
+      <div class="task-instr">${item.prompt}</div>
+      <div style="text-align:center;margin:16px 0;">${optsHtml}</div>`;
+  }
   if(item.type==='wordstudy'){
     const p = state.practice;
     if(!p.wsPhase || p.wsPhase==='study'){
@@ -1810,14 +2112,14 @@ function renderItemBody(item, handlerName){
     const cls = item.options.length<=2 ? 'pic-options two' : 'pic-options';
     return `
       <div class="task-instr">${item.taskIcon} ${taskInstructions[item.taskIcon]||''}</div>
-      <div class="pic-target">${item.targetEmoji}</div>
+      <div class="pic-target">${renderPicVal(item.targetEmoji)}</div>
       <button class="speak-btn" onclick="speakCurrent()">🔊</button>
       <div class="${cls}">${item.options.map((opt,i)=>
-        `<button class="pic-opt-btn" onclick="${handlerName}(${i})">${opt}</button>`
+        `<button class="pic-opt-btn" onclick="${handlerName}(${i})">${renderPicVal(opt)}</button>`
       ).join('')}</div>`;
   }
   let body = '';
-  if(item.pictureEmoji) body += `<div class="pic-target">${item.pictureEmoji}</div>`;
+  if(item.pictureEmoji) body += `<div class="pic-target">${renderPicVal(item.pictureEmoji)}</div>`;
   body += `<div class="prompt-text">${item.prompt}</div>`;
   body += `<button class="speak-btn" onclick="speakCurrent()">🔊</button>`;
   if(item.type==='choice'){
@@ -2606,17 +2908,17 @@ function renderItemBodyStatic(item, given){
     const cls = item.options.length<=2 ? 'pic-options two' : 'pic-options';
     return `
       <div class="task-instr">${item.taskIcon} ${taskInstructions[item.taskIcon]||''}</div>
-      <div class="pic-target">${item.targetEmoji}</div>
+      <div class="pic-target">${renderPicVal(item.targetEmoji)}</div>
       <button class="speak-btn" onclick="speakCurrent()">🔊</button>
       <div class="${cls}">${item.options.map((opt,i)=>{
         let cls2='pic-opt-btn';
         if(i===item.answer) cls2+=' correct';
         else if(i===given) cls2+=' wrong';
-        return `<button class="${cls2}" disabled>${opt}</button>`;
+        return `<button class="${cls2}" disabled>${renderPicVal(opt)}</button>`;
       }).join('')}</div>`;
   }
   let body = '';
-  if(item.pictureEmoji) body += `<div class="pic-target">${item.pictureEmoji}</div>`;
+  if(item.pictureEmoji) body += `<div class="pic-target">${renderPicVal(item.pictureEmoji)}</div>`;
   body += `<div class="prompt-text">${item.prompt}</div>`;
   body += `<button class="speak-btn" onclick="speakCurrent()">🔊</button>`;
   if(item.type==='choice'){
@@ -3131,6 +3433,16 @@ function renderTeacherOverlay(){
       <button class="sheet-close" onclick="toggleTeacher()">✕</button>
       <h2 style="font-size:1.2rem;">Für Lehrkräfte</h2>
       <p style="font-size:0.9rem;color:#4B6473;margin-top:6px;">Momentaner Lernstand pro Kompetenzbereich – als Gesprächsgrundlage, z. B. für Förderplanung oder Elterngespräche.</p>
+      <div style="display:flex;gap:10px;margin-top:14px;">
+        <div style="flex:1;">
+          <label style="font-size:0.75rem;color:#4B6473;">Name/Kürzel (nur lokal auf diesem Gerät)</label>
+          <input type="text" id="childLabelInput" value="${escapeHtml(state.childLabel||'')}" onchange="updateChildInfo()" placeholder="z. B. Initialen" style="width:100%;border:2px solid var(--line);border-radius:var(--radius-sm);padding:7px 9px;font-family:'Atkinson Hyperlegible';font-size:0.88rem;margin-top:2px;">
+        </div>
+        <div style="flex:1;">
+          <label style="font-size:0.75rem;color:#4B6473;">Klasse</label>
+          <input type="text" id="classNameInput" value="${escapeHtml(state.className||'')}" onchange="updateChildInfo()" placeholder="z. B. 3b" style="width:100%;border:2px solid var(--line);border-radius:var(--radius-sm);padding:7px 9px;font-family:'Atkinson Hyperlegible';font-size:0.88rem;margin-top:2px;">
+        </div>
+      </div>
       <table class="teacher-panel">
         <tr><th>Bereich</th><th>Stufe</th><th>Sterne</th><th>Fehler</th></tr>
         ${rows}
@@ -3141,6 +3453,8 @@ function renderTeacherOverlay(){
       <p style="font-size:0.82rem;color:#6B7F8C;line-height:1.5;margin-top:16px;">
       Funktionsweise: Der Lotsen-Check testet jeden Bereich jetzt mit drei zufällig gewählten Aufgaben statt zwei – Einstiegsitem, ein leichteres oder schwereres Folgeitem, und ein Bestätigungsitem auf der so ermittelten Stufe. Fällt die Bestätigung negativ aus, wird eine Stufe zurückgestuft – das fängt Ausrutscher und Zufallstreffer ab. Jede Diagnose wird als Bericht gespeichert (Testergebnis je Aufgabe, aktueller Lernstand als „Ich kann"-Aussage, nächster Lernschritt) und dient bei einer Wiederholung (z. B. nach einem halben Jahr) automatisch als Vergleichsbasis. Ein Aufstieg passiert erst, wenn mindestens 8 Versuche auf der aktuellen Stufe protokolliert sind UND von den letzten 6 Versuchen höchstens 1 falsch war (über mehrere Sitzungen hinweg gespeichert) – reines Raten reicht damit nicht für einen Aufstieg. Sind von den letzten 4 Versuchen mindestens 3 falsch, geht es eine Stufe zurück. Die Fehlerzahl je Bereich wird fortlaufend gezählt. Nach jeder Sitzung schätzt das Kind anhand einer „Ich kann..."-Aussage zum konkreten Lernziel der Stufe seine eigene Beherrschung ein – dargestellt als wachsende Pflanze in drei selbst gezeichneten Stufen (Keim, kleine Blätter, blühend) statt als Gesichtsausdruck, damit nicht die Person, sondern der noch wachsende Lernstand bewertet wird – sichtbar oben in der Tabelle, mit Warnhinweis bei auffälliger Abweichung von der tatsächlichen Fehlerzahl. Ein gemeisterter Bereich (🏆) wird nach 14 Tagen automatisch zur kurzen Auffrischung (🔁, 4 Aufgaben aus Stufe 2+3 gemischt) wieder vorgelegt; läuft die Auffrischung gut, verlängert sich die Frist um weitere 14 Tage, bei Schwierigkeiten schon nach 3 Tagen erneut oder mit Rückstufung. Lesefahrrinne/Schreibwerft schalten sich erst frei, wenn Lauthafen, Buchstabenbrücke & Silbendock mindestens Stufe 2 erreicht haben; Leuchtturm/Speicherstadt entsprechend erst nach Lesefahrrinne/Schreibwerft – angelehnt an die alphabetische-vor-orthografischer-Strategie-Abfolge, damit kein Kind mit Aufgaben konfrontiert wird, für die die Grundlage fehlt. Der Fortschritt wird ausschließlich lokal auf diesem Gerät gespeichert (kein Server, keine Übertragung von Kinderdaten). Dies ist ein Funktionsprototyp; für den Realeinsatz braucht es größere, psychometrisch abgesicherte Aufgabenpools sowie eine Anbindung an die schulische Dokumentation (z. B. DiViS/Förderplan, SCHNABEL-Ergebnisse).</p>
       ${(state.diagReports&&state.diagReports.length) ? `<button class="btn btn-ghost" style="margin-top:16px;" onclick="viewDiagReport()">📋 Diagnosebericht ansehen</button>` : ''}
+      <button class="btn btn-primary" style="margin-top:16px;" onclick="exportFoerderplan()">📄 Förderplan-Auszug exportieren</button>
+      <p style="font-size:0.78rem;color:#6B7F8C;line-height:1.4;margin-top:4px;">Erzeugt eine druckbare Übersicht (Lernausgangslage, Förderziele, Verlauf) als Arbeitsgrundlage für den diagnosegestützten Förderplan nach § 5 VO Notenschutz – kein fertiger, rechtsgültiger Förderplan und kein Ersatz für SCHNABEL/SLS.</p>
       <button class="btn btn-ghost" style="margin-top:10px;" onclick="toggleTeacher(); startDiagnose();">🔁 Diagnose erneut durchführen (z. B. nach 6 Monaten)</button>
       <button class="btn btn-ghost" style="margin-top:10px;" onclick="exportData()">📤 Daten exportieren (Sicherung)</button>
       <button class="btn btn-ghost" style="margin-top:10px;" onclick="document.getElementById('importFileInput').click()">📥 Daten importieren</button>
