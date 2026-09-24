@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Buchstabenhafen – Lese-Rechtschreib-Lotse</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Andika:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
 <style>
   :root{
     --harbor-dark:#0F3145;
@@ -27,7 +28,7 @@
     margin:0;
     background:var(--sand);
     color:var(--ink);
-    font-family:'Atkinson Hyperlegible', sans-serif;
+    font-family:'Andika', sans-serif;
     -webkit-font-smoothing:antialiased;
   }
   h1,h2,h3,.display{
@@ -138,7 +139,7 @@
     border:2px solid var(--line);
     border-radius:var(--radius-sm);
     padding:16px 10px;
-    font-family:'Atkinson Hyperlegible';
+    font-family:'Andika';
     font-weight:700;font-size:1.1rem;color:var(--ink);
     cursor:pointer;
   }
@@ -150,7 +151,7 @@
   .text-input-row{display:flex;gap:10px;margin-top:18px;}
   .text-input-row input{
     flex:1;font-size:1.2rem;padding:14px 16px;border-radius:var(--radius-sm);
-    border:2px solid var(--line);font-family:'Atkinson Hyperlegible';
+    border:2px solid var(--line);font-family:'Andika';
   }
   .task-badge{font-size:1.9rem;margin-bottom:2px;}
   .task-instr{
@@ -166,7 +167,7 @@
     background:var(--sand);border:2px solid var(--line);border-radius:var(--radius-sm);
     padding:12px 6px;font-size:1.8rem;line-height:1.15;cursor:pointer;
     display:flex;align-items:center;justify-content:center;min-height:80px;
-    font-family:'Atkinson Hyperlegible';font-weight:700;color:var(--ink);
+    font-family:'Andika';font-weight:700;color:var(--ink);
     word-break:break-word;
   }
   .pic-opt-btn:active{transform:scale(0.96);}
@@ -231,7 +232,7 @@
 </head>
 <body>
 <div id="app"></div>
-<div id="ttsNotice" style="display:none;position:fixed;left:12px;right:12px;bottom:12px;background:#0F3145;color:#fff;padding:14px 16px;border-radius:14px;font-family:'Atkinson Hyperlegible';font-size:0.88rem;line-height:1.4;z-index:20;box-shadow:0 4px 18px rgba(0,0,0,0.25);">
+<div id="ttsNotice" style="display:none;position:fixed;left:12px;right:12px;bottom:12px;background:#0F3145;color:#fff;padding:14px 16px;border-radius:14px;font-family:'Andika';font-size:0.88rem;line-height:1.4;z-index:20;box-shadow:0 4px 18px rgba(0,0,0,0.25);">
   🔈 Auf diesem Gerät/in dieser Ansicht ist keine Sprachausgabe verfügbar. Öffne die Datei direkt im Browser der Vorschau (z. B. Chrome), dann sollte der Lautsprecher-Button funktionieren.
   <button onclick="document.getElementById('ttsNotice').style.display='none'" style="display:block;margin-top:8px;background:#E2672E;border:none;color:#fff;padding:8px 14px;border-radius:999px;font-weight:700;">Verstanden</button>
 </div>
@@ -824,8 +825,8 @@ const content = {
       pic('👏','☂️','Regenschirm', [silbenbogen(2),silbenbogen(3),silbenbogen(4)], 1, 'Re-gen-schirm: drei Bögen.'),
       pic('👏','🥔','Kartoffel', [silbenbogen(2),silbenbogen(3),silbenbogen(4)], 1, 'Kar-tof-fel: drei Bögen.'),
       pic('🔁','❄️','Schnee', ['🦌','🌳','🐟'], 0, 'Schnee – Reh: reimt sich!'),
-      pic('🎯','🐊','Krokodil', ['👑','🐱','🌳'], 0, 'Krokodil – Krone: gleicher Anlaut „Kr", nicht nur „K"!'),
-      pic('🎯','👓','Brille', ['🍞','⚽','🌙'], 0, 'Brille – Brot: gleicher Anlaut „Br", nicht nur „B"!'),
+      pic('🎯','🐊','Krokodil', ['👑','🐟','🌳'], 0, 'Krokodil – Krone: gleicher Anlaut „Kr".'),
+      pic('🎯','👓','Brille', ['🍞','🐟','🌙'], 0, 'Brille – Brot: gleicher Anlaut „Br".'),
       pic('🔁','🪟','Fenster', ['👻👻','🌳','🐟'], 0, 'Fenster – Gespenster: reimt sich!'),
     ],
   },
@@ -1962,7 +1963,7 @@ function renderItemBody(item, handlerName){
       const arcWidth = Math.max(opt.length,1) * boxW;
       return `
       <span style="display:inline-block;vertical-align:top;margin:6px 10px;">
-        <button onclick="${handlerName}(${i})" style="display:block;min-width:${arcWidth-8}px;padding:10px 12px;border:2px solid var(--line);border-radius:12px;font-size:1.3rem;font-family:'Atkinson Hyperlegible';font-weight:700;background:var(--sand);">${opt}</button>
+        <button onclick="${handlerName}(${i})" style="display:block;min-width:${arcWidth-8}px;padding:10px 12px;border:2px solid var(--line);border-radius:12px;font-size:1.3rem;font-family:'Andika';font-weight:700;background:var(--sand);">${opt}</button>
         ${opt.length>1 ? syllableArcSpan(arcWidth) : ''}
       </span>`;
     }).join('');
@@ -1982,7 +1983,7 @@ function renderItemBody(item, handlerName){
         const boxes = group.map(tok=>{
           const idx = globalIdx++;
           return `
-          <button onclick="wordstudyPlayToken(${idx})" style="display:inline-block;position:relative;margin:2px;min-width:36px;height:44px;padding:0 6px;border:2px solid var(--line);border-radius:10px;font-size:1.25rem;font-family:'Atkinson Hyperlegible';font-weight:700;background:var(--sand);line-height:40px;text-align:center;">
+          <button onclick="wordstudyPlayToken(${idx})" style="display:inline-block;position:relative;margin:2px;min-width:36px;height:44px;padding:0 6px;border:2px solid var(--line);border-radius:10px;font-size:1.25rem;font-family:'Andika';font-weight:700;background:var(--sand);line-height:40px;text-align:center;">
             ${isVowelSoundKey(tok.key) ? `<span style="position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:0.95rem;">👑</span>` : ''}
             ${tok.text}
           </button>`;
@@ -2052,7 +2053,7 @@ function renderItemBody(item, handlerName){
           const idx = globalIdx++;
           const playing = state.practice.sbPlayingIdx === idx;
           return `
-          <button onclick="satzbauPlayToken(${idx})" style="display:inline-block;position:relative;margin:2px;min-width:36px;height:44px;padding:0 6px;border:2px solid ${playing?'var(--foam)':'var(--line)'};border-radius:10px;font-size:1.25rem;font-family:'Atkinson Hyperlegible';font-weight:700;background:${playing?'var(--foam)33':'var(--sand)'};line-height:40px;text-align:center;transition:background 0.15s;">
+          <button onclick="satzbauPlayToken(${idx})" style="display:inline-block;position:relative;margin:2px;min-width:36px;height:44px;padding:0 6px;border:2px solid ${playing?'var(--foam)':'var(--line)'};border-radius:10px;font-size:1.25rem;font-family:'Andika';font-weight:700;background:${playing?'var(--foam)33':'var(--sand)'};line-height:40px;text-align:center;transition:background 0.15s;">
             ${isVowelSoundKey(tok.key) ? `<span style="position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:0.95rem;">👑</span>` : ''}
             ${tok.text}
           </button>`;
@@ -2077,7 +2078,7 @@ function renderItemBody(item, handlerName){
     const words = sentenceWords();
     const wordBtns = words.map((w,i)=>{
       const marked = p.sbMarked && p.sbMarked[i];
-      return `<button onclick="satzbauToggleWord(${i})" style="margin:4px;padding:9px 13px;border-radius:10px;border:2px solid var(--line);font-size:1.1rem;font-family:'Atkinson Hyperlegible';font-weight:700;background:${marked?'#F1A38B':'var(--sand)'};color:${marked?'#fff':'var(--ink)'};">${w}</button>`;
+      return `<button onclick="satzbauToggleWord(${i})" style="margin:4px;padding:9px 13px;border-radius:10px;border:2px solid var(--line);font-size:1.1rem;font-family:'Andika';font-weight:700;background:${marked?'#F1A38B':'var(--sand)'};color:${marked?'#fff':'var(--ink)'};">${w}</button>`;
     }).join('');
     return `
       <div class="task-instr">👀 Vergleiche mit deinem Blatt. Tippe die Wörter an, die du anders geschrieben hast.</div>
@@ -2096,7 +2097,7 @@ function renderItemBody(item, handlerName){
     const words = item.sentence.split(' ');
     const wordBtns = words.map((w,i)=>{
       const marked = p.markedWords && p.markedWords[i];
-      return `<button onclick="toggleDictateWord(${i})" style="margin:4px;padding:9px 13px;border-radius:10px;border:2px solid var(--line);font-size:1.15rem;font-family:'Atkinson Hyperlegible';font-weight:700;background:${marked?'#F1A38B':'var(--sand)'};color:${marked?'#fff':'var(--ink)'};">${w}</button>`;
+      return `<button onclick="toggleDictateWord(${i})" style="margin:4px;padding:9px 13px;border-radius:10px;border:2px solid var(--line);font-size:1.15rem;font-family:'Andika';font-weight:700;background:${marked?'#F1A38B':'var(--sand)'};color:${marked?'#fff':'var(--ink)'};">${w}</button>`;
     }).join('');
     return `
       <div class="task-instr">👀 Vergleiche mit deinem Blatt. Tippe die Wörter an, die du anders geschrieben hast.</div>
@@ -3394,7 +3395,7 @@ function renderHistorySection(){
 
   const noteForm = `
     <p style="font-size:0.85rem;color:#334;margin-top:14px;margin-bottom:4px;">Notiz zur aktuellen Woche (z. B. SCHNABEL-Ergebnis, Beobachtung):</p>
-    <textarea id="weekNoteInput" rows="2" style="width:100%;border:2px solid var(--line);border-radius:var(--radius-sm);padding:8px 10px;font-family:'Atkinson Hyperlegible';font-size:0.88rem;" placeholder="z. B. SCHNABEL Dez.: Schwäche bei Doppelkonsonanten">${currentNote}</textarea>
+    <textarea id="weekNoteInput" rows="2" style="width:100%;border:2px solid var(--line);border-radius:var(--radius-sm);padding:8px 10px;font-family:'Andika';font-size:0.88rem;" placeholder="z. B. SCHNABEL Dez.: Schwäche bei Doppelkonsonanten">${currentNote}</textarea>
     <button class="btn btn-ghost" style="margin-top:8px;padding:8px 16px;font-size:0.9rem;" onclick="saveWeekNote()">Notiz speichern</button>`;
 
   if(history.length === 0){
@@ -3471,11 +3472,11 @@ function renderTeacherOverlay(){
       <div style="display:flex;gap:10px;margin-top:14px;">
         <div style="flex:1;">
           <label style="font-size:0.75rem;color:#4B6473;">Name/Kürzel (nur lokal auf diesem Gerät)</label>
-          <input type="text" id="childLabelInput" value="${escapeHtml(state.childLabel||'')}" onchange="updateChildInfo()" placeholder="z. B. Initialen" style="width:100%;border:2px solid var(--line);border-radius:var(--radius-sm);padding:7px 9px;font-family:'Atkinson Hyperlegible';font-size:0.88rem;margin-top:2px;">
+          <input type="text" id="childLabelInput" value="${escapeHtml(state.childLabel||'')}" onchange="updateChildInfo()" placeholder="z. B. Initialen" style="width:100%;border:2px solid var(--line);border-radius:var(--radius-sm);padding:7px 9px;font-family:'Andika';font-size:0.88rem;margin-top:2px;">
         </div>
         <div style="flex:1;">
           <label style="font-size:0.75rem;color:#4B6473;">Klasse</label>
-          <input type="text" id="classNameInput" value="${escapeHtml(state.className||'')}" onchange="updateChildInfo()" placeholder="z. B. 3b" style="width:100%;border:2px solid var(--line);border-radius:var(--radius-sm);padding:7px 9px;font-family:'Atkinson Hyperlegible';font-size:0.88rem;margin-top:2px;">
+          <input type="text" id="classNameInput" value="${escapeHtml(state.className||'')}" onchange="updateChildInfo()" placeholder="z. B. 3b" style="width:100%;border:2px solid var(--line);border-radius:var(--radius-sm);padding:7px 9px;font-family:'Andika';font-size:0.88rem;margin-top:2px;">
         </div>
       </div>
       <table class="teacher-panel">
