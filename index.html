@@ -1511,6 +1511,22 @@ const STATUS_LABELS = {
   mastered:'gefestigt',
 };
 
+// Hamburger Schulhalbjahr zum aktuellen Datum (kalendarische Näherung:
+// 1. Halbjahr 01.08.-31.01., 2. Halbjahr 01.02.-31.07.) - für die exakten
+// Daten (bewegliche Ferientage) bitte den offiziellen Kalender prüfen.
+function currentSchulhalbjahr(){
+  const d = new Date();
+  const y = d.getFullYear(), m = d.getMonth()+1;
+  const pad = n => String(n);
+  if(m>=8){
+    return {label:'1. Halbjahr '+y+'/'+String(y+1).slice(2), from:'01.08.'+y, to:'31.01.'+(y+1)};
+  } else if(m===1){
+    return {label:'1. Halbjahr '+(y-1)+'/'+String(y).slice(2), from:'01.08.'+(y-1), to:'31.01.'+y};
+  } else {
+    return {label:'2. Halbjahr '+(y-1)+'/'+String(y).slice(2), from:'01.02.'+y, to:'31.07.'+y};
+  }
+}
+
 function foerderplanDomainRow(d){
   const status = domainStatus(d).status;
   const lvl = state.levels[d.id] || 1;
@@ -1528,7 +1544,8 @@ function buildFoerderplanHTML(){
   const allDomains = domains.concat(activeAdvanced);
   const rows = allDomains.map(foerderplanDomainRow);
 
-  const lernausgangTable = rows.map(r => `
+  const relevantRows = rows.filter(r => r.status!=='mastered');
+  const lernausgangTable = relevantRows.map(r => `
     <tr>
       <td>${r.d.icon} ${escapeHtml(r.d.name)}<br><span class="fp-sub">${escapeHtml(r.d.sub)}</span></td>
       <td>${escapeHtml(STATUS_LABELS[r.status]||r.status)}</td>
@@ -1575,6 +1592,7 @@ function buildFoerderplanHTML(){
   const today = todayStr();
   const child = escapeHtml(state.childLabel||'') || '____________________';
   const klass = escapeHtml(state.className||'') || '______';
+  const hj = currentSchulhalbjahr();
 
   return `<!DOCTYPE html>
 <html lang="de">
@@ -1605,15 +1623,15 @@ function buildFoerderplanHTML(){
     <button onclick="window.print()" style="font-family:Arial;font-weight:bold;padding:10px 18px;border-radius:8px;border:none;background:#1B6E7F;color:#fff;cursor:pointer;">🖨️ Drucken / Als PDF speichern</button>
   </div>
 
-  <h1>Diagnosegestützter Förderplan – Auszug (Entwurf)</h1>
+  <h1>Diagnosegestützter Förderplan – Auszug</h1>
   <p class="fp-meta">Bereich: Lesen und/oder Rechtschreiben · erzeugt mit Buchstabenhafen am ${today}</p>
   <div class="fp-meta" style="margin-top:12px;">
     <div>Name/Kürzel: <strong>${child}</strong> &nbsp;&nbsp; Klasse: <strong>${klass}</strong></div>
-    <div>Schule: <span class="fp-fill">&nbsp;</span> &nbsp;&nbsp; Förderzeitraum: <span class="fp-fill">&nbsp;</span></div>
+    <div>Förderzeitraum: <strong>${hj.label}</strong> (${hj.from} – ${hj.to})</div>
     ${lastDiag ? `<div>Letzte Einstiegs-/Wiederholungsdiagnostik in Buchstabenhafen: ${lastDiag}</div>` : ''}
   </div>
 
-  <div class="fp-note">Dieser Auszug fasst den digitalen Übungsverlauf aus Buchstabenhafen zusammen. Er ersetzt weder die schulisch-verbindliche Testung (SCHNABEL/SLS) noch die pädagogische Einschätzung der Lehrkraft und ist kein rechtsgültiger Förderplan nach § 5 VO Notenschutz. Er dient als Arbeitsgrundlage, die von der zuständigen Lehrkraft geprüft, ergänzt und in den Schülerbogen sowie in DiViS übertragen werden muss.</div>
+  <div class="fp-note">Dieser Auszug fasst den digitalen Übungsverlauf aus Buchstabenhafen zusammen. Er ersetzt weder die schulisch-verbindliche Testung (SCHNABEL/SLS) noch die pädagogische Einschätzung der Lehrkraft und ist kein rechtsgültiger Förderplan nach § 5 VO Notenschutz. Er dient als Arbeitsgrundlage, die von der zuständigen Lehrkraft geprüft wird.</div>
 
   <h2>1. Individuelle Lernausgangslage und Förderbereiche</h2>
   <table class="fp-table">
@@ -1631,33 +1649,15 @@ function buildFoerderplanHTML(){
   <h3 style="font-size:0.95rem;margin-top:16px;">Fehlerschwerpunkte Rechtschreiben (Leuchtturm &amp; Speicherstadt)</h3>
   ${errorHtml}
 
-  <h2>3. Nachteilsausgleich</h2>
-  <p class="fp-muted">Wird von Buchstabenhafen nicht ermittelt – Prüfung/Entscheidung erfolgt durch die Zeugniskonferenz nach § 6 VO Notenschutz (frühestens nach sechsmonatiger schulischer Förderung).</p>
-  <div class="fp-meta">
-    <div>☐ nicht erforderlich &nbsp;&nbsp; ☐ Prüfung eingeleitet am <span class="fp-fill">&nbsp;</span> &nbsp;&nbsp; ☐ gewährt ab <span class="fp-fill">&nbsp;</span></div>
-    <div>Art und Umfang: <span class="fp-fill" style="min-width:420px;">&nbsp;</span></div>
-  </div>
-
-  <h2>4. Notenschutz (Lesen und/oder Rechtschreiben)</h2>
-  <p class="fp-muted">Wird von Buchstabenhafen nicht ermittelt – setzt mindestens zwölfmonatige schulische Förderung und Nachteilsausgleich voraus (§ 7 VO Notenschutz).</p>
-  <div class="fp-meta">
-    <div>☐ nicht erforderlich &nbsp;&nbsp; ☐ Sorgeberechtigte informiert am <span class="fp-fill">&nbsp;</span> &nbsp;&nbsp; ☐ gewährt ab <span class="fp-fill">&nbsp;</span></div>
-    <div>Art und Umfang: <span class="fp-fill" style="min-width:420px;">&nbsp;</span></div>
-  </div>
-
-  <h2>5. Auswertung der Lernentwicklung und Anpassung der Maßnahmen</h2>
+  <h2>3. Auswertung der Lernentwicklung und Anpassung der Maßnahmen</h2>
   ${historyHtml}
   <div class="fp-meta" style="margin-top:12px;">
     <div>Auswertung/Fortschreibung erfolgt zum Ende des Schulhalbjahres bzw. Schuljahres. Nächste geplante Auswertung am: <span class="fp-fill">&nbsp;</span></div>
-    <div>Besprochen mit den Sorgeberechtigten am: <span class="fp-fill">&nbsp;</span></div>
     <div>Anpassung der Maßnahmen: <span class="fp-fill" style="min-width:500px;">&nbsp;</span></div>
   </div>
 
   <div class="fp-sig">
     <span class="line">&nbsp;</span> Unterschrift Förder-/Klassenlehrkraft, Datum
-  </div>
-  <div class="fp-sig" style="margin-top:26px;">
-    <span class="line">&nbsp;</span> Kenntnisnahme Sorgeberechtigte, Datum
   </div>
 
   <p class="fp-muted" style="margin-top:30px;border-top:1px solid #D8C9A8;padding-top:10px;">Buchstabenhafen ist ein schulischer Übungs- und Beobachtungsprototyp (lokale Gerätespeicherung, keine Datenübertragung). Dieser Auszug wurde am ${today} automatisch erzeugt und ist vor Verwendung im Förderplan/DiViS durch die zuständige Lehrkraft zu prüfen.</p>
