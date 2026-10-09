@@ -228,6 +228,101 @@
     padding:22px 20px 30px;max-height:85vh;overflow-y:auto;
   }
   .sheet-close{float:right;background:none;border:none;font-size:1.4rem;color:var(--harbor-dark);cursor:pointer;}
+  /* ---- Hafenkarte: Dein Weg, Pokal-Regal, Hilfe ---- */
+  .map-h{font-family:'Baloo 2',sans-serif;font-size:1.25rem;margin:14px 0 6px;color:var(--harbor-dark);}
+  .map-h small{font-size:.8rem;color:#6B7F8C;font-family:'Andika',sans-serif;}
+  .station-hint{font-size:.78rem;color:#4B6473;margin-top:4px;line-height:1.35;}
+  .more-btn{display:block;margin:12px auto 4px;}
+  .shelf{margin-top:20px;background:#fff;border:3px solid var(--line);border-radius:20px;padding:12px 14px;}
+  .shelf-head{display:flex;align-items:center;justify-content:space-between;}
+  .shelf-head h3{margin:0;font-family:'Baloo 2',sans-serif;font-size:1.05rem;color:var(--harbor-dark);}
+  .shelf-total{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.15rem;}
+  .shelf-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+  .shelf-tile{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:92px;padding:8px 10px;border:3px solid var(--sun);border-radius:14px;background:#FFF8E1;font-family:'Andika',sans-serif;color:var(--ink);cursor:pointer;}
+  .shelf-tile.known{border-color:var(--line);background:var(--sand);opacity:.9;}
+  .shelf-tile:disabled{opacity:.5;cursor:default;}
+  .shelf-tile .si{font-size:1.6rem;line-height:1;}
+  .shelf-tile .sn{font-size:.78rem;font-weight:700;}
+  .shelf-tile .sc{font-size:.74rem;color:#4B6473;}
+  .shelf-empty{font-size:.85rem;color:#6B7F8C;padding:6px 2px;}
+  .plus-star{color:#B07A00;white-space:nowrap;}
+  .help-link{background:none;border:none;color:var(--harbor-mid);font-family:'Andika',sans-serif;font-weight:700;font-size:.85rem;text-decoration:underline;cursor:pointer;margin-left:6px;}
+  .help-row{display:flex;gap:12px;align-items:flex-start;margin-top:14px;font-size:1rem;line-height:1.45;}
+  .help-ic{font-size:2rem;line-height:1;}
+  /* ---- Lesekai ---- */
+  /* ---- Kreuze an (Seite) ---- */
+  .ks-count{text-align:right;font-weight:700;color:#4B6473;margin-top:6px;}
+  .ks-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px;}
+  @media (max-width:640px){.ks-grid{grid-template-columns:1fr;}}
+  .ks-item{display:flex;align-items:center;gap:12px;background:#fff;border:3px solid var(--line);border-radius:18px;padding:10px;}
+  .ks-item.ok{border-color:#2E8B57;background:#E3F4EA;}
+  .ks-item.no{border-color:var(--coral);background:#FDE9DD;}
+  .ks-pic{flex:0 0 auto;width:84px;height:84px;border-radius:50%;background:var(--sand-deep);display:flex;align-items:center;justify-content:center;font-size:50px;line-height:1;}
+  .ks-pic .pic-img{height:56px;width:auto;}
+  .ks-opts{flex:1;display:flex;flex-direction:column;gap:8px;min-width:0;}
+  .ks-opt{display:flex;align-items:center;gap:10px;min-height:54px;padding:6px 12px;border-radius:12px;border:3px solid var(--line);background:var(--sand);font-family:'Andika',sans-serif;font-size:1.35rem;font-weight:700;color:var(--ink);text-align:left;cursor:pointer;}
+  .ks-box{flex:0 0 auto;width:28px;height:28px;border:3px solid var(--harbor-mid);border-radius:8px;background:#fff;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:1.1rem;}
+  .ks-opt.sel{border-color:var(--harbor-mid);background:#E4F2F4;}
+  .ks-opt.sel .ks-box{background:var(--harbor-mid);}
+  .ks-opt.sel .ks-box::after{content:"✓";}
+  .ks-opt.right{border-color:#2E8B57;background:#fff;}
+  .ks-opt.right .ks-box{background:#2E8B57;border-color:#2E8B57;}
+  .ks-opt.right .ks-box::after{content:"✓";}
+  .ks-opt.wrong{border-color:var(--coral);background:#fff;}
+  .ks-opt.wrong .ks-box{background:var(--coral);border-color:var(--coral);}
+  .ks-opt.wrong .ks-box::after{content:"✗";}
+  .ks-diff{color:var(--coral-dark);text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:4px;}
+  .btn[disabled]{opacity:.5;cursor:default;}
+  /* ---- Erklärvideo Lotze Lumi ---- */
+  .lumi-stage{position:relative;background:#0F3145;border-radius:20px;overflow:hidden;aspect-ratio:10/7;border:4px solid #F4B93E;margin-top:14px;}
+  .lumi-stage{background:#4D9CCB;}
+  .lumi-stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;}
+  .lumi-stage img.kb{animation:lumikb 16s ease-in-out forwards;}
+  @keyframes lumikb{from{transform:scale(1)}to{transform:scale(1.06)}}
+  .lumi-cap{position:absolute;left:0;right:0;bottom:0;padding:10px 14px;background:rgba(15,49,69,.9);color:#fff;font-size:clamp(1.05rem,3.4vw,1.5rem);line-height:1.35;text-align:center;min-height:3.4em;display:flex;align-items:center;justify-content:center;font-weight:600;}
+  .lumi-start{position:absolute;inset:0;background:rgba(15,49,69,.93);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:5;text-align:center;padding:16px;}
+  .lumi-start p{margin:0;font-size:1.2rem;}
+  .lumi-sum{position:absolute;inset:0;bottom:3.4em;background:linear-gradient(#DFF0F5,#FCF4E4);color:#173142;display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:12px;}
+  .lumi-sum h2{margin:0;font-size:clamp(1.2rem,4.5vw,1.9rem);}
+  .lumi-tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:560px;}
+  .lumi-tile{background:#fff;border:3px solid #cfe0e6;border-radius:16px;padding:8px;text-align:center;font-size:clamp(.85rem,2.8vw,1.15rem);opacity:.35;transition:.4s;}
+  .lumi-tile.lit{opacity:1;border-color:#2E8B57;}
+  .lumi-tile span{display:block;font-size:clamp(1.6rem,5.5vw,2.4rem);}
+  .lumi-bar{height:10px;background:#d8c9a8;border-radius:6px;margin:12px 2px 6px;overflow:hidden;}
+  .lumi-bar i{display:block;height:100%;width:0;background:#F4B93E;transition:width .4s;}
+  .lumi-title{text-align:center;font-weight:700;color:var(--harbor-dark);min-height:1.4em;}
+  .lumi-dots{display:flex;gap:8px;justify-content:center;margin:8px 0;}
+  .lumi-dots b{width:14px;height:14px;border-radius:50%;background:#d8c9a8;cursor:pointer;}
+  .lumi-dots b.on{background:#E2672E;}
+  .lumi-ctrl{display:flex;gap:10px;justify-content:center;}
+  .lumi-ctrl .btn{min-width:64px;min-height:56px;font-size:1.3rem;}
+  .syl-0{color:#C44F1D;} .syl-1{color:#1B6E7F;}
+  .m-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;}
+  .m-col{display:flex;flex-direction:column;gap:10px;}
+  .m-btn{min-height:68px;border:3px solid var(--line);border-radius:14px;background:var(--sand);font-family:'Andika',sans-serif;font-weight:700;font-size:1.5rem;color:var(--ink);cursor:pointer;padding:6px 10px;}
+  .m-pic{font-size:2.6rem;line-height:1;}
+  .m-pic .pic-img{height:2.8rem;width:auto;}
+  .m-sel{border-color:var(--harbor-mid);background:#E4F2F4;box-shadow:0 0 0 3px #1B6E7F55;}
+  .m-done{border-color:#2E8B57;background:#E3F4EA;opacity:.85;}
+  .m-wrong{border-color:var(--coral);background:#FDE9DD;animation:mshake .3s;}
+  @keyframes mshake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .m-rows{display:flex;flex-direction:column;gap:8px;margin-top:12px;}
+  .m-row{display:flex;align-items:center;justify-content:center;gap:14px;font-size:1.5rem;font-weight:700;}
+  .m-rowpic{font-size:2.2rem;min-width:54px;text-align:center;}
+  .m-arrow{color:#6B7F8C;}
+  .mal-sents{margin:8px 0 4px;text-align:left;}
+  .mal-sent{display:flex;gap:10px;align-items:flex-start;font-size:1.25rem;font-weight:700;margin:6px 0;}
+  .mal-mark{flex:0 0 auto;}
+  .mal-fig{max-width:320px;margin:6px auto 0;}
+  .mal-svg{width:100%;height:auto;display:block;}
+  .mal-svg [data-r]{stroke:#173142;stroke-width:3;stroke-linejoin:round;cursor:pointer;}
+  .mal-svg .deco{pointer-events:none;}
+  .mal-pal{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:12px;}
+  .mal-col{display:flex;align-items:center;gap:8px;min-height:48px;padding:6px 12px;border:3px solid var(--line);border-radius:14px;background:var(--sand);font-family:'Andika',sans-serif;font-weight:700;font-size:1.05rem;color:var(--ink);cursor:pointer;}
+  .mal-col .sw{width:24px;height:24px;border-radius:50%;background:var(--c);border:2px solid #173142;display:inline-flex;align-items:center;justify-content:center;font-size:.8rem;}
+  .mal-col .sw-weg{background:#fff;}
+  .mal-col.sel{border-color:var(--harbor-mid);background:#E4F2F4;box-shadow:0 0 0 3px #1B6E7F55;}
+  .mal-note{margin-top:8px;text-align:center;font-weight:700;color:var(--coral-dark);}
 </style>
 </head>
 <body>
@@ -282,6 +377,7 @@ const domains = [
   {id:'buchstabe', name:'Buchstabenbrücke', sub:'Laute Buchstaben zuordnen', icon:'🌉', color:'#1B6E7F'},
   {id:'silbendock', name:'Silbendock', sub:'Laute & Silben verschriften', icon:'🪢', color:'#6B8E6B'},
   {id:'lesen', name:'Lesefahrrinne', sub:'Genau & flüssig lesen', icon:'⛵', color:'#E2672E'},
+  {id:'lesekai', name:'Lesekai', sub:'Wörter & Sätze lesen, ankreuzen, malen', icon:'📖', color:'#B5527A'},
   {id:'schreib1', name:'Schreibwerft', sub:'Wörter lauttreu schreiben', icon:'⚓', color:'#0F3145'},
   {id:'schreib2', name:'Leuchtturm', sub:'Richtig schreiben mit Regeln', icon:'🗼', color:'#F4B93E'},
   {id:'grundwortschatz', name:'Speicherstadt', sub:'Hamburger Grundwortschatz üben', icon:'🧱', color:'#A34A3D'},
@@ -295,31 +391,69 @@ const domains = [
 // konfrontiert, für die die Voraussetzungen fehlen.
 const TIERS = {
   phon:0, buchstabe:0, silbendock:0,
-  lesen:1, schreib1:1,
+  lesen:1, lesekai:1, schreib1:1,
   schreib2:2, grundwortschatz:2, satzbau:2,
   diktat:3,
 };
 // Flaschenpost und Satzwerft brauchen Papier bzw. freie Konstruktion - kein
 // Teil der kurzen digitalen Einstiegsdiagnostik. Starten regulär bei Stufe 1,
 // sobald sie über die normale Stufen-Freischaltung erreichbar werden.
-const diagDomains = domains.filter(d => d.id !== 'diktat' && d.id !== 'satzbau');
+const diagDomains = domains.filter(d => d.id !== 'diktat' && d.id !== 'satzbau' && d.id !== 'lesekai');
 const PREREQ_LEVEL = 2;   // Vorstufe muss mind. Stufe 2 erreicht haben
 const MASTERY_STARS = 12; // ab so vielen Sternen bei Stufe 3 gilt ein Bereich als gefestigt
 
 function domainStatus(d){
   const tier = TIERS[d.id] || 0;
   if(tier > 0){
-    const prereqDomains = domains.filter(x => TIERS[x.id] === tier-1);
+    // Lesekai ist eine Ergänzung zur Lesefahrrinne und sperrt keine höhere Stufe.
+    const prereqDomains = domains.filter(x => TIERS[x.id] === tier-1 && x.id!=='lesekai');
     const ready = prereqDomains.every(x => (state.levels[x.id]||1) >= PREREQ_LEVEL);
     if(!ready) return {status:'locked', prereqDomains};
   }
-  const lvl = state.levels[d.id]||1, st = state.stars[d.id]||0;
-  if(lvl>=3 && st>=MASTERY_STARS){
-    const m = state.mastery[d.id];
+  const lvl = state.levels[d.id]||1;
+  const m = state.mastery[d.id];
+  // Gemeistert: bereits vergebenes Mastery bleibt bestehen (Altbestand), neu
+  // nur mit dem schärferen Kriterium (siehe masteryReliable).
+  if((m && lvl>=3) || masteryReliable(d)){
     if(m && m.nextReviewAt && m.nextReviewAt <= todayStr()) return {status:'review'};
     return {status:'mastered'};
   }
   return {status:'active'};
+}
+
+// Verlässlich gemeistert: Stufe 3+, mind. 12 Sterne UND von den letzten 8
+// Aufgaben auf dieser Stufe mindestens 7 richtig.
+function masteryReliable(d){
+  const lvl = state.levels[d.id]||1, st = state.stars[d.id]||0;
+  if(lvl<3 || st<MASTERY_STARS) return false;
+  const saved = state.attemptLogs[d.id];
+  if(!saved || saved.level!==lvl) return false;
+  const last8 = (saved.log||[]).slice(-8);
+  return last8.length>=8 && last8.filter(Boolean).length>=7;
+}
+
+// Altbestand (Daten ohne stationsVersion): Wer nach der alten Regel (Stufe 3 +
+// 12 Sterne) bereits gemeistert hatte, behält Pokal und Auffrischungs-Termin.
+function migrateStationsV1(){
+  state.trophies = state.trophies || {};
+  const t = todayStr();
+  domains.forEach(d=>{
+    const lvl = state.levels[d.id]||1, st = state.stars[d.id]||0;
+    if(lvl>=3 && st>=MASTERY_STARS && !state.mastery[d.id]) state.mastery[d.id] = {nextReviewAt: addDays(t,14)};
+    if(state.mastery[d.id] && !state.trophies[d.id]) state.trophies[d.id] = t;
+  });
+  state.stationsVersion = 2;
+}
+
+// Ein einmal verdienter Pokal bleibt für immer im Pokal-Regal.
+function ensureTrophies(){
+  state.trophies = state.trophies || {};
+  let changed = false;
+  domains.forEach(d=>{
+    const s = domainStatus(d).status;
+    if((s==='mastered' || s==='review') && !state.trophies[d.id]){ state.trophies[d.id] = todayStr(); changed = true; }
+  });
+  if(changed) saveProgress();
 }
 
 // Silbenbögen wie im Unterricht: ein Bogen pro Silbe, statt abstrakter Punkte.
@@ -396,6 +530,12 @@ const iCanStatements = {
     3:'Ich kann einen längeren Satz lesen und seinen Sinn verstehen.',
     4:'Ich kann auch Sätze mit einem Nebensatz lesen und ihren Sinn verstehen.',
   },
+  lesekai: {
+    1:'Ich kann zu einem Bild das passende Wort lesen und ankreuzen.',
+    2:'Ich kann auch längere Wörter mit Silbenfarben lesen und Bilder mit Wörtern verbinden.',
+    3:'Ich kann einen ganzen Satz lesen und das passende Bild dazu finden.',
+    4:'Ich kann Sätze lesen und genau das malen, was dasteht.',
+  },
   schreib1: {
     1:'Ich kann einfache Wörter so aufschreiben, wie ich sie höre.',
     2:'Ich kann auch Wörter mit neuen Buchstaben lautgetreu aufschreiben.',
@@ -464,6 +604,12 @@ const levelGoals = {
     2:'Du liest jetzt kurze Sätze und findest das passende Wort für die Lücke.',
     3:'Längere Sätze – du übst, den Sinn genau zu verstehen.',
     4:'Jetzt kommen Sätze mit einem Nebensatz dazu (weil, nachdem, als, damit) – lies genau.',
+  },
+  lesekai: {
+    1:'Hier liest du Wörter ganz genau: Zu jedem Bild gehört ein Wort. Die Wörter sehen fast gleich aus – lies bis zum letzten Buchstaben!',
+    2:'Jetzt sind es mehr Wörter. Lange Wörter haben farbige Silben, die helfen beim Lesen. Du verbindest auch Bilder mit Wörtern.',
+    3:'Du liest ganze Sätze und findest das Bild, das zum Satz passt. Lies jedes Wort genau.',
+    4:'Lies und male: Lies die Sätze und male genau das, was dasteht – nicht mehr und nicht weniger.',
   },
   schreib1: {
     1:'Hier schreibst du deine ersten ganzen Wörter – ganz einfache, die genauso klingen, wie sie geschrieben werden.',
@@ -612,6 +758,142 @@ function renderPicVal(val){
   }
   return val;
 }
+
+// ============================================================
+// Lesekai: handlungsorientierte Leseübungen (Ankreuzen, Verbinden, Malen).
+// Konzeptidee: Progression von Wort über Satz zur Handlung, Silben farbig
+// gegliedert, ähnliche Wörter zwingen zum genauen Lesen (Minimalpaare).
+// Eigene Wörter, Sätze und Bilder - keine Übernahme fremder Hefte.
+// ============================================================
+const LESE_TIPS = {
+  anlaut: 'Die Wörter sind fast gleich. Schau auf den ersten Buchstaben.',
+  vokal:  'Die Wörter sind fast gleich. Schau auf den Buchstaben in der Mitte.',
+  mitte:  'Die Wörter sind fast gleich. Schau auf die Buchstaben in der Mitte.',
+  ende:   'Die Wörter sind fast gleich. Lies bis zum letzten Buchstaben.',
+};
+const READ_ERROR_LABELS = {
+  lese_anlaut:    'Wortanfang überlesen oder verwechselt',
+  lese_vokal:     'Vokal in der Wortmitte verwechselt',
+  lese_mitte:     'Buchstaben in der Wortmitte verwechselt',
+  lese_ende:      'Wortende überlesen',
+  lese_zuordnung: 'Wort-Bild-Zuordnung (Verbinde)',
+  lese_satz:      'Satzverstehen (Satz zum Bild)',
+  lese_anweisung: 'Anweisung lesen und umsetzen (Lies und male)',
+};
+
+// "Bir|ne" -> Silben abwechselnd eingefärbt (Silbengliederung als Lesehilfe)
+function fmtOpt(opt){
+  if(typeof opt==='string' && opt.indexOf('|')>=0){
+    return opt.split('|').map((s,i)=>`<span class="syl syl-${i%2}">${s}</span>`).join('');
+  }
+  return opt;
+}
+
+// Kreuze an: Bild + ähnliche Wörter, das passende Wort wählen.
+function kreuz(emoji, right, wrongs, typ){
+  return {type:'choice', prompt:'Welches Wort passt zum Bild?', pictureEmoji:emoji,
+    options:[right, ...wrongs], answer:0, layout:'single', tip:LESE_TIPS[typ],
+    speak:'Welches Wort passt zum Bild?', errorCategory:'lese_'+typ};
+}
+// Satz zum Bild: ein Satz, der sich nur in einem Wort von den anderen unterscheidet.
+function satzbild(emoji, right, wrongs){
+  return {type:'choice', prompt:'Welcher Satz passt zum Bild?', pictureEmoji:emoji,
+    options:[right, ...wrongs], answer:0, layout:'single',
+    tip:'Lies jedes Wort im Satz genau. Wer oder was kommt vor? Und was passiert? Beides muss zum Bild passen.',
+    speak:'Welcher Satz passt zum Bild?', errorCategory:'lese_satz'};
+}
+// Verbinde: Tippe ein Bild an, dann das passende Wort.
+function verbinde(pairs){
+  return {type:'match', pairs,
+    tip:'Lies jedes Wort bis zum Ende. Die Wörter sehen sich ähnlich – achte auf die Buchstaben, die anders sind.',
+    speak:'Verbinde jedes Bild mit dem passenden Wort. Tippe erst ein Bild an, dann das Wort.',
+    errorCategory:'lese_zuordnung'};
+}
+// Lies und male: Sätze lesen und genau das ausmalen, was dasteht.
+// tasks: [{text, set:[[region, farbe], ...]}]; Farbe 'weiss' = bleibt weiß.
+function malen(figur, tasks){
+  return {type:'malen', figur, tasks,
+    tip:'Lies jeden Satz noch einmal genau. Male nur das, was dasteht – und nichts anderes.',
+    speak:'Lies und male. Tippe erst eine Farbe an, dann den Teil im Bild.',
+    errorCategory:'lese_anweisung'};
+}
+
+// Kreuze an als Seite mit 6 Aufgaben (wie im Übungsheft): Bild + zwei fast
+// gleiche Wörter, ohne Artikel (der Artikel würde die Lösung verraten).
+// Pro Seite werden 6 Paare zufällig gezogen; jede Aufgabe zählt einzeln.
+const KS_POOL = [
+  {pic:'🌙', right:'Mond',  wrong:'Mund',  typ:'vokal'},
+  {pic:'👄', right:'Mund',  wrong:'Mond',  typ:'vokal'},
+  {pic:'🐶', right:'Hund',  wrong:'Hand',  typ:'vokal'},
+  {pic:'✋', right:'Hand',  wrong:'Hund',  typ:'vokal'},
+  {pic:'🐰', right:'Hase',  wrong:'Hose',  typ:'vokal'},
+  {pic:'🐭', right:'Maus',  wrong:'Haus',  typ:'anlaut'},
+  {pic:'🏠', right:'Haus',  wrong:'Maus',  typ:'anlaut'},
+  {pic:'👖', right:'Hose',  wrong:'Rose',  typ:'anlaut'},
+  {pic:'🌹', right:'Rose',  wrong:'Hose',  typ:'anlaut'},
+  {pic:'🐟', right:'Fisch', wrong:'Tisch', typ:'anlaut'},
+  {pic:'☀️', right:'Sonne', wrong:'Tonne', typ:'anlaut'},
+  {pic:'⚽', right:'Ball',  wrong:'Fall',  typ:'anlaut'},
+  {pic:'🧣', right:'Schal', wrong:'Schaf', typ:'ende'},
+  {pic:'🐑', right:'Schaf', wrong:'Schal', typ:'ende'},
+];
+function kreuzseite(pool){
+  return {type:'kreuzseite', pool, size:6,
+    tip:'Schau dir die farbigen Buchstaben an: Dort unterscheiden sich die Wörter.',
+    speak:'Welches Wort passt zu jedem Bild? Tippe das richtige Wort an. Wenn du fertig bist, tippe auf Prüfen.'};
+}
+
+const MAL_COLORS = {
+  rot:    {hex:'#E04B3F', label:'rot'},
+  blau:   {hex:'#3F7FD6', label:'blau'},
+  gelb:   {hex:'#F4D03F', label:'gelb'},
+  gruen:  {hex:'#4FA85A', label:'grün'},
+  braun:  {hex:'#8B5A2B', label:'braun'},
+  orange: {hex:'#F08A24', label:'orange'},
+};
+
+// Eigene Ausmal-Figuren (SVG). draw(a): a('region') liefert die Attribute
+// (data-r, fill, onclick) für ein anklickbares Teil. Mehrere Formen dürfen
+// dieselbe Region teilen. Eigene SVG-Zeichnungen lassen sich hier genauso
+// eintragen: Teile mit a('name') versehen, Namen in "regions" auflisten.
+const MAL_FIGUREN = {
+  haus:{ regions:['dach','wand','tuer','fenster','sonne'], draw:a=>`
+    <svg viewBox="0 0 260 200" class="mal-svg" role="img" aria-label="Haus mit Sonne">
+      <g class="deco" stroke="#173142" stroke-width="3" stroke-linecap="round">
+        ${[0,45,90,135,180,225,270,315].map(d=>{const r=d*Math.PI/180;return `<line x1="${(220+29*Math.cos(r)).toFixed(1)}" y1="${(42+29*Math.sin(r)).toFixed(1)}" x2="${(220+38*Math.cos(r)).toFixed(1)}" y2="${(42+38*Math.sin(r)).toFixed(1)}"/>`}).join('')}
+        <line x1="8" y1="180" x2="252" y2="180"/>
+      </g>
+      <circle ${a('sonne')} cx="220" cy="42" r="22"/>
+      <rect ${a('wand')} x="45" y="92" width="130" height="88"/>
+      <polygon ${a('dach')} points="35,94 110,36 185,94"/>
+      <rect ${a('tuer')} x="85" y="122" width="36" height="58"/>
+      <rect ${a('fenster')} x="136" y="112" width="30" height="30"/>
+      <g class="deco" stroke="#173142" stroke-width="3" stroke-linecap="round">
+        <line x1="151" y1="112" x2="151" y2="142"/><line x1="136" y1="127" x2="166" y2="127"/>
+        <circle cx="113" cy="153" r="2.5" fill="#173142"/>
+      </g>
+    </svg>`},
+  blume:{ regions:['bluete','stiel','blatt','topf'], draw:a=>`
+    <svg viewBox="0 0 260 200" class="mal-svg" role="img" aria-label="Blume im Topf">
+      <rect ${a('stiel')} x="125" y="78" width="10" height="76"/>
+      <ellipse ${a('blatt')} cx="160" cy="120" rx="26" ry="11" transform="rotate(-28 160 120)"/>
+      <polygon ${a('topf')} points="92,150 168,150 156,194 104,194"/>
+      ${[-90,-18,54,126,198].map(d=>{const r=d*Math.PI/180;return `<circle ${a('bluete')} cx="${(130+26*Math.cos(r)).toFixed(1)}" cy="${(54+26*Math.sin(r)).toFixed(1)}" r="17"/>`}).join('')}
+      <circle ${a('bluete')} cx="130" cy="54" r="16"/>
+    </svg>`},
+  fisch:{ regions:['koerper','schwanz','flosse','auge'], draw:a=>`
+    <svg viewBox="0 0 260 200" class="mal-svg" role="img" aria-label="Fisch">
+      <polygon ${a('schwanz')} points="182,100 240,60 240,140"/>
+      <polygon ${a('flosse')} points="88,62 140,62 122,24"/>
+      <ellipse ${a('koerper')} cx="112" cy="100" rx="76" ry="48"/>
+      <circle ${a('auge')} cx="62" cy="88" r="10"/>
+      <g class="deco" stroke="#173142" stroke-width="3" stroke-linecap="round" fill="none">
+        <circle cx="60" cy="88" r="3" fill="#173142"/>
+        <path d="M 40 112 Q 52 122 64 114"/>
+        <path d="M 120 78 Q 134 100 120 124"/>
+      </g>
+    </svg>`},
+};
 
 // Satzwerft: freie Konstruktion aus Körben (Wer? Was tut er? Wo? Wie?) statt
 // starrem Umordnen eines vorgegebenen Satzes - jede Kombination ergibt einen
@@ -804,7 +1086,7 @@ const content = {
       pic('🔁','☀️','Sonne', ['🛢️','🐟','⭐'], 0, 'Sonne – Tonne: reimt sich!'),
       pic('👏','🦋','Schmetterling', [silbenbogen(2),silbenbogen(3),silbenbogen(4)], 1, 'Schwinge mit: Schmet-ter-ling. Drei Bögen!'),
       pic('🎯','🌸','Blume', ['⚡','🌙','🐱'], 0, 'Blume – Blitz: gleicher Anfang „Bl".'),
-      pic('🔁','🌳','Baum', ['img:traum.png','⚽','🐟'], 0, 'Baum – Traum: reimt sich!'),
+      pic('🔁','🌳','Baum', ['img:Traum.png','⚽','🐟'], 0, 'Baum – Traum: reimt sich!'),
       pic('👏','🦓','Zebra', [silbenbogen(1),silbenbogen(2),silbenbogen(3)], 1, 'Ze-bra: zwei Bögen.'),
       pic('🎯','🦁','Löwe', ['🥄','🐟','🌳'], 0, 'Löwe – Löffel: gleicher Anlaut „L".'),
       pic('🎯','🚢','Schiff', ['🏫','🐕','🌙'], 0, 'Schiff – Schule: gleicher Anlaut „Sch".'),
@@ -840,7 +1122,7 @@ const content = {
       pic('🔡','⚽','Ball', ['B','D','P'], 0, 'B-all: erster Laut „B".', true),
       pic('🔡','🦔','Igel', ['I','E','O'], 0, 'I-gel: erster Laut „I".'),
       pic('🔚','⚽','Ball', ['L','N','M'], 0, 'Ba-LL: letzter Laut „L".'),
-      pic('🔡','img:gabel.png','Gabel', ['G','K','B'], 0, 'G-abel: erster Laut „G".', true),
+      pic('🔡','img:Gabel.png','Gabel', ['G','K','B'], 0, 'G-abel: erster Laut „G".', true),
       pic('🔡','🥫','Dose', ['D','B','P'], 0, 'D-ose: erster Laut „D".', true),
       pic('🔡','👃','Nase', ['N','M','H'], 0, 'N-ase: erster Laut „N".', true),
       pic('🔡','🚀','Rakete', ['R','L','W'], 0, 'R-akete: erster Laut „R".', true),
@@ -848,7 +1130,7 @@ const content = {
       pic('🔡',tableIcon(),'Tisch', ['T','D','P'], 0, 'T-isch: erster Laut „T".', true),
       pic('🔡','☁️','Wolke', ['W','M','B'], 0, 'W-olke: erster Laut „W".', true),
       pic('🔡','🦓','Zebra', ['Z','S','T'], 0, 'Z-ebra: erster Laut „Z".', true),
-      pic('🔡','img:lampe.png','Lampe', ['L','N','M'], 0, 'L-ampe: erster Laut „L".', true),
+      pic('🔡','img:Lampe.png','Lampe', ['L','N','M'], 0, 'L-ampe: erster Laut „L".', true),
       pic('🔡','🎩','Hut', ['H','F','W'], 0, 'H-ut: erster Laut „H".', true),
       pic('🔡','img:Joghurt.png','Joghurt', ['J','Y','G'], 0, 'J-oghurt: erster Laut „J".', true),
       pic('🔡','📁','Ordner', ['O','A','U'], 0, 'O-rdner: erster Laut „O".', true),
@@ -888,7 +1170,7 @@ const content = {
       pic('🔤','🐑','Schaf', ['Schaf','Schaaf','Chaf'], 0, 'Schaf: „Sch" ist ein eigener Laut.'),
       pic('🔤','🧥','Jacke', ['Jacke','Wacke','Nacke'], 0, 'J-acke: achte auf den ersten Laut.'),
       pic('🔤','☁️','Wolke', ['Wolke','Volke','Wolge'], 0, 'Wolke: W-o-l-ke.'),
-      pic('🔤','img:lampe.png','Lampe', ['Lampe','Rampe','Lambe'], 0, 'Lampe: L-a-m-pe.'),
+      pic('🔤','img:Lampe.png','Lampe', ['Lampe','Rampe','Lambe'], 0, 'Lampe: L-a-m-pe.'),
     ],
     3:[
       pic('🔤','🏠','Dach', ['Dach','Bach','Pach'], 0, 'b, d und p sehen ähnlich aus – höre genau hin: D-ach.'),
@@ -900,7 +1182,7 @@ const content = {
       pic('🔤','🕷️','Spinne', ['Spinne','Pinne','Schpinne'], 0, 'Sp klingt wie „Schp", geschrieben wird nur Sp-inne.'),
       pic('🔡','💶','Euro', ['Eu','Ei','Au'], 0, 'Eu-ro: der Zwielaut „Eu".', false, 'EU'),
       pic('🔡','🛢️','Öl', ['Ö','O','U'], 0, 'Ö klingt anders als O – Ö-l.', false, 'OE'),
-      pic('🔡','img:ueberraschungsei.png','Überraschungsei', ['Ü','U','I'], 0, 'Ü klingt anders als U – Ü-berraschung.', false, 'UE'),
+      pic('🔡','img:Ueberraschungsei.png','Überraschungsei', ['Ü','U','I'], 0, 'Ü klingt anders als U – Ü-berraschung.', false, 'UE'),
       pic('🔤','🎺','Trompete', ['Trompete','Drompete','Tropete'], 0, 'Tr am Anfang: zwei Konsonanten.'),
       pic('🔤','🖍️','Kreide', ['Kreide','Kleide','Greide'], 0, 'Kr am Anfang: zwei Konsonanten.'),
     ],
@@ -909,7 +1191,7 @@ const content = {
       pic('🔤','🏰','Schloss', ['Schloss','Schlos','Sloss'], 0, 'Schl am Anfang, doppeltes „s" am Ende.'),
       pic('🔤','🦷','Zahnbürste', ['Zahnbürste','Zahnbürzte','Sahnbürste'], 0, 'Zusammengesetztes Wort: Zahn + Bürste.'),
       pic('🔤','🌪️','Sturm', ['Sturm','Sturn','Storm'], 0, 'St am Anfang.'),
-      pic('🔤','img:strumpf.png','Strumpf', ['Strumpf','Strump','Ztrumpf'], 0, 'Str am Anfang UND mpf am Ende – gleich zwei Häufungen.'),
+      pic('🔤','img:Strumpf.png','Strumpf', ['Strumpf','Strump','Ztrumpf'], 0, 'Str am Anfang UND mpf am Ende – gleich zwei Häufungen.'),
       pic('🔤','🦅','Adler', ['Adler','Atler','Adla'], 0, 'Adler wird immer mit „d" geschrieben.'),
     ],
   },
@@ -938,7 +1220,7 @@ const content = {
       inp('Schreibe nur den letzten Laut, den du hörst.', 'r', 'To-r: der letzte Laut ist „r".', 'Tor', '🥅'),
       inp('Schreibe nur den letzten Laut, den du hörst.', 's', 'Bu-s: der letzte Laut ist „s".', 'Bus', '🚌'),
       inp('Schreibe nur den letzten Laut, den du hörst.', 'f', 'Wolf endet auf „f".', 'Wolf', '🐺'),
-      inp('Schreibe nur den letzten Laut, den du hörst.', 'm', 'Arm endet auf „m".', 'Arm', 'img:arm.png'),
+      inp('Schreibe nur den letzten Laut, den du hörst.', 'm', 'Arm endet auf „m".', 'Arm', 'img:Arm.png'),
     ],
     3:[ // Offene Silben verschriften (Konsonant + Vokal)
       inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'ba', 'Ba-na-ne: Trick – jede Silbe braucht mindestens einen Vokal (a,e,i,o,u), hier das „a".', 'Banane', '🍌'),
@@ -947,7 +1229,7 @@ const content = {
       inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'ka', 'Ka-me-ra: ein Konsonant, ein Vokal – „ka".', 'Kamera', '📷'),
       inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'to', 'To-ma-te: ein Konsonant, ein Vokal – „to".', 'Tomate', '🍅'),
       inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'gi', 'Gi-tar-re: ein Konsonant, ein Vokal – „gi".', 'Gitarre', '🎸'),
-      inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'se', 'Se-gel: ein Konsonant, ein Vokal – „se".', 'Segel', 'img:segel.png'),
+      inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'se', 'Se-gel: ein Konsonant, ein Vokal – „se".', 'Segel', 'img:Segel.png'),
       inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'ra', 'Ra-ke-te: ein Konsonant, ein Vokal – „ra".', 'Rakete', '🚀'),
       inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'ro', 'Ro-se: ein Konsonant, ein Vokal – „ro".', 'Rose', '🌹'),
     ],
@@ -1003,6 +1285,85 @@ const content = {
       ch('Nachdem sie das Buch zu Ende gelesen hatte, stellte Emma es zurück ins ___.', ['Regal','Wasser','Feuer'], 0, 'Wohin stellt man ein Buch nach dem Lesen?'),
     ],
   },
+  // Lesekai: Stufe 1 Kreuze an (2 Wörter), Stufe 2 Kreuze an mit Silbenfarben
+  // (3 Wörter) + Verbinde, Stufe 3 Satz zum Bild, Stufe 4 Lies und male.
+  lesekai: {
+    1:[
+      kreuzseite(KS_POOL), kreuzseite(KS_POOL), kreuzseite(KS_POOL),
+    ],
+    2:[
+      kreuz('🍐','Bir|ne',['Bie|ne','Bir|ke'],'mitte'),
+      kreuz('🐝','Bie|ne',['Bir|ne','Bei|ne'],'mitte'),
+      kreuz('🔔','Glo|cke',['Lo|cke','Ja|cke'],'anlaut'),
+      kreuz('🌲','Tan|ne',['Ton|ne','Kan|ne'],'vokal'),
+      kreuz('🍞','Brot',['Boot','Rot'],'mitte'),
+      kreuz('🎩','Hut',['Hund','Huhn'],'ende'),
+      kreuz('🐑','Schaf',['Schal','Schaum'],'ende'),
+      kreuz('🚂','Zug',['Zahn','Zaun'],'mitte'),
+      verbinde([{pic:'👴',word:'Opa'},{pic:'👵',word:'Oma'},{pic:'🛸',word:'Ufo'}]),
+      verbinde([{pic:'🌙',word:'Mond'},{pic:'👄',word:'Mund'},{pic:'🐭',word:'Maus'}]),
+      verbinde([{pic:'🏠',word:'Haus'},{pic:'🐰',word:'Hase'},{pic:'👖',word:'Hose'}]),
+      verbinde([{pic:'🍐',word:'Bir|ne'},{pic:'🐝',word:'Bie|ne'},{pic:'🍞',word:'Brot'}]),
+      verbinde([{pic:'🧣',word:'Schal'},{pic:'🐑',word:'Schaf'},{pic:'👟',word:'Schuh'}]),
+      verbinde([{pic:'🐳',word:'Wal'},{pic:'🚌',word:'Bus'},{pic:'🦉',word:'Eu|le'}]),
+    ],
+    3:[
+      satzbild('🐶💤','Der Hund schläft.',['Der Hund rennt.','Die Katze schläft.']),
+      satzbild('🐱🥛','Die Katze trinkt Milch.',['Die Katze trinkt Saft.','Der Hund trinkt Milch.']),
+      satzbild('👧📖','Das Mädchen liest.',['Das Mädchen malt.','Der Junge liest.']),
+      satzbild('👦⚽','Der Junge spielt Fußball.',['Der Junge spielt Tennis.','Das Mädchen spielt Fußball.']),
+      satzbild('🌧️☂️','Es regnet.',['Es schneit.','Die Sonne scheint.']),
+      satzbild('🐦🌳','Der Vogel sitzt im Baum.',['Der Vogel sitzt auf dem Dach.','Die Katze sitzt im Baum.']),
+      satzbild('🚗🏠','Das Auto steht vor dem Haus.',['Das Fahrrad steht vor dem Haus.','Das Auto steht im Haus.']),
+      satzbild('👩‍🍳🍲','Die Frau kocht.',['Die Frau schläft.','Der Mann kocht.']),
+      satzbild('🐟🌊','Der Fisch schwimmt.',['Der Fisch fliegt.','Der Vogel schwimmt.']),
+      satzbild('👶🍼','Das Baby trinkt Milch.',['Das Baby isst Brot.','Die Oma trinkt Milch.']),
+      satzbild('☀️🏖️','Die Sonne scheint am Strand.',['Es schneit am Strand.','Die Sonne scheint im Wald.']),
+      satzbild('🍎🌳','Der Apfel hängt am Baum.',['Der Apfel liegt im Wasser.','Die Birne hängt am Baum.']),
+    ],
+    4:[
+      malen('haus',[
+        {text:'Das Dach ist rot.', set:[['dach','rot']]},
+        {text:'Die Tür ist braun.', set:[['tuer','braun']]},
+        {text:'Die Sonne ist gelb.', set:[['sonne','gelb']]},
+      ]),
+      malen('haus',[
+        {text:'Male das Fenster blau.', set:[['fenster','blau']]},
+        {text:'Male die Wand gelb.', set:[['wand','gelb']]},
+        {text:'Das Dach ist braun.', set:[['dach','braun']]},
+      ]),
+      malen('haus',[
+        {text:'Die Tür ist grün und das Dach ist rot.', set:[['tuer','gruen'],['dach','rot']]},
+        {text:'Das Fenster ist blau.', set:[['fenster','blau']]},
+        {text:'Die Wand bleibt weiß.', set:[['wand','weiss']]},
+      ]),
+      malen('blume',[
+        {text:'Die Blüte ist gelb.', set:[['bluete','gelb']]},
+        {text:'Der Stiel ist grün.', set:[['stiel','gruen']]},
+        {text:'Der Topf ist braun.', set:[['topf','braun']]},
+      ]),
+      malen('blume',[
+        {text:'Male das Blatt grün.', set:[['blatt','gruen']]},
+        {text:'Male die Blüte rot.', set:[['bluete','rot']]},
+        {text:'Der Topf bleibt weiß.', set:[['topf','weiss']]},
+      ]),
+      malen('blume',[
+        {text:'Die Blüte ist orange und der Stiel ist grün.', set:[['bluete','orange'],['stiel','gruen']]},
+        {text:'Male den Topf blau.', set:[['topf','blau']]},
+      ]),
+      malen('fisch',[
+        {text:'Der Körper ist orange.', set:[['koerper','orange']]},
+        {text:'Der Schwanz ist rot.', set:[['schwanz','rot']]},
+        {text:'Das Auge ist blau.', set:[['auge','blau']]},
+      ]),
+      malen('fisch',[
+        {text:'Male die Flosse gelb.', set:[['flosse','gelb']]},
+        {text:'Male den Körper blau.', set:[['koerper','blau']]},
+        {text:'Der Schwanz bleibt weiß.', set:[['schwanz','weiss']]},
+      ]),
+    ],
+  },
+
   // Nach dem Phonemstufen-Prinzip (Reuter-Liehr): Stufe 1 nutzt
   // ausschließlich Vokale, Zwielaute und "Dauerkonsonanten" (m,l,s,n,f,r,w,
   // sch), die man beim Sprechen dehnen kann, ohne Konsonantenhäufung. Erst
@@ -1017,7 +1378,7 @@ const content = {
       inp('Schreibe das Wort, das du hörst.', 'eule', 'Eu-le: Zwielaut „eu" am Wortanfang.', 'Eule', '🦉'),
       inp('Schreibe das Wort, das du hörst.', 'sofa', 'So-fa: zwei offene Silben, ganz lautgetreu.', 'Sofa', '🛋️'),
       inp('Schreibe das Wort, das du hörst.', 'hase', 'Ha-se: zwei offene Silben, ganz lautgetreu.', 'Hase', '🐰'),
-      inp('Schreibe das Wort, das du hörst.', 'rasen', 'Ra-sen: zwei offene Silben, ganz lautgetreu.', 'Rasen', 'img:rasen.png'),
+      inp('Schreibe das Wort, das du hörst.', 'rasen', 'Ra-sen: zwei offene Silben, ganz lautgetreu.', 'Rasen', 'img:Rasen.png'),
     ],
     2:[ // Phonemstufe 2: + Stoppkonsonanten (b,d,g,t,p,k) und h,ch, weiterhin ohne Häufung
       inp('Schreibe das Wort, das du hörst.', 'hut', 'Hu-t: ganz lautgetreu geschrieben.', 'Hut', '🎩'),
@@ -1026,15 +1387,15 @@ const content = {
       inp('Schreibe das Wort, das du hörst.', 'fisch', 'Fi-sch: „sch" ist ein Laut aus drei Buchstaben.', 'Fisch', '🐟'),
       inp('Schreibe das Wort, das du hörst.', 'dose', 'Do-se: offene Silbe, ganz lautgetreu.', 'Dose', '🥫'),
       inp('Schreibe das Wort, das du hörst.', 'kuchen', 'Ku-chen: „ch" ist ein eigener Laut.', 'Kuchen', '🎂'),
-      inp('Schreibe das Wort, das du hörst.', 'gabel', 'Ga-bel: ganz lautgetreu.', 'Gabel', 'img:gabel.png'),
+      inp('Schreibe das Wort, das du hörst.', 'gabel', 'Ga-bel: ganz lautgetreu.', 'Gabel', 'img:Gabel.png'),
       inp('Schreibe das Wort, das du hörst.', 'besen', 'Be-sen: ganz lautgetreu.', 'Besen', '🧹'),
     ],
     3:[ // Reine Konsonantenhäufungen (mehrere verschiedene, echt hörbare Konsonanten hintereinander) - bewusst OHNE Doppelkonsonanten, da die Verdopplung eine Rechtschreibregel ist, keine Hörwahrnehmung
       inp('Schreibe das Wort, das du hörst.', 'frosch', 'Fr am Anfang: zwei Konsonanten hintereinander.', 'Frosch', '🐸'),
-      inp('Schreibe das Wort, das du hörst.', 'traum', 'Tr am Anfang: zwei Konsonanten hintereinander.', 'Traum', 'img:traum.png'),
+      inp('Schreibe das Wort, das du hörst.', 'traum', 'Tr am Anfang: zwei Konsonanten hintereinander.', 'Traum', 'img:Traum.png'),
       inp('Schreibe das Wort, das du hörst.', 'stern', 'St am Anfang – ein häufiger Wortbaustein.', 'Stern', '⭐'),
       inp('Schreibe das Wort, das du hörst.', 'schwein', 'Schw am Anfang: drei Buchstaben, zwei Laute direkt hintereinander.', 'Schwein', '🐷'),
-      inp('Schreibe das Wort, das du hörst.', 'strumpf', 'Str am Anfang, mpf am Ende – viele Konsonanten, aber alle einzeln hörbar.', 'Strumpf', 'img:strumpf.png'),
+      inp('Schreibe das Wort, das du hörst.', 'strumpf', 'Str am Anfang, mpf am Ende – viele Konsonanten, aber alle einzeln hörbar.', 'Strumpf', 'img:Strumpf.png'),
       inp('Schreibe das Wort, das du hörst.', 'krake', 'Kr am Anfang: zwei Konsonanten hintereinander.', 'Krake', '🐙'),
       inp('Schreibe das Wort, das du hörst.', 'geschenk', 'Sch und nk: zwei Konsonantenhäufungen in einem Wort.', 'Geschenk', '🎁'),
       inp('Schreibe das Wort, das du hörst.', 'pflaume', 'Pfl am Anfang: drei Konsonanten hintereinander.', 'Pflaume'),
@@ -1305,7 +1666,7 @@ const diagSilbendock = {
     silbchoice('Tippe den letzten Laut an, den du hörst.', ['r','l','n'], 0, 'To-r: der letzte Laut ist „r".', 'Tor', '🥅'),
     silbchoice('Tippe den letzten Laut an, den du hörst.', ['s','f','t'], 0, 'Bu-s: der letzte Laut ist „s".', 'Bus', '🚌'),
     silbchoice('Tippe den letzten Laut an, den du hörst.', ['f','l','w'], 0, 'Wolf endet auf „f".', 'Wolf', '🐺'),
-    silbchoice('Tippe den letzten Laut an, den du hörst.', ['m','n','l'], 0, 'Arm endet auf „m".', 'Arm', 'img:arm.png'),
+    silbchoice('Tippe den letzten Laut an, den du hörst.', ['m','n','l'], 0, 'Arm endet auf „m".', 'Arm', 'img:Arm.png'),
   ],
   3:[ // Erste Silbe - Distraktoren sind andere echte Silben AUS DEMSELBEN Wort
     silbchoice('Welche ist die erste Silbe des Wortes, das du hörst?', ['ba','na','ne'], 0, 'Ba-na-ne: die erste Silbe ist „ba".', 'Banane', '🍌'),
@@ -1314,7 +1675,7 @@ const diagSilbendock = {
     silbchoice('Welche ist die erste Silbe des Wortes, das du hörst?', ['ka','me','ra'], 0, 'Ka-me-ra: die erste Silbe ist „ka".', 'Kamera', '📷'),
     silbchoice('Welche ist die erste Silbe des Wortes, das du hörst?', ['to','ma','te'], 0, 'To-ma-te: die erste Silbe ist „to".', 'Tomate', '🍅'),
     silbchoice('Welche ist die erste Silbe des Wortes, das du hörst?', ['gi','tar','re'], 0, 'Gi-tar-re: die erste Silbe ist „gi".', 'Gitarre', '🎸'),
-    silbchoice('Welche ist die erste Silbe des Wortes, das du hörst?', ['se','gel','el'], 0, 'Se-gel: die erste Silbe ist „se".', 'Segel', 'img:segel.png'),
+    silbchoice('Welche ist die erste Silbe des Wortes, das du hörst?', ['se','gel','el'], 0, 'Se-gel: die erste Silbe ist „se".', 'Segel', 'img:Segel.png'),
     silbchoice('Welche ist die erste Silbe des Wortes, das du hörst?', ['ra','ke','te'], 0, 'Ra-ke-te: die erste Silbe ist „ra".', 'Rakete', '🚀'),
     silbchoice('Welche ist die erste Silbe des Wortes, das du hörst?', ['ro','se','os'], 0, 'Ro-se: die erste Silbe ist „ro".', 'Rose', '🌹'),
   ],
@@ -1348,6 +1709,7 @@ let state = {
   levels:{}, stars:{}, diagDone:false, history:[], errorCounts:{}, attemptLogs:{},
   mastery:{}, selfChecks:[], pendingSelfCheck:null, pendingReview:false,
   wordStore:[], onboardStep:0, errorProfile:{}, discoverSeen:{},
+  trophies:{}, knownAtStart:{}, stationsVersion:2, showMoreStations:false, showAllStations:false, showStarHelp:false,
   childLabel:'', className:'',
   needsBasicLetterDrill:false, drill:null,
   practice:{domainId:null, level:1, attemptLog:[], queue:[], current:null, itemsDone:0, answered:false, lastCorrect:null},
@@ -1391,6 +1753,7 @@ function saveProgress(){
       needsBasicLetterDrill: state.needsBasicLetterDrill,
       diagReports: state.diagReports, wordStore: state.wordStore, errorProfile: state.errorProfile, discoverSeen: state.discoverSeen,
       childLabel: state.childLabel, className: state.className,
+      trophies: state.trophies, knownAtStart: state.knownAtStart, stationsVersion: 2,
     }));
   }catch(e){}
 }
@@ -1414,6 +1777,9 @@ function loadProgress(){
       state.discoverSeen = d.discoverSeen || {};
       state.childLabel = d.childLabel || '';
       state.className = d.className || '';
+      state.trophies = d.trophies || {};
+      state.knownAtStart = d.knownAtStart || {};
+      if(!d.stationsVersion) migrateStationsV1();   // Altbestand: Pokale übernehmen
     }
   }catch(e){}
 }
@@ -1426,6 +1792,7 @@ window.exportData = function(){
     needsBasicLetterDrill: state.needsBasicLetterDrill,
     diagReports: state.diagReports, wordStore: state.wordStore, errorProfile: state.errorProfile, discoverSeen: state.discoverSeen,
     childLabel: state.childLabel, className: state.className,
+    trophies: state.trophies, knownAtStart: state.knownAtStart, stationsVersion: 2,
     exportedAt: new Date().toISOString(),
   };
   try{
@@ -1469,6 +1836,9 @@ window.importData = function(file){
       state.discoverSeen = d.discoverSeen || {};
       state.childLabel = d.childLabel || '';
       state.className = d.className || '';
+      state.trophies = d.trophies || {};
+      state.knownAtStart = d.knownAtStart || {};
+      if(!d.stationsVersion) migrateStationsV1();   // alte Sicherung: Pokale übernehmen
       saveProgress();
       alert('Daten erfolgreich importiert!');
       state.screen = 'start';
@@ -1573,6 +1943,15 @@ function buildFoerderplanHTML(){
       ${errorEntries.map(e=>`<tr><td>${escapeHtml(e.name)}</td><td style="text-align:center;">${e.count}</td></tr>`).join('')}
     </table>` : '<p class="fp-muted">Noch keine kategorisierten Rechtschreib-Fehlerschwerpunkte erfasst.</p>';
 
+  const readEntries = Object.keys(READ_ERROR_LABELS)
+    .map(k => ({name: READ_ERROR_LABELS[k], count: state.errorProfile[k]||0}))
+    .filter(e => e.count > 0).sort((a,b)=>b.count-a.count);
+  const readHtml = readEntries.length ? `
+    <table class="fp-table">
+      <tr><th>Leseschwerpunkt (Lesekai)</th><th>Häufigkeit erfasst</th></tr>
+      ${readEntries.map(e=>`<tr><td>${escapeHtml(e.name)}</td><td style="text-align:center;">${e.count}</td></tr>`).join('')}
+    </table>` : '';
+
   const history = state.history || [];
   const historyHtml = history.length ? `
     <p class="fp-muted">Erfasster Zeitraum: ${history[0].date} bis ${history[history.length-1].date} (${history.length} Woche(n))</p>
@@ -1649,6 +2028,7 @@ function buildFoerderplanHTML(){
   </table>` : '<p class="fp-muted">Aktuell kein Bereich mit offenem Förderziel erfasst.</p>'}
   <h3 style="font-size:0.95rem;margin-top:16px;">Fehlerschwerpunkte Rechtschreiben (Leuchtturm &amp; Speicherstadt)</h3>
   ${errorHtml}
+  ${readHtml}
 
   <h2>3. Auswertung der Lernentwicklung und Anpassung der Maßnahmen</h2>
   ${historyHtml}
@@ -1688,7 +2068,7 @@ window.confirmReset = function(){
   if(confirm('Fortschritt wirklich löschen und neu starten?')){
     state.levels={}; state.stars={}; state.diagDone=false; state.history=[];
     state.errorCounts={}; state.attemptLogs={}; state.mastery={}; state.selfChecks=[];
-    state.needsBasicLetterDrill=false; state.diagReports=[]; state.wordStore=[]; state.onboardStep=0; state.errorProfile={}; state.discoverSeen={};
+    state.needsBasicLetterDrill=false; state.diagReports=[]; state.wordStore=[]; state.onboardStep=0; state.errorProfile={}; state.discoverSeen={}; state.trophies={}; state.knownAtStart={};
     try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
     state.showTeacher=false;
     state.screen='start';
@@ -1781,9 +2161,196 @@ window.speakCurrent = function(){
 };
 
 
+// ---- Lesekai: Kreuze an als Seite (6 Aufgaben) ----
+function ksDiff(w, other){
+  let s0=0; while(s0<w.length && s0<other.length && w[s0]===other[s0]) s0++;
+  let e=0; while(e<w.length-s0 && e<other.length-s0 && w[w.length-1-e]===other[other.length-1-e]) e++;
+  return w.slice(0,s0)+'<span class="ks-diff">'+w.slice(s0,w.length-e)+'</span>'+w.slice(w.length-e);
+}
+function buildKreuzseiteRows(pool, n){
+  const rows = [], seen = new Set();
+  shuffle(pool).forEach(e=>{
+    if(rows.length>=n) return;
+    const key = [e.right, e.wrong].sort().join('|');
+    if(seen.has(key)) return;            // dasselbe Wortpaar nicht zweimal auf einer Seite
+    seen.add(key);
+    rows.push({pic:e.pic, typ:e.typ, opts:shuffle([{w:e.right,ok:true},{w:e.wrong,ok:false}])});
+  });
+  return rows;
+}
+function renderKreuzseite(item, isStatic){
+  const p = state.practice, rows = item.rows || [], ans = p.ksAnswers || {};
+  const n = Object.keys(ans).length;
+  const cards = rows.map((r,i)=>{
+    const picked = ans[i];
+    let cardCls = 'ks-item';
+    if(isStatic) cardCls += (picked!==undefined && r.opts[picked].ok) ? ' ok' : ' no';
+    const opts = r.opts.map((o,k)=>{
+      let cls = 'ks-opt';
+      if(isStatic){ if(o.ok) cls += ' right'; else if(picked===k) cls += ' wrong'; }
+      else if(picked===k) cls += ' sel';
+      const word = isStatic ? ksDiff(o.w, r.opts[1-k].w) : o.w;
+      return `<button class="${cls}" ${isStatic?'disabled':''} onclick="ksPick(${i},${k})"><span class="ks-box"></span><span class="ks-word">${word}</span></button>`;
+    }).join('');
+    return `<div class="${cardCls}"><div class="ks-pic">${renderPicVal(r.pic)}</div><div class="ks-opts">${opts}</div></div>`;
+  }).join('');
+  const head = `<div class="task-instr">✅ Welches Wort passt zum Bild? Tippe das richtige Wort an.</div>
+    <button class="speak-btn" onclick="speakCurrent()">🔊</button>`;
+  if(isStatic) return head + `<div class="ks-grid">${cards}</div>`;
+  return head + `<div class="ks-count">${n} von ${rows.length}</div><div class="ks-grid">${cards}</div>
+    <button class="btn btn-primary btn-block" style="margin-top:14px;" ${n<rows.length?'disabled':''} onclick="ksCheck()">✅ Prüfen</button>`;
+}
+window.ksPick = function(i,k){
+  const p = state.practice; if(p.answered) return;
+  p.ksAnswers[i] = k; rerenderKeepScroll();
+};
+// Jede der 6 Aufgaben zählt einzeln (Versuchsliste, Sterne, Fehlerprofil).
+// Die letzte läuft durch practiceAnswer (Stufenlogik, Speichern, Rückmeldung).
+window.ksCheck = function(){
+  const p = state.practice; if(p.answered) return;
+  const rows = p.current.rows;
+  if(Object.keys(p.ksAnswers).length < rows.length) return;
+  const res = rows.map((r,i)=> r.opts[p.ksAnswers[i]].ok);
+  const last = rows.length-1;
+  for(let i=0;i<last;i++){
+    p.attemptLog.push(res[i]); if(p.attemptLog.length>12) p.attemptLog.shift();
+    if(res[i]){ state.stars[p.domainId] = (state.stars[p.domainId]||0)+1; }
+    else {
+      state.errorCounts[p.domainId] = (state.errorCounts[p.domainId]||0)+1;
+      const key = 'lese_'+rows[i].typ;
+      state.errorProfile[key] = (state.errorProfile[key]||0)+1;
+      p.sessionErrors = (p.sessionErrors||0)+1;
+    }
+  }
+  p.itemsDone += last;
+  p.ksResults = res;
+  p.current.errorCategory = 'lese_'+rows[last].typ;
+  window.practiceAnswer(res[last] ? 0 : 1);
+};
+function ksFeedback(p){
+  const res = p.ksResults || [], c = res.filter(Boolean).length, n = res.length;
+  const up = p.levelUpMsg ? ' ' + p.levelUpMsg : '';
+  if(c===n) return `<div class="feedback-box feedback-good">✅ Alles richtig! <b class="plus-star">+${c} ⭐</b>${up}</div>`;
+  return `<div class="feedback-box feedback-tip">💡 ${c} von ${n} richtig${c ? ` – <b class="plus-star">+${c} ⭐</b>` : ''}.${up}<br><br>Schau dir die farbigen Buchstaben an: Dort unterscheiden sich die beiden Wörter. Lies beim nächsten Mal bis zum Ende.${p.levelDownMsg ? '<br><br>'+p.levelDownMsg : ''}</div>`;
+}
+function ksSpeech(p){
+  const res = p.ksResults || [], c = res.filter(Boolean).length, n = res.length;
+  if(c===n) return 'Alles richtig!' + (p.levelUpMsg ? ' ' + p.levelUpMsg : '');
+  return c + ' von ' + n + ' richtig. Schau dir die farbigen Buchstaben an. Dort unterscheiden sich die beiden Wörter.' + (p.levelDownMsg ? ' ' + p.levelDownMsg : '');
+}
+
+// ---- Lesekai: Verbinde (Tap-Tap) und Lies und male ----
+function rerenderKeepScroll(){
+  const y = window.scrollY;
+  render(true);
+  window.scrollTo(0, y);
+}
+
+function renderMatchBody(item, isStatic){
+  const p = state.practice;
+  const instr = `<div class="task-instr">🔗 Verbinde: Tippe ein Bild an, dann das passende Wort.</div>
+    <button class="speak-btn" onclick="speakCurrent()">🔊</button>`;
+  if(isStatic){
+    const rows = item.pairs.map(pr =>
+      `<div class="m-row"><span class="m-rowpic">${renderPicVal(pr.pic)}</span><span class="m-arrow">→</span><span class="m-rowword">${fmtOpt(pr.word)}</span></div>`
+    ).join('');
+    return instr + `<div class="m-rows">${rows}</div>`;
+  }
+  const done = p.matchDone || [];
+  const order = (p.matchOrder && p.matchOrder.length===item.pairs.length) ? p.matchOrder : item.pairs.map((_,i)=>i);
+  const pics = item.pairs.map((pr,i)=>{
+    const isDone = done.includes(i);
+    const cls = 'm-btn m-pic' + (isDone?' m-done':'') + (p.matchSel===i ? ' m-sel':'');
+    return `<button class="${cls}" ${isDone?'disabled':''} onclick="matchPic(${i})">${renderPicVal(pr.pic)}</button>`;
+  }).join('');
+  const words = order.map(j=>{
+    const isDone = done.includes(j);
+    const cls = 'm-btn m-word' + (isDone?' m-done':'') + (p.matchFlash===j ? ' m-wrong':'');
+    return `<button class="${cls}" ${isDone?'disabled':''} onclick="matchWord(${j})">${fmtOpt(item.pairs[j].word)}</button>`;
+  }).join('');
+  const hint = p.matchNeedPic ? `<div class="mal-note">👆 Tippe zuerst ein Bild an.</div>` : '';
+  return instr + hint + `<div class="m-grid"><div class="m-col">${pics}</div><div class="m-col">${words}</div></div>`;
+}
+
+window.matchPic = function(i){
+  const p = state.practice; if(p.answered) return;
+  if((p.matchDone||[]).includes(i)) return;
+  p.matchSel = i; p.matchFlash = null; p.matchNeedPic = false;
+  rerenderKeepScroll();
+};
+window.matchWord = function(j){
+  const p = state.practice; if(p.answered) return;
+  if(p.matchSel===null || p.matchSel===undefined){ p.matchNeedPic = true; rerenderKeepScroll(); return; }
+  if(p.matchSel===j){
+    p.matchDone.push(j); p.matchSel = null; p.matchFlash = null;
+    if(p.matchDone.length===p.current.pairs.length){
+      window.practiceAnswer(p.matchWrong===0 ? 0 : 1);   // sauber = ohne falsches Antippen
+      return;
+    }
+  } else {
+    p.matchWrong++; p.matchFlash = j; p.matchSel = null;  // erneut ein Bild wählen
+  }
+  rerenderKeepScroll();
+};
+
+function malEvaluate(item, fills){
+  const expected = {};
+  item.tasks.forEach(t=>t.set.forEach(([r,c])=>{ expected[r] = (c==='weiss') ? null : c; }));
+  const fig = MAL_FIGUREN[item.figur];
+  const taskOk = item.tasks.map(t=>t.set.every(([r,c])=> (fills[r]||null) === (c==='weiss' ? null : c)));
+  const extra = fig.regions.some(r => !(r in expected) && fills[r]);
+  return {taskOk, extra, ok: taskOk.every(Boolean) && !extra};
+}
+
+function renderMalenBody(item, isStatic){
+  const p = state.practice;
+  const fig = MAL_FIGUREN[item.figur];
+  const fills = p.malFill || {};
+  const a = r => `data-r="${r}" fill="${fills[r] ? MAL_COLORS[fills[r]].hex : '#FFFFFF'}"` + (isStatic ? '' : ` onclick="malRegion('${r}')"`);
+  const svg = fig.draw(a);
+  const res = isStatic ? malEvaluate(item, fills) : null;
+  const sentences = item.tasks.map((t,i)=>{
+    let mark = '☐';
+    if(isStatic) mark = res.taskOk[i] ? '✅' : '❌';
+    else {
+      const need = t.set.filter(x=>x[1]!=='weiss');
+      if(need.length && need.every(x=>fills[x[0]])) mark = '☑️';
+    }
+    return `<div class="mal-sent"><span class="mal-mark">${mark}</span><span>${t.text}</span></div>`;
+  }).join('');
+  const palette = isStatic ? '' : `<div class="mal-pal">${
+    Object.keys(MAL_COLORS).map(k=>`<button class="mal-col${p.malColor===k?' sel':''}" style="--c:${MAL_COLORS[k].hex}" onclick="malPick('${k}')"><span class="sw"></span>${MAL_COLORS[k].label}</button>`).join('')
+  }<button class="mal-col${p.malColor==='weg'?' sel':''}" onclick="malPick('weg')"><span class="sw sw-weg">✕</span>weg</button></div>`;
+  const note = isStatic
+    ? (res.extra ? `<div class="mal-note">Ein Teil im Bild war gar nicht dran – er sollte weiß bleiben.</div>` : '')
+    : (p.malHint ? `<div class="mal-note">👆 Tippe zuerst eine Farbe an.</div>` : '');
+  return `
+    <div class="task-instr">🎨 Lies und male. Tippe erst eine Farbe an, dann den Teil im Bild.</div>
+    <button class="speak-btn" onclick="speakCurrent()">🔊</button>
+    <div class="mal-sents">${sentences}</div>
+    <div class="mal-fig">${svg}</div>
+    ${palette}${note}
+    ${isStatic ? '' : `<button class="btn btn-primary btn-block" style="margin-top:12px;" onclick="malCheck()">✅ Fertig</button>`}`;
+}
+
+window.malPick = function(k){
+  const p = state.practice; if(p.answered) return;
+  p.malColor = k; p.malHint = false; rerenderKeepScroll();
+};
+window.malRegion = function(r){
+  const p = state.practice; if(p.answered) return;
+  if(!p.malColor){ p.malHint = true; rerenderKeepScroll(); return; }
+  if(p.malColor==='weg') delete p.malFill[r]; else p.malFill[r] = p.malColor;
+  p.malHint = false; rerenderKeepScroll();
+};
+window.malCheck = function(){
+  const p = state.practice; if(p.answered) return;
+  window.practiceAnswer(malEvaluate(p.current, p.malFill).ok ? 0 : 1);
+};
+
 function checkAnswer(item, given){
   if(item.type==='choice' || item.type==='pic' || item.type==='flash' || item.type==='silbchoice') return given===item.answer;
-  if(item.type==='dictate') return given===0;
+  if(item.type==='dictate' || item.type==='match' || item.type==='malen' || item.type==='kreuzseite') return given===0;
   if(item.type==='satzbau') return given===0;
   const norm = s => (s||'').toString().trim().toLowerCase().replace(/ß/g,'ss');
   return norm(given)===norm(item.answer).replace(/ß/g,'ss');
@@ -1807,6 +2374,7 @@ function render(skipAudioStop){
   app.innerHTML = renderScreen();
   if(state.showTeacher) app.innerHTML += renderTeacherOverlay();
   if(state.showInfo) app.innerHTML += renderInfoOverlay();
+  if(state.showStarHelp) app.innerHTML += renderStarHelpOverlay();
   window.scrollTo(0,0);
 }
 
@@ -1823,6 +2391,7 @@ function renderScreen(){
   if(state.screen==='diagreport') return screenDiagReport();
   if(state.screen==='vertiefung') return screenVertiefung();
   if(state.screen==='discover') return screenDiscover();
+  if(state.screen==='lumi') return screenLumi();
   return '';
 }
 
@@ -1926,8 +2495,8 @@ function renderInfoOverlay(){
       <button class="sheet-close" onclick="toggleInfo()">✕</button>
       <h2 style="font-size:1.2rem;">So funktioniert der Buchstabenhafen</h2>
       <p style="font-size:0.9rem;line-height:1.55;color:#334;margin-top:10px;">
-      Der Lotsen-Check (kurze Bildaufgaben, kein Lesen nötig) findet den Startpunkt in sieben Bereichen.
-      Danach öffnet sich die Hafenkarte mit sieben Stationen. In jeder Station passen sich die Aufgaben automatisch an:
+      Der Lotsen-Check (kurze Bildaufgaben, kein Lesen nötig) findet den Startpunkt in mehreren Bereichen.
+      Danach öffnet sich die Hafenkarte mit „Dein Weg“: nur die Stationen, die gerade dran sind (höchstens drei). Gemeisterte Stationen ziehen ins Pokal-Regal um. In jeder Station passen sich die Aufgaben automatisch an:
       läuft es gut, wird es eine Stufe schwerer; läuft es schwer, geht es eine Stufe zurück – die Zone der nächsten Entwicklung.</p>
       <p class="footnote" style="margin-top:14px;">Aufgebaut auf Grundlagen der evidenzbasierten LRS-Diagnostik und -Förderung (u. a. phonologische Bewusstheit, Graphem-Phonem-Zuordnung, Silben- und Morphemstrategien). Kein Ersatz für die schulisch-verbindliche Testung (SCHNABEL/SLS) oder eine fachärztliche bzw. schulpsychologische Diagnostik. Der Fortschritt wird nur lokal auf diesem Gerät gespeichert.</p>
     </div>
@@ -1957,6 +2526,9 @@ function screenDiagnose(){
 }
 
 function renderItemBody(item, handlerName){
+  if(item.type==='match') return renderMatchBody(item, false);
+  if(item.type==='kreuzseite') return renderKreuzseite(item, false);
+  if(item.type==='malen') return renderMalenBody(item, false);
   if(item.type==='silbchoice'){
     const boxW = 58;
     const optsHtml = item.options.map((opt,i)=>{
@@ -2131,9 +2703,9 @@ function renderItemBody(item, handlerName){
   body += `<div class="prompt-text">${item.prompt}</div>`;
   body += `<button class="speak-btn" onclick="speakCurrent()">🔊</button>`;
   if(item.type==='choice'){
-    const cls = item.options.length<=2 ? 'options single' : 'options';
+    const cls = (item.options.length<=2 || item.layout==='single') ? 'options single' : 'options';
     body += `<div class="${cls}">` + item.options.map((opt,i)=>
-      `<button class="opt-btn" onclick="${handlerName}(${i})">${opt}</button>`
+      `<button class="opt-btn" onclick="${handlerName}(${i})">${fmtOpt(opt)}</button>`
     ).join('') + `</div>`;
   } else {
     body += `<div class="text-input-row">
@@ -2198,6 +2770,8 @@ window.diagAnswer = function(given){
   state.diag.domainIndex++;
   if(state.diag.domainIndex>=diagDomains.length){
     state.diagDone = true;
+    state.knownAtStart = {};
+    diagDomains.forEach(dd=>{ if((state.levels[dd.id]||1)>=3) state.knownAtStart[dd.id] = true; });
     if(state.levels.buchstabe === 1 || state.diag.buchstabeSkipped){
       state.needsBasicLetterDrill = true;
     }
@@ -2244,32 +2818,41 @@ function screenVertiefung(){
   </main>`;
 }
 
-function screenMap(){
-  const withStatus = domains.map(d => ({d, info: domainStatus(d)}));
-  const order = {active:0, review:1, mastered:2, locked:3};
-  const sorted = [...withStatus].sort((a,b)=> order[a.info.status]-order[b.info.status]);
+// Hafenkarte: zeigt nur "Dein Weg" (höchstens 3 Stationen nach Bedarf),
+// gemeisterte Stationen wohnen im Pokal-Regal. Nichts davon verändert
+// gespeicherte Daten - es ist reine Darstellung.
+function stationHint(d, info){
+  if(info.status!=='active') return '';
+  const lvl = state.levels[d.id]||1, st = state.stars[d.id]||0;
+  const saved = state.attemptLogs[d.id];
+  const n = (saved && saved.level===lvl) ? (saved.log||[]).length : 0;
+  const anchorLine = lvl>=4 ? 'Du bist auf der höchsten Stufe!'
+    : (n<8 ? `Noch ${8-n} Aufgaben, dann prüfen wir, ob du eine Stufe höher kannst.`
+            : 'Schaffst du fast alles richtig, geht es eine Stufe hoch.');
+  const cupLine = lvl>=3 ? `🏆 Pokal: ⭐ ${Math.min(st,MASTERY_STARS)} von ${MASTERY_STARS} und sicher auf Stufe 3`
+                         : '🏆 Den Pokal gibt es ab Stufe 3.';
+  return `<div class="station-hint">${anchorLine}<br>${cupLine}</div>`;
+}
 
-  const rows = sorted.map(({d,info})=>{
-    const lvl = state.levels[d.id]||1;
-    const st = state.stars[d.id]||0;
-    const anchors = '⚓'.repeat(lvl) + '·'.repeat(4-lvl);
-    const cls = 'station' + (info.status==='locked' ? ' locked' : info.status==='mastered' ? ' mastered' : info.status==='review' ? ' review' : '');
-    const onclick = info.status==='locked' ? '' : `onclick="openDomain('${d.id}')"`;
-    let badge = `<div class="stars-badge">⭐ ${st}</div>`;
-    let extra = '';
-    if(info.status==='mastered'){
-      badge = `<div class="stars-badge">🏆 ${st}</div>`;
-    }
-    if(info.status==='review'){
-      badge = `<div class="stars-badge">🔁 Auffrischen</div>`;
-      extra = `<div class="lock-note">Kurzer Check, ob das noch sicher sitzt.</div>`;
-    }
-    if(info.status==='locked'){
-      badge = `<div class="stars-badge">🔒</div>`;
-      const names = info.prereqDomains.map(x=>x.name).join(' & ');
-      extra = `<div class="lock-note">Kommt, sobald ${names} sicherer sitzen.</div>`;
-    }
-    return `
+function stationCard(d, info){
+  const lvl = state.levels[d.id]||1;
+  const st = state.stars[d.id]||0;
+  const anchors = '⚓'.repeat(lvl) + '·'.repeat(Math.max(0,4-lvl));
+  const cls = 'station' + (info.status==='locked' ? ' locked' : info.status==='mastered' ? ' mastered' : info.status==='review' ? ' review' : '');
+  const onclick = info.status==='locked' ? '' : `onclick="openDomain('${d.id}')"`;
+  let badge = `<div class="stars-badge">⭐ ${st}</div>`;
+  let extra = stationHint(d, info);
+  if(info.status==='mastered') badge = `<div class="stars-badge">🏆 ${st}</div>`;
+  if(info.status==='review'){
+    badge = `<div class="stars-badge">🔁 Auffrischen</div>`;
+    extra = `<div class="lock-note">Kurzer Check, ob das noch sicher sitzt.</div>`;
+  }
+  if(info.status==='locked'){
+    badge = `<div class="stars-badge">🔒</div>`;
+    const names = info.prereqDomains.map(x=>x.name).join(' & ');
+    extra = `<div class="lock-note">Kommt, sobald ${names} sicherer sitzen.</div>`;
+  }
+  return `
     <div class="${cls}" ${onclick}>
       <div class="station-icon" style="background:${d.color}22;">${d.icon}</div>
       <div class="station-body">
@@ -2280,7 +2863,53 @@ function screenMap(){
       </div>
       ${badge}
     </div>`;
-  }).join('');
+}
+
+function screenMap(){
+  ensureTrophies();
+  const withStatus = domains.map(d => ({d, info: domainStatus(d)}));
+  const known = state.knownAtStart || {};
+  const showAll = !!state.showAllStations;
+
+  const rank = ({d,info}) => [info.status==='review'?0:1, state.levels[d.id]||1, TIERS[d.id]||0, domains.indexOf(d)];
+  const cmp = (a,b)=>{ const ra=rank(a), rb=rank(b); for(let i=0;i<ra.length;i++){ if(ra[i]!==rb[i]) return ra[i]-rb[i]; } return 0; };
+  const needed = withStatus
+    .filter(x => (x.info.status==='active' || x.info.status==='review') && !(known[x.d.id] && x.info.status==='active'))
+    .sort(cmp);
+
+  let wegList, moreList = [];
+  if(showAll){
+    const order = {active:0, review:1, mastered:2, locked:3};
+    wegList = [...withStatus].sort((a,b)=> order[a.info.status]-order[b.info.status]);
+  } else {
+    wegList = needed.slice(0,3);
+    moreList = needed.slice(3);
+  }
+  const wegHtml = wegList.length
+    ? wegList.map(x=>stationCard(x.d,x.info)).join('')
+    : `<div class="shelf-empty">Im Moment ist keine Station dran. Schau ins Pokal-Regal oder frag deine Lehrkraft.</div>`;
+  const wegTitle = showAll ? `<h2 class="map-h">Alle Stationen <small>(Lehrkraft-Ansicht)</small></h2>` : `<h2 class="map-h">Dein Weg</h2>`;
+  const moreHtml = moreList.length ? `
+    <button class="btn btn-ghost more-btn" onclick="toggleMoreStations()">${state.showMoreStations ? '▲ Weniger anzeigen' : `➕ Weitere Stationen (${moreList.length})`}</button>
+    ${state.showMoreStations ? `<div class="map-wrap">${moreList.map(x=>stationCard(x.d,x.info)).join('')}</div>` : ''}` : '';
+  const lockedCount = withStatus.filter(x=>x.info.status==='locked').length;
+  const lockedNote = (!showAll && lockedCount) ? `<p class="footnote" style="text-align:center;margin-top:10px;">🔒 Noch ${lockedCount} ${lockedCount===1?'Station wartet':'Stationen warten'} auf dich – sie kommen, sobald du bereit bist.</p>` : '';
+
+  // Pokal-Regal: einmal verdiente Pokale bleiben; "schon gekonnt" ohne Pokal/Sterne.
+  const trophyDomains = domains.filter(d=>state.trophies && state.trophies[d.id]);
+  const knownDomains = domains.filter(d=>known[d.id] && !(state.trophies && state.trophies[d.id]));
+  const tile = (d, cls, line) => {
+    const locked = domainStatus(d).status==='locked';
+    return `<button class="shelf-tile ${cls}" ${locked?'disabled':`onclick="openDomain('${d.id}')"`}><span class="si">${d.icon}</span><span class="sn">${d.name}</span><span class="sc">${line}</span></button>`;
+  };
+  const tiles = trophyDomains.map(d=>tile(d,'',`🏆 ⭐ ${state.stars[d.id]||0}`)).join('')
+              + knownDomains.map(d=>tile(d,'known','✔ schon gekonnt')).join('');
+  const totalStars = Object.values(state.stars||{}).reduce((a,b)=>a+(b||0),0);
+  const shelfHtml = `
+    <div class="shelf">
+      <div class="shelf-head"><h3>🏆 Dein Pokal-Regal</h3><div class="shelf-total">⭐ ${totalStars}</div></div>
+      <div class="shelf-row">${tiles || '<div class="shelf-empty">Hier sammelst du deine Pokale. Jede Station, die du sicher kannst, bekommt hier einen Platz.</div>'}</div>
+    </div>`;
 
   const drillBanner = state.needsBasicLetterDrill ? `
     <div class="prompt-card" style="text-align:center;border-color:var(--coral);margin-bottom:16px;">
@@ -2325,8 +2954,12 @@ function screenMap(){
     ${vertiefungBanner}
     ${wordStoreBanner}
     ${categoryBanner}
-    <div class="map-wrap">${rows}</div>
-    <p class="footnote">⚓ zeigt deine aktuelle Übungsstufe (1–3), ⭐ deine gesammelten Sterne, 🏆 einen gefestigten Bereich, 🔒 einen Bereich, der noch etwas wartet.</p>
+    ${wegTitle}
+    <div class="map-wrap">${wegHtml}</div>
+    ${moreHtml}
+    ${lockedNote}
+    ${shelfHtml}
+    <p class="footnote" style="text-align:center;">⚓ Stufe (1–4) · ⭐ Sterne · 🏆 Pokal <button class="help-link" onclick="toggleStarHelp()">❓ So bekomme ich ⭐ ⚓ 🏆</button></p>
   </main>`;
 }
 
@@ -2344,6 +2977,193 @@ window.startDiagnose = function(){
 window.goMap = function(){ state.screen='map'; render(); };
 window.toggleTeacher = function(){ state.showTeacher = !state.showTeacher; render(); };
 window.toggleInfo = function(){ state.showInfo = !state.showInfo; render(); };
+window.toggleStarHelp = function(){ state.showStarHelp = !state.showStarHelp; render(); };
+window.toggleMoreStations = function(){ state.showMoreStations = !state.showMoreStations; render(); };
+window.toggleAllStations = function(){ state.showAllStations = !state.showAllStations; state.showTeacher = false; render(); };
+const STAR_HELP_TEXT = 'So bekommst du Sterne, Anker und Pokale. Für jede richtige Aufgabe bekommst du einen Stern. Die Sterne bleiben immer bei dir. Der Anker zeigt deine Stufe. Wenn du genug geübt hast und fast alles richtig war, steigst du eine Stufe höher. Einen Pokal bekommst du, wenn du eine Station sicher kannst: Stufe drei, zwölf Sterne und fast alle letzten Aufgaben richtig. Deinen Pokal behältst du für immer.';
+window.speakStarHelp = function(){ speak(STAR_HELP_TEXT); };
+function renderStarHelpOverlay(){
+  return `
+  <div class="overlay" onclick="if(event.target===this) toggleStarHelp()">
+    <div class="sheet">
+      <button class="sheet-close" onclick="toggleStarHelp()">✕</button>
+      <h2 style="font-size:1.3rem;">So bekommst du ⭐ ⚓ 🏆</h2>
+      <div class="help-row"><span class="help-ic">⭐</span><div><b>Stern</b><br>Für jede richtige Aufgabe gibt es einen Stern. Deine Sterne bleiben immer bei dir.</div></div>
+      <div class="help-row"><span class="help-ic">⚓</span><div><b>Anker</b><br>Der Anker zeigt deine Stufe. Hast du genug geübt und fast alles richtig gemacht, geht es eine Stufe hoch.</div></div>
+      <div class="help-row"><span class="help-ic">🏆</span><div><b>Pokal</b><br>Den bekommst du, wenn du eine Station sicher kannst: Stufe 3, 12 ⭐ und fast alle letzten Aufgaben richtig. Den Pokal behältst du für immer.</div></div>
+      <button class="btn btn-primary btn-block" style="margin-top:14px;" onclick="speakStarHelp()">🔊 Vorlesen</button>
+    </div>
+  </div>`;
+}
+
+/* ============================================================
+   Erklärvideo "Lotze Lumi" (Einstieg Buchstabenbrücke)
+   Bilder:  lumi_szene1.jpg … lumi_szene6.jpg (flach neben der HTML-Datei)
+   Ton:     lumi_<Szene>_<Satz>.m4a, z. B. lumi_2_1.m4a (flach, wie die Laut-Dateien).
+            Fehlt eine Datei, spricht automatisch die Gerätestimme (say).
+   cap = Untertitel und Sprechertext zum Einsprechen, say = Ersatztext für die Gerätestimme,
+   pause = Pause nach dem Satz in Millisekunden.
+   ============================================================ */
+const LUMI_SCENES = [
+  {title:'Willkommen im Hamburger Buchstabenhafen', img:'lumi_szene1.jpg', steps:[
+    {cap:'Ahoi! Ich bin Lotze Lumi.', say:'Ahoi! Ich bin Lotze Lumi.', pause:500},
+    {cap:'Im Hamburger Hafen ist etwas durcheinandergeraten.', say:'Im Hamburger Hafen ist etwas durcheinandergeraten.', pause:500},
+    {cap:'Die Laute und Buchstaben müssen wieder zueinanderfinden.', say:'Die Laute und Buchstaben müssen wieder zueinanderfinden.', pause:800},
+    {cap:'Hilfst du mir?', say:'Hilfst du mir?', pause:1500}]},
+  {title:'Hören → Buchstabe', img:'lumi_szene2.jpg', steps:[
+    {cap:'Welchen Laut hörst du?', say:'Welchen Laut hörst du?', pause:500},
+    {cap:'/m/!', say:'Mmmm!', pause:1200},
+    {cap:'Welcher Buchstabe passt dazu?', say:'Welcher Buchstabe passt dazu?', pause:500},
+    {cap:'Schau auf die Buchstabenbojen. M, S oder L?', say:'Schau auf die Buchstabenbojen. M, S oder L?', pause:800},
+    {cap:'Überlege kurz …', say:'Überlege kurz.', pause:4000}]},
+  {title:'Buchstabe → Laut', img:'lumi_szene3.jpg', steps:[
+    {cap:'Jetzt andersherum!', say:'Jetzt andersherum!', pause:600},
+    {cap:'Schau auf das F.', say:'Schau auf das F.', pause:600},
+    {cap:'Welchen Laut macht dieser Buchstabe?', say:'Welchen Laut macht dieser Buchstabe?', pause:800},
+    {cap:'Sprich ihn leise mit: /f/!', say:'Sprich ihn leise mit: ffff!', pause:2500},
+    {cap:'Nicht den Namen des Buchstabens, sondern seinen Laut.', say:'Nicht den Namen des Buchstabens, sondern seinen Laut.', pause:1500}]},
+  {title:'Genau unterscheiden', img:'lumi_szene4.jpg', steps:[
+    {cap:'Halt, hier sehen manche Buchstaben ähnlich aus!', say:'Halt, hier sehen manche Buchstaben ähnlich aus!', pause:600},
+    {cap:'Sie klingen aber ganz unterschiedlich.', say:'Sie klingen aber ganz unterschiedlich.', pause:700},
+    {cap:'Hör genau hin: /b/, /d/, /p/ – das sind verschiedene Laute!', say:'Hör genau hin: b, d, p – das sind verschiedene Laute!', pause:800},
+    {cap:'Nicht verwechseln!', say:'Nicht verwechseln!', pause:1500}]},
+  {title:'Laute im Wort entdecken', img:'lumi_szene5.jpg', steps:[
+    {cap:'Jetzt kommt alles zusammen!', say:'Jetzt kommt alles zusammen!', pause:600},
+    {cap:'Am Anfang hörst du /m/.', say:'Am Anfang hörst du mmm.', pause:900},
+    {cap:'In der Mitte /au/.', say:'In der Mitte au.', pause:900},
+    {cap:'Am Ende /s/.', say:'Am Ende ssss.', pause:900},
+    {cap:'M – au – s: Maus!', say:'M, au, s: Maus!', pause:1500}]},
+  {title:'Du bist ein Lautelotse!', img:'lumi_szene6.jpg', steps:[
+    {cap:'Das hast du prima gemacht!', say:'Das hast du prima gemacht!', pause:600},
+    {cap:'Höre einen Laut und finde den Buchstaben.', say:'Höre einen Laut und finde den Buchstaben.', pause:600},
+    {cap:'Sieh einen Buchstaben und sprich den Laut.', say:'Sieh einen Buchstaben und sprich den Laut.', pause:600},
+    {cap:'Höre genau hin, wenn Laute ähnlich sind.', say:'Höre genau hin, wenn Laute ähnlich sind.', pause:600},
+    {cap:'Jetzt bist du bereit für deine nächste Aufgabe im Buchstabenhafen.', say:'Jetzt bist du bereit für deine nächste Aufgabe im Buchstabenhafen.', pause:800},
+    {cap:'Leinen los!', say:'Leinen los!', pause:1500}]},
+  {title:'Das hast du gelernt', img:'', steps:[
+    {cap:'Das hast du gelernt:', say:'Das hast du gelernt:', pause:500},
+    {cap:'Hören → Buchstabe auswählen', say:'Hören und den Buchstaben auswählen.', pause:600},
+    {cap:'Buchstabe sehen → Laut sprechen', say:'Den Buchstaben sehen und den Laut sprechen.', pause:600},
+    {cap:'Verwechslungspaare unterscheiden', say:'Verwechslungspaare genau unterscheiden.', pause:600},
+    {cap:'Laute im Wort: An-, In- und Endlaut', say:'Laute im Wort entdecken: Anlaut, Inlaut und Endlaut.', pause:900},
+    {cap:'Auf geht’s im Buchstabenhafen!', say:'Auf geht’s im Buchstabenhafen!', pause:1200}]},
+];
+const LUMI_SEEN_KEY = 'lumi_intro';   // wird in discoverSeen gespeichert (kein neues Feld, Export/Import bleiben gleich)
+let lumiRun = {scene:0, step:0, token:0, playing:false, timer:null};
+
+function lumiActive(tok){ return tok===lumiRun.token && state.screen==='lumi' && document.getElementById('lumiCap'); }
+function lumiHalt(){
+  lumiRun.token++; clearTimeout(lumiRun.timer); lumiRun.timer=null;
+  try{ stopAllAudio(); }catch(e){}
+}
+function lumiShow(i){
+  const sc = LUMI_SCENES[i];
+  const img = document.getElementById('lumiImg'), sum = document.getElementById('lumiSum');
+  if(sc.img){ img.style.display='block'; img.src = sc.img; img.classList.remove('kb'); void img.offsetWidth; img.classList.add('kb'); sum.style.display='none'; }
+  else { img.style.display='none'; sum.style.display='flex'; }
+  document.querySelectorAll('.lumi-dots b').forEach((d,k)=>d.classList.toggle('on',k===i));
+  document.getElementById('lumiProg').style.width = ((i+1)/LUMI_SCENES.length*100)+'%';
+  document.getElementById('lumiTitle').textContent = sc.title;
+  document.querySelectorAll('.lumi-tile').forEach(t=>t.classList.remove('lit'));
+}
+function lumiSpeakStep(sceneIdx, stepIdx, tok, done){
+  const st = LUMI_SCENES[sceneIdx].steps[stepIdx];
+  const key = 'lumi_'+(sceneIdx+1)+'_'+(stepIdx+1);
+  playAudioKey(key, ok=>{
+    if(!lumiActive(tok)) return;
+    if(ok){ done(); return; }
+    speak(st.say, 0.85);
+    lumiRun.timer = setTimeout(()=>{ if(lumiActive(tok)) done(); }, Math.max(1800, st.say.length*85));
+  });
+}
+function lumiRunStep(){
+  const tok = ++lumiRun.token;
+  const sc = LUMI_SCENES[lumiRun.scene];
+  if(lumiRun.step >= sc.steps.length){
+    if(lumiRun.scene < LUMI_SCENES.length-1){
+      lumiRun.scene++; lumiRun.step=0; lumiShow(lumiRun.scene);
+      lumiRun.timer = setTimeout(()=>{ if(lumiActive(tok)) lumiRunStep(); }, 700);
+    } else {
+      lumiRun.playing=false;
+      document.getElementById('lumiCap').textContent='🎉 Geschafft!';
+      document.getElementById('lumiPP').textContent='▶ Nochmal';
+      document.getElementById('lumiGo').style.display='block';
+    }
+    return;
+  }
+  const st = sc.steps[lumiRun.step];
+  document.getElementById('lumiCap').textContent = st.cap;
+  if(lumiRun.scene===LUMI_SCENES.length-1)
+    document.querySelectorAll('.lumi-tile').forEach((t,k)=>t.classList.toggle('lit', k < lumiRun.step));
+  const s = lumiRun.scene, p = lumiRun.step;
+  lumiSpeakStep(s, p, tok, ()=>{
+    lumiRun.step++;
+    lumiRun.timer = setTimeout(()=>{ if(lumiActive(tok)) lumiRunStep(); }, st.pause);
+  });
+}
+function screenLumi(){
+  const dots = LUMI_SCENES.map((s,i)=>`<b onclick="lumiGo(${i})"></b>`).join('');
+  return `
+  ${topbar('Lotze Lumi erklärt', 'Kurzes Erklärvideo', true)}
+  <main>
+    <div class="lumi-stage">
+      <img id="lumiImg" alt="" draggable="false">
+      <div class="lumi-sum" id="lumiSum"><h2>🏆 Das hast du gelernt</h2><div class="lumi-tiles">
+        <div class="lumi-tile"><span>👂</span>Hören → Buchstabe<br>auswählen</div>
+        <div class="lumi-tile"><span>👁️</span>Buchstabe sehen →<br>Laut sprechen</div>
+        <div class="lumi-tile"><span>b ↔ d</span>Verwechslungspaare<br>unterscheiden</div>
+        <div class="lumi-tile"><span>🐭</span>Laute im Wort:<br>An-, In-, Endlaut</div></div></div>
+      <div class="lumi-cap" id="lumiCap"></div>
+      <div class="lumi-start" id="lumiStart">
+        <div>${mascotIcon(72)}</div>
+        <p>Hör gut zu und schau genau hin!</p>
+        <button class="btn btn-primary" style="font-size:1.4rem;padding:14px 34px;" onclick="lumiStart()">▶ Video starten</button>
+        <button class="btn btn-ghost" onclick="lumiFinish()">Überspringen</button>
+      </div>
+    </div>
+    <div class="lumi-bar"><i id="lumiProg"></i></div>
+    <div class="lumi-title" id="lumiTitle"></div>
+    <div class="lumi-dots">${dots}</div>
+    <div class="lumi-ctrl">
+      <button class="btn btn-ghost" onclick="lumiGo(lumiRun.scene-1)" aria-label="Zurück">⏮</button>
+      <button class="btn btn-primary" id="lumiPP" onclick="lumiToggle()">⏸ Pause</button>
+      <button class="btn btn-ghost" onclick="lumiGo(lumiRun.scene+1)" aria-label="Weiter">⏭</button>
+    </div>
+    <button class="btn btn-primary btn-block" id="lumiGo" style="display:none;margin-top:14px;" onclick="lumiFinish()">Los geht's! ▶️</button>
+    <button class="btn btn-ghost btn-block" style="margin-top:10px;" onclick="lumiFinish()">Video überspringen</button>
+  </main>`;
+}
+window.showLumi = function(){
+  lumiHalt(); lumiRun.scene=0; lumiRun.step=0; lumiRun.playing=false;
+  state.screen='lumi'; render();
+  lumiShow(0);
+};
+window.lumiStart = function(){
+  document.getElementById('lumiStart').style.display='none';
+  lumiRun.playing=true; lumiRun.scene=0; lumiRun.step=0; lumiShow(0);
+  document.getElementById('lumiPP').textContent='⏸ Pause';
+  lumiRunStep();
+};
+window.lumiGo = function(i){
+  i = Math.max(0, Math.min(LUMI_SCENES.length-1, i));
+  lumiHalt(); lumiRun.scene=i; lumiRun.step=0; lumiRun.playing=true;
+  document.getElementById('lumiStart').style.display='none';
+  document.getElementById('lumiGo').style.display='none';
+  document.getElementById('lumiPP').textContent='⏸ Pause';
+  lumiShow(i); lumiRunStep();
+};
+window.lumiToggle = function(){
+  if(lumiRun.playing){ lumiRun.playing=false; lumiHalt(); document.getElementById('lumiPP').textContent='▶ Weiter'; return; }
+  if(lumiRun.scene===LUMI_SCENES.length-1 && lumiRun.step>=LUMI_SCENES[lumiRun.scene].steps.length){ lumiGo(0); return; }
+  document.getElementById('lumiStart').style.display='none';
+  lumiRun.playing=true; document.getElementById('lumiPP').textContent='⏸ Pause'; lumiRunStep();
+};
+window.lumiFinish = function(){
+  lumiHalt(); lumiRun.playing=false;
+  state.discoverSeen[LUMI_SEEN_KEY] = true;
+  saveProgress();
+  state.screen='goal'; render(); speakGoal();
+};
 
 window.openDomain = function(domainId){
   const d = domains.find(x=>x.id===domainId);
@@ -2359,6 +3179,11 @@ window.openDomain = function(domainId){
     state.screen = 'discover';
     render();
     speakDiscoverPair();
+    return;
+  }
+  // Erster Besuch der Buchstabenbrücke: zuerst das kurze Erklärvideo.
+  if(domainId==='buchstabe' && !state.pendingReview && !state.discoverSeen[LUMI_SEEN_KEY]){
+    showLumi();
     return;
   }
   state.screen = 'goal';
@@ -2415,7 +3240,7 @@ window.startPracticeSession = function(){
   }
   state.practice = {
     domainId, level, isReview,
-    sessionTarget: isReview ? 4 : (domainId==='satzbau' ? 2 : 6), sessionErrors:0,
+    sessionTarget: isReview ? 4 : (domainId==='satzbau' ? 2 : (domainId==='lesekai' && level>=4 ? 3 : 6)), sessionErrors:0,
     attemptLog: saved.log, queue:[],
     itemsDone:0, answered:false, lastCorrect:null, current:null,
     levelUpMsg:null, levelDownMsg:null,
@@ -2486,6 +3311,7 @@ function screenGoal(){
       <p style="font-size:1.1rem;line-height:1.55;color:var(--harbor-dark);font-family:'Baloo 2';font-weight:600;">${goal}</p>
       <button class="speak-btn" onclick="speakGoal()">🔊</button>
       <button class="btn btn-primary btn-block" style="margin-top:14px;" onclick="startPracticeSession()">Los geht's! ▶️</button>
+      ${d.id==='buchstabe' ? '<button class="btn btn-ghost btn-block" style="margin-top:10px;" onclick="showLumi()">🎬 Erklärvideo ansehen</button>' : ''}
     </div>
   </main>`;
 }
@@ -2580,6 +3406,17 @@ function pickPracticeItem(){
     p.sbWordIndex = 0;
     p.sbMarked = [];
   }
+  if(p.current && p.current.type==='kreuzseite'){
+    p.current = {...p.current, rows: buildKreuzseiteRows(p.current.pool, p.current.size)};
+    p.ksAnswers = {}; p.ksResults = null;
+  }
+  if(p.current && p.current.type==='match'){
+    p.matchSel = null; p.matchDone = []; p.matchWrong = 0; p.matchFlash = null; p.matchNeedPic = false;
+    p.matchOrder = shuffle(p.current.pairs.map((_,i)=>i));
+  }
+  if(p.current && p.current.type==='malen'){
+    p.malColor = null; p.malFill = {}; p.malHint = false;
+  }
   if(p.current && p.current.type==='wordstudy'){
     p.wsPhase = 'study';
     p.wsShowPicture = false;
@@ -2594,8 +3431,10 @@ function screenPractice(){
 
   let feedback='';
   if(p.answered){
-    if(p.lastCorrect){
-      feedback = `<div class="feedback-box feedback-good">✅ ${p.levelUpMsg ? (p.correctPhrase+' '+p.levelUpMsg) : p.correctPhrase}</div>`;
+    if(item.type==='kreuzseite'){
+      feedback = ksFeedback(p);
+    } else if(p.lastCorrect){
+      feedback = `<div class="feedback-box feedback-good">✅ ${p.levelUpMsg ? (p.correctPhrase+' '+p.levelUpMsg) : p.correctPhrase}${p.isWordReview ? '' : ' <b class="plus-star">+1 ⭐</b>'}</div>`;
     } else if(item.type==='dictate'){
       feedback = `<div class="feedback-box feedback-tip">💡 Okay, dieses Wort hast du noch nicht ganz richtig geschrieben. Das üben wir einfach noch mal.${p.levelDownMsg?('<br><br>'+p.levelDownMsg):''}</div>`;
     } else if(item.type==='satzbau'){
@@ -2610,14 +3449,14 @@ function screenPractice(){
   }
 
   const bodyHtml = p.answered ? renderItemBodyStatic(item, p.lastGiven) : renderItemBody(item, 'practiceAnswer');
-  const skipBtn = (!p.answered && !['flash','dictate','satzbau','wordstudy'].includes(item.type) && p.level>=2)
+  const skipBtn = (!p.answered && !['flash','dictate','satzbau','wordstudy','match','malen','kreuzseite'].includes(item.type) && p.level>=2)
     ? `<button class="btn btn-ghost" style="margin-top:14px;font-size:0.95rem;" onclick="practiceDontKnow()">🤷 Weiß ich nicht</button>`
     : '';
 
   return `
   ${topbar(d.name, d.sub, true)}
   <main>
-    <div class="progress-track"><div class="progress-fill" style="width:${Math.min(100,(p.itemsDone/6)*100)}%; background:${d.color};"></div></div>
+    <div class="progress-track"><div class="progress-fill" style="width:${Math.min(100,(p.itemsDone/(p.sessionTarget||6))*100)}%; background:${d.color};"></div></div>
     <div class="prompt-card">
       <div class="domain-tag" style="background:${d.color}22;">${d.icon} Stufe ${p.level} von 4</div>
       ${bodyHtml}
@@ -2878,6 +3717,9 @@ window.startCategoryReview = function(category){
 };
 
 function renderItemBodyStatic(item, given){
+  if(item.type==='match') return renderMatchBody(item, true);
+  if(item.type==='kreuzseite') return renderKreuzseite(item, true);
+  if(item.type==='malen') return renderMalenBody(item, true);
   if(item.type==='wordstudy'){
     return `
       <div class="task-instr">👀 Dein Wort war:</div>
@@ -2937,12 +3779,12 @@ function renderItemBodyStatic(item, given){
   body += `<div class="prompt-text">${item.prompt}</div>`;
   body += `<button class="speak-btn" onclick="speakCurrent()">🔊</button>`;
   if(item.type==='choice'){
-    const cls = item.options.length<=2 ? 'options single' : 'options';
+    const cls = (item.options.length<=2 || item.layout==='single') ? 'options single' : 'options';
     body += `<div class="${cls}">` + item.options.map((opt,i)=>{
       let cls2='opt-btn';
       if(i===item.answer) cls2+=' correct';
       else if(i===given) cls2+=' wrong';
-      return `<button class="${cls2}" disabled>${opt}</button>`;
+      return `<button class="${cls2}" disabled>${fmtOpt(opt)}</button>`;
     }).join('') + `</div>`;
   } else {
     body += `<div class="text-input-row"><input type="text" disabled value="${escHtml(given||'')}"></div>`;
@@ -3035,7 +3877,7 @@ window.practiceAnswer = function(given){
         }
       }
     }
-    if(!levelChanged && p.level>1 && !correct){
+    if(!levelChanged && p.level>1 && (!correct || (item.type==='kreuzseite' && p.ksResults && p.ksResults.includes(false)))){
       const lastFour = p.attemptLog.slice(-4);
       if(lastFour.filter(x=>!x).length>=3){
         p.level--;
@@ -3051,10 +3893,15 @@ window.practiceAnswer = function(given){
     const dObj = domains.find(x=>x.id===p.domainId);
     if(dObj && domainStatus(dObj).status==='mastered' && !state.mastery[p.domainId]){
       state.mastery[p.domainId] = {nextReviewAt: addDays(todayStr(), 14)};
+      state.trophies = state.trophies || {};
+      state.trophies[p.domainId] = todayStr();
+      p.levelUpMsg = (p.levelUpMsg ? p.levelUpMsg + ' ' : '') + '🏆 Pokal! Diese Station kannst du jetzt sicher.';
     }
   }
 
-  if(correct){
+  if(item.type==='kreuzseite'){
+    speak(ksSpeech(p));
+  } else if(correct){
     speak(p.levelUpMsg ? (p.correctPhrase + ' ' + p.levelUpMsg) : p.correctPhrase);
   } else if(item.type==='dictate'){
     speak('Okay, dieses Wort hast du noch nicht ganz richtig geschrieben. Das üben wir einfach noch mal.' + (p.levelDownMsg ? ' ' + p.levelDownMsg : ''));
@@ -3364,13 +4211,29 @@ function historyBarChart(levels, color){
   return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" style="display:block;">${bars}</svg>`;
 }
 
+function renderReadProfileSection(){
+  const entries = Object.keys(READ_ERROR_LABELS)
+    .map(k => ({name: READ_ERROR_LABELS[k], count: state.errorProfile[k]||0}))
+    .filter(e => e.count > 0).sort((a,b)=>b.count-a.count);
+  if(entries.length===0) return '';
+  const maxCount = Math.max(...entries.map(e=>e.count));
+  const rows = entries.map(e => `<tr>
+      <td style="font-size:0.85rem;">${e.name}</td>
+      <td><svg viewBox="0 0 140 16" width="140" height="16"><rect x="0" y="2" width="${Math.round((e.count/maxCount)*140)}" height="12" fill="#B5527A" rx="3"/></svg></td>
+      <td style="font-size:0.85rem;text-align:center;">${e.count}</td></tr>`).join('');
+  return `
+    <h3 style="font-size:1rem;margin-top:18px;">Leseprofil (Lesekai)</h3>
+    <p style="font-size:0.8rem;color:#6B7F8C;margin-top:2px;">Zeigt, wo beim genauen Lesen Fehler passieren (Wortanfang, Wortmitte, Wortende, Satz, Anweisung).</p>
+    <table class="teacher-panel"><tr><th>Art des Lesefehlers</th><th>Häufigkeit</th><th>Anzahl</th></tr>${rows}</table>`;
+}
+
 function renderErrorProfileSection(){
   const entries = Object.keys(ERROR_CATEGORIES)
     .map(cat => ({cat, name: ERROR_CATEGORIES[cat], count: state.errorProfile[cat]||0}))
     .filter(e => e.count > 0)
     .sort((a,b) => b.count - a.count);
   if(entries.length === 0){
-    return `<h3 style="font-size:1rem;margin-top:18px;">Fehlerprofil</h3><p style="font-size:0.85rem;color:#6B7F8C;margin-top:4px;">Noch keine kategorisierten Fehler erfasst (Leuchtturm/Speicherstadt).</p>`;
+    return `<h3 style="font-size:1rem;margin-top:18px;">Fehlerprofil</h3><p style="font-size:0.85rem;color:#6B7F8C;margin-top:4px;">Noch keine kategorisierten Fehler erfasst (Leuchtturm/Speicherstadt).</p>` + renderReadProfileSection();
   }
   const maxCount = Math.max(...entries.map(e=>e.count));
   const rows = entries.map(e => {
@@ -3384,7 +4247,7 @@ function renderErrorProfileSection(){
   return `
     <h3 style="font-size:1rem;margin-top:18px;">Fehlerprofil (Leuchtturm &amp; Speicherstadt)</h3>
     <p style="font-size:0.8rem;color:#6B7F8C;margin-top:2px;">Zeigt, bei welchen Rechtschreibmustern noch Unsicherheit besteht - nicht nur wie viele, sondern welche Art von Fehlern.</p>
-    <table class="teacher-panel"><tr><th>Muster</th><th>Häufigkeit</th><th>Anzahl</th></tr>${rows}</table>`;
+    <table class="teacher-panel"><tr><th>Muster</th><th>Häufigkeit</th><th>Anzahl</th></tr>${rows}</table>` + renderReadProfileSection();
 }
 
 function renderHistorySection(){
@@ -3432,11 +4295,7 @@ window.saveWeekNote = function(){
   }
   entry.note = val;
   state.history = history.slice(-26);
-  try{
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      levels: state.levels, stars: state.stars, diagDone: !!state.diagDone, history: state.history,
-    }));
-  }catch(e){}
+  saveProgress();   // vollständig speichern (früher wurden dabei nur 4 Felder geschrieben)
   render();
 };
 
@@ -3491,6 +4350,7 @@ function renderTeacherOverlay(){
       ${(state.diagReports&&state.diagReports.length) ? `<button class="btn btn-ghost" style="margin-top:16px;" onclick="viewDiagReport()">📋 Diagnosebericht ansehen</button>` : ''}
       <button class="btn btn-primary" style="margin-top:16px;" onclick="exportFoerderplan()">📄 Förderplan-Auszug exportieren</button>
       <p style="font-size:0.78rem;color:#6B7F8C;line-height:1.4;margin-top:4px;">Erzeugt eine druckbare Übersicht (Lernausgangslage, Förderziele, Verlauf) als Arbeitsgrundlage für den diagnosegestützten Förderplan nach § 5 VO Notenschutz – kein fertiger, rechtsgültiger Förderplan und kein Ersatz für SCHNABEL/SLS.</p>
+      <button class="btn btn-ghost" style="margin-top:10px;" onclick="toggleAllStations()">${state.showAllStations ? '👁️ Wieder nur „Dein Weg" zeigen' : '👁️ Alle Stationen zeigen (Lehrkraft)'}</button>
       <button class="btn btn-ghost" style="margin-top:10px;" onclick="toggleTeacher(); startDiagnose();">🔁 Diagnose erneut durchführen (z. B. nach 6 Monaten)</button>
       <button class="btn btn-ghost" style="margin-top:10px;" onclick="exportData()">📤 Daten exportieren (Sicherung)</button>
       <button class="btn btn-ghost" style="margin-top:10px;" onclick="document.getElementById('importFileInput').click()">📥 Daten importieren</button>
