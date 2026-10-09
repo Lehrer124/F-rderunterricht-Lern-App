@@ -401,17 +401,57 @@ const TIERS = {
 // Teil der kurzen digitalen Einstiegsdiagnostik. Starten regulär bei Stufe 1,
 // sobald sie über die normale Stufen-Freischaltung erreichbar werden.
 const diagDomains = domains.filter(d => d.id !== 'diktat' && d.id !== 'satzbau' && d.id !== 'lesekai');
-const PREREQ_LEVEL = 2;   // Vorstufe muss mind. Stufe 2 erreicht haben
 const MASTERY_STARS = 12; // ab so vielen Sternen bei Stufe 3 gilt ein Bereich als gefestigt
 
+// ------------------------------------------------------------------
+// Abhängigkeiten zwischen den Stationen (inhaltlich begründet).
+// DEPS[Station][Stufe] = [[Voraussetzungs-Station, mindestens Stufe], ...]:
+// Das wird gebraucht, um diese Stufe zu betreten. Die Bedingungen gelten
+// kumulativ (Stufe 3 braucht auch alles von Stufe 1 und 2). Stufe 1 = Start der
+// Station. Stufe "n" einer Voraussetzung heißt: ihre Stufen 1 bis n-1 sind
+// durchlaufen. Es gibt keine Lehrkraft-Freigabe, die Kinder selbst nutzen könnten.
+// ------------------------------------------------------------------
+const DEPS = {
+  // Aufschreiben setzt Buchstabenkenntnis (Laut -> Buchstabe) und Anlaut-Hören voraus
+  silbendock:      {1:[['buchstabe',2],['phon',2]], 4:[['buchstabe',3]]},
+  // Wörter lesen: Buchstabenbrücke Stufe 2 ("ganze Wörter mit ihren Buchstaben verbinden")
+  lesen:           {1:[['buchstabe',2]], 3:[['buchstabe',3]]},
+  // Lesekai: Wörter zum Bild; Silbenfarben brauchen Silbenbewusstheit; Sätze/Anweisungen brauchen Satzlesen
+  lesekai:         {1:[['buchstabe',2]], 2:[['phon',2]], 3:[['lesen',2]], 4:[['lesen',3]]},
+  // ganze Wörter schreiben: Laute heraushören (Silbendock bis Silben) + Buchstaben;
+  // Konsonantenhäufungen (Stern, Schlange, Pfanne) erst nach Buchstabenbrücke Stufe 3
+  schreib1:        {1:[['silbendock',3],['buchstabe',2]], 3:[['buchstabe',3],['silbendock',4]], 4:[['buchstabe',4]]},
+  // Rechtschreibregeln bauen auf sicherem lautgetreuem Schreiben und Wörterlesen auf
+  schreib2:        {1:[['schreib1',3],['lesen',2]], 3:[['schreib1',4]]},
+  grundwortschatz: {1:[['schreib1',3],['lesen',2]], 3:[['schreib1',4]], 4:[['lesen',3]]},
+  satzbau:         {1:[['schreib1',3],['lesen',2]], 3:[['schreib1',4]]},
+  diktat:          {1:[['schreib2',2],['grundwortschatz',2],['satzbau',2]], 3:[['schreib2',3],['grundwortschatz',3]]},
+};
+function depsMissing(id, level){
+  const tab = DEPS[id]; if(!tab) return [];
+  const need = {};
+  Object.keys(tab).map(Number).filter(L=>L<=level).forEach(L=>{
+    tab[L].forEach(([sid,lv])=>{ need[sid] = Math.max(need[sid]||0, lv); });
+  });
+  return Object.keys(need)
+    .filter(sid => (state.levels[sid]||1) < need[sid])
+    .map(sid => ({d: domains.find(x=>x.id===sid), need: need[sid]}));
+}
+// Schon begonnen = es wurde wirklich geübt (nicht nur ein Diagnose-Startwert).
+// Begonnene Stationen werden nie wieder gesperrt.
+function stationStarted(id){
+  const saved = state.attemptLogs[id];
+  return (state.stars[id]||0)>0 || (state.errorCounts[id]||0)>0 || !!state.mastery[id]
+      || !!(state.trophies && state.trophies[id]) || !!(saved && saved.log && saved.log.length);
+}
+// Wartet die Station auf eine Voraussetzung für die nächste Stufe?
+function nextLevelBlocked(id){
+  const lvl = state.levels[id]||1;
+  return lvl<4 ? depsMissing(id, lvl+1) : [];
+}
 function domainStatus(d){
-  const tier = TIERS[d.id] || 0;
-  if(tier > 0){
-    // Lesekai ist eine Ergänzung zur Lesefahrrinne und sperrt keine höhere Stufe.
-    const prereqDomains = domains.filter(x => TIERS[x.id] === tier-1 && x.id!=='lesekai');
-    const ready = prereqDomains.every(x => (state.levels[x.id]||1) >= PREREQ_LEVEL);
-    if(!ready) return {status:'locked', prereqDomains};
-  }
+  const missing = depsMissing(d.id, 1);
+  if(missing.length && !stationStarted(d.id)) return {status:'locked', missing};
   const lvl = state.levels[d.id]||1;
   const m = state.mastery[d.id];
   // Gemeistert: bereits vergebenes Mastery bleibt bestehen (Altbestand), neu
@@ -2833,7 +2873,9 @@ function stationHint(d, info){
             : 'Schaffst du fast alles richtig, geht es eine Stufe hoch.');
   const cupLine = lvl>=3 ? `🏆 Pokal: ⭐ ${Math.min(st,MASTERY_STARS)} von ${MASTERY_STARS} und sicher auf Stufe 3`
                          : '🏆 Den Pokal gibt es ab Stufe 3.';
-  return `<div class="station-hint">${anchorLine}<br>${cupLine}</div>`;
+  const wait = nextLevelBlocked(d.id);
+  const waitLine = wait.length ? `<br>⏳ Für die nächste Stufe übst du zuerst: ${wait.map(x=>`${x.d.name} (Stufe ${x.need})`).join(' &amp; ')}.` : '';
+  return `<div class="station-hint">${anchorLine}<br>${cupLine}${waitLine}</div>`;
 }
 
 function videoButton(d, info){
@@ -2858,8 +2900,8 @@ function stationCard(d, info){
   }
   if(info.status==='locked'){
     badge = `<div class="stars-badge">🔒</div>`;
-    const names = info.prereqDomains.map(x=>x.name).join(' & ');
-    extra = `<div class="lock-note">Kommt, sobald ${names} sicherer sitzen.</div>`;
+    const names = info.missing.map(x=>`${x.d.name} (Stufe ${x.need})`).join(' & ');
+    extra = `<div class="lock-note">Kommt, sobald du in ${names} so weit bist.</div>`;
   }
   return `
     <div class="${cls}" ${onclick}>
@@ -2881,7 +2923,9 @@ function screenMap(){
   const known = state.knownAtStart || {};
   const showAll = !!state.showAllStations;
 
-  const rank = ({d,info}) => [info.status==='review'?0:1, state.levels[d.id]||1, TIERS[d.id]||0, domains.indexOf(d)];
+  // Reihenfolge: Auffrischung zuerst; dann Stationen, an denen etwas zu lernen ist
+  // (nicht wartend), begonnene vor neuen, niedrige Stufe vor hoher.
+  const rank = ({d,info}) => [info.status==='review'?0:1, (nextLevelBlocked(d.id).length && stationStarted(d.id))?1:0, stationStarted(d.id)?0:1, state.levels[d.id]||1, TIERS[d.id]||0, domains.indexOf(d)];
   const cmp = (a,b)=>{ const ra=rank(a), rb=rank(b); for(let i=0;i<ra.length;i++){ if(ra[i]!==rb[i]) return ra[i]-rb[i]; } return 0; };
   const needed = withStatus
     .filter(x => (x.info.status==='active' || x.info.status==='review') && !(known[x.d.id] && x.info.status==='active'))
@@ -2892,8 +2936,24 @@ function screenMap(){
     const order = {active:0, review:1, mastered:2, locked:3};
     wegList = [...withStatus].sort((a,b)=> order[a.info.status]-order[b.info.status]);
   } else {
-    wegList = needed.slice(0,3);
-    moreList = needed.slice(3);
+    // höchstens drei Stationen, davon höchstens eine neue (noch nicht begonnene)
+    wegList = []; moreList = [];
+    let newCount = 0;
+    needed.forEach(x=>{
+      const fresh = !stationStarted(x.d.id) && x.info.status!=='review';
+      if(wegList.length<3 && (!fresh || newCount<1)){ wegList.push(x); if(fresh) newCount++; }
+      else moreList.push(x);
+    });
+    // Ein Platz bleibt für Neues frei: Gibt es eine freigeschaltete neue Station, rückt sie
+    // nach, damit parallel gelernt wird (die zuletzt einsortierte begonnene Station wartet unter "Weitere").
+    if(wegList.length===3 && newCount===0){
+      const idx = moreList.findIndex(x=>!stationStarted(x.d.id) && x.info.status!=='review');
+      const last = wegList[2];
+      if(idx>=0 && last.info.status!=='review'){
+        const fresh = moreList.splice(idx,1)[0];
+        wegList[2] = fresh; moreList.unshift(last);
+      }
+    }
   }
   const wegHtml = wegList.length
     ? wegList.map(x=>stationCard(x.d,x.info)).join('')
@@ -3877,7 +3937,13 @@ window.practiceAnswer = function(given){
     // erkennbar niedrig ist – reines Raten reicht nicht mehr aus.
     if(p.level<4 && p.attemptLog.length>=8){
       const lastSix = p.attemptLog.slice(-6);
-      if(lastSix.filter(x=>!x).length<=1){
+      const wait = nextLevelBlocked(p.domainId);
+      if(lastSix.filter(x=>!x).length<=1 && wait.length){
+        if(!p.waitShown){
+          p.waitShown = true;
+          p.levelUpMsg = '👍 Das kannst du schon richtig gut! Damit es hier weitergeht, übst du zuerst: ' + wait.map(x=>x.d.name+' (Stufe '+x.need+')').join(' und ') + '.';
+        }
+      } else if(lastSix.filter(x=>!x).length<=1){
         p.level++;
         p.attemptLog=[]; p.queue=[];
         levelChanged = true;
