@@ -273,6 +273,8 @@
   .ks-opt.wrong .ks-box::after{content:"✗";}
   .ks-diff{color:var(--coral-dark);text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:4px;}
   .btn[disabled]{opacity:.5;cursor:default;}
+  /* ---- Lernvideo-Knopf auf der Stationskachel ---- */
+  .station-video{margin-top:8px;display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:6px 14px;border-radius:14px;border:2px solid var(--coral);background:#fff;color:var(--coral-dark);font-family:inherit;font-weight:700;font-size:.9rem;cursor:pointer;}
   /* ---- Erklärvideo Lotze Lumi ---- */
   .lumi-stage{position:relative;background:#0F3145;border-radius:20px;overflow:hidden;aspect-ratio:10/7;border:4px solid #F4B93E;margin-top:14px;}
   .lumi-stage{background:#4D9CCB;}
@@ -2834,6 +2836,13 @@ function stationHint(d, info){
   return `<div class="station-hint">${anchorLine}<br>${cupLine}</div>`;
 }
 
+function videoButton(d, info){
+  if(info.status==='locked') return '';
+  const v = LERNVIDEOS.find(x=>x.domain===d.id);
+  if(!v) return '';
+  return `<button class="station-video" onclick="event.stopPropagation();showLumi('${v.id}','map')">🎬 Erklärvideo</button>`;
+}
+
 function stationCard(d, info){
   const lvl = state.levels[d.id]||1;
   const st = state.stars[d.id]||0;
@@ -2860,6 +2869,7 @@ function stationCard(d, info){
         <div class="sub">${d.sub}</div>
         <div class="anchors">${anchors}</div>
         ${extra}
+        ${videoButton(d, info)}
       </div>
       ${badge}
     </div>`;
@@ -2997,7 +3007,7 @@ function renderStarHelpOverlay(){
 }
 
 /* ============================================================
-   Erklärvideo "Lotze Lumi" (Einstieg Buchstabenbrücke)
+   Lernvideos (Registry LERNVIDEOS). Erstes Video: "Lotze Lumi" (Einstieg Buchstabenbrücke)
    Bilder:  lumi_szene1.jpg … lumi_szene6.jpg (flach neben der HTML-Datei)
    Ton:     lumi_<Szene>_<Satz>.m4a, z. B. lumi_2_1.m4a (flach, wie die Laut-Dateien).
             Fehlt eine Datei, spricht automatisch die Gerätestimme (say).
@@ -3040,7 +3050,7 @@ const LUMI_SCENES = [
     {cap:'Höre genau hin, wenn Laute ähnlich sind.', say:'Höre genau hin, wenn Laute ähnlich sind.', pause:600},
     {cap:'Jetzt bist du bereit für deine nächste Aufgabe im Buchstabenhafen.', say:'Jetzt bist du bereit für deine nächste Aufgabe im Buchstabenhafen.', pause:800},
     {cap:'Leinen los!', say:'Leinen los!', pause:1500}]},
-  {title:'Das hast du gelernt', img:'', steps:[
+  {title:'Das hast du gelernt', img:'', summary:{title:'🏆 Das hast du gelernt', tiles:[['👂','Hören → Buchstabe<br>auswählen'],['👁️','Buchstabe sehen →<br>Laut sprechen'],['b ↔ d','Verwechslungspaare<br>unterscheiden'],['🐭','Laute im Wort:<br>An-, In-, Endlaut']]}, steps:[
     {cap:'Das hast du gelernt:', say:'Das hast du gelernt:', pause:500},
     {cap:'Hören → Buchstabe auswählen', say:'Hören und den Buchstaben auswählen.', pause:600},
     {cap:'Buchstabe sehen → Laut sprechen', say:'Den Buchstaben sehen und den Laut sprechen.', pause:600},
@@ -3048,8 +3058,15 @@ const LUMI_SCENES = [
     {cap:'Laute im Wort: An-, In- und Endlaut', say:'Laute im Wort entdecken: Anlaut, Inlaut und Endlaut.', pause:900},
     {cap:'Auf geht’s im Buchstabenhafen!', say:'Auf geht’s im Buchstabenhafen!', pause:1200}]},
 ];
+// Weitere Lernvideos: einfach einen Eintrag ergänzen (domain = Station, auf deren Kachel der Knopf erscheint). scenes = Szenenliste wie LUMI_SCENES,
+// prefix = Dateiname-Anfang der Sounddateien (<prefix>_<Szene>_<Satz>.m4a) und Bilder.
+const LERNVIDEOS = [
+  {id:'lumi', domain:'buchstabe', icon:'⚓', title:'Buchstaben und Laute', sub:'Mit Lotze Lumi', scenes:LUMI_SCENES, prefix:'lumi'},
+];
 const LUMI_SEEN_KEY = 'lumi_intro';   // wird in discoverSeen gespeichert (kein neues Feld, Export/Import bleiben gleich)
-let lumiRun = {scene:0, step:0, token:0, playing:false, timer:null};
+let lumiRun = {scene:0, step:0, token:0, playing:false, timer:null, vid:'lumi', returnTo:'goal'};
+function curVideo(){ return LERNVIDEOS.find(v=>v.id===lumiRun.vid) || LERNVIDEOS[0]; }
+function curScenes(){ return curVideo().scenes; }
 
 function lumiActive(tok){ return tok===lumiRun.token && state.screen==='lumi' && document.getElementById('lumiCap'); }
 function lumiHalt(){
@@ -3057,18 +3074,19 @@ function lumiHalt(){
   try{ stopAllAudio(); }catch(e){}
 }
 function lumiShow(i){
-  const sc = LUMI_SCENES[i];
+  const sc = curScenes()[i];
   const img = document.getElementById('lumiImg'), sum = document.getElementById('lumiSum');
   if(sc.img){ img.style.display='block'; img.src = sc.img; img.classList.remove('kb'); void img.offsetWidth; img.classList.add('kb'); sum.style.display='none'; }
   else { img.style.display='none'; sum.style.display='flex'; }
+  sum.innerHTML = sc.summary ? `<h2>${sc.summary.title}</h2><div class="lumi-tiles">${sc.summary.tiles.map(t=>`<div class="lumi-tile"><span>${t[0]}</span>${t[1]}</div>`).join('')}</div>` : '';
   document.querySelectorAll('.lumi-dots b').forEach((d,k)=>d.classList.toggle('on',k===i));
-  document.getElementById('lumiProg').style.width = ((i+1)/LUMI_SCENES.length*100)+'%';
+  document.getElementById('lumiProg').style.width = ((i+1)/curScenes().length*100)+'%';
   document.getElementById('lumiTitle').textContent = sc.title;
   document.querySelectorAll('.lumi-tile').forEach(t=>t.classList.remove('lit'));
 }
 function lumiSpeakStep(sceneIdx, stepIdx, tok, done){
-  const st = LUMI_SCENES[sceneIdx].steps[stepIdx];
-  const key = 'lumi_'+(sceneIdx+1)+'_'+(stepIdx+1);
+  const st = curScenes()[sceneIdx].steps[stepIdx];
+  const key = curVideo().prefix+'_'+(sceneIdx+1)+'_'+(stepIdx+1);
   playAudioKey(key, ok=>{
     if(!lumiActive(tok)) return;
     if(ok){ done(); return; }
@@ -3078,9 +3096,9 @@ function lumiSpeakStep(sceneIdx, stepIdx, tok, done){
 }
 function lumiRunStep(){
   const tok = ++lumiRun.token;
-  const sc = LUMI_SCENES[lumiRun.scene];
+  const sc = curScenes()[lumiRun.scene];
   if(lumiRun.step >= sc.steps.length){
-    if(lumiRun.scene < LUMI_SCENES.length-1){
+    if(lumiRun.scene < curScenes().length-1){
       lumiRun.scene++; lumiRun.step=0; lumiShow(lumiRun.scene);
       lumiRun.timer = setTimeout(()=>{ if(lumiActive(tok)) lumiRunStep(); }, 700);
     } else {
@@ -3093,7 +3111,7 @@ function lumiRunStep(){
   }
   const st = sc.steps[lumiRun.step];
   document.getElementById('lumiCap').textContent = st.cap;
-  if(lumiRun.scene===LUMI_SCENES.length-1)
+  if(sc.summary)
     document.querySelectorAll('.lumi-tile').forEach((t,k)=>t.classList.toggle('lit', k < lumiRun.step));
   const s = lumiRun.scene, p = lumiRun.step;
   lumiSpeakStep(s, p, tok, ()=>{
@@ -3102,17 +3120,13 @@ function lumiRunStep(){
   });
 }
 function screenLumi(){
-  const dots = LUMI_SCENES.map((s,i)=>`<b onclick="lumiGo(${i})"></b>`).join('');
+  const dots = curScenes().map((s,i)=>`<b onclick="lumiGo(${i})"></b>`).join('');
   return `
-  ${topbar('Lotze Lumi erklärt', 'Kurzes Erklärvideo', true)}
+  ${topbar(curVideo().sub, curVideo().title, true)}
   <main>
     <div class="lumi-stage">
       <img id="lumiImg" alt="" draggable="false">
-      <div class="lumi-sum" id="lumiSum"><h2>🏆 Das hast du gelernt</h2><div class="lumi-tiles">
-        <div class="lumi-tile"><span>👂</span>Hören → Buchstabe<br>auswählen</div>
-        <div class="lumi-tile"><span>👁️</span>Buchstabe sehen →<br>Laut sprechen</div>
-        <div class="lumi-tile"><span>b ↔ d</span>Verwechslungspaare<br>unterscheiden</div>
-        <div class="lumi-tile"><span>🐭</span>Laute im Wort:<br>An-, In-, Endlaut</div></div></div>
+      <div class="lumi-sum" id="lumiSum"></div>
       <div class="lumi-cap" id="lumiCap"></div>
       <div class="lumi-start" id="lumiStart">
         <div>${mascotIcon(72)}</div>
@@ -3133,8 +3147,8 @@ function screenLumi(){
     <button class="btn btn-ghost btn-block" style="margin-top:10px;" onclick="lumiFinish()">Video überspringen</button>
   </main>`;
 }
-window.showLumi = function(){
-  lumiHalt(); lumiRun.scene=0; lumiRun.step=0; lumiRun.playing=false;
+window.showLumi = function(vid, returnTo){
+  lumiHalt(); lumiRun.vid = vid || 'lumi'; lumiRun.returnTo = returnTo || 'goal'; lumiRun.scene=0; lumiRun.step=0; lumiRun.playing=false;
   state.screen='lumi'; render();
   lumiShow(0);
 };
@@ -3145,7 +3159,7 @@ window.lumiStart = function(){
   lumiRunStep();
 };
 window.lumiGo = function(i){
-  i = Math.max(0, Math.min(LUMI_SCENES.length-1, i));
+  i = Math.max(0, Math.min(curScenes().length-1, i));
   lumiHalt(); lumiRun.scene=i; lumiRun.step=0; lumiRun.playing=true;
   document.getElementById('lumiStart').style.display='none';
   document.getElementById('lumiGo').style.display='none';
@@ -3154,14 +3168,14 @@ window.lumiGo = function(i){
 };
 window.lumiToggle = function(){
   if(lumiRun.playing){ lumiRun.playing=false; lumiHalt(); document.getElementById('lumiPP').textContent='▶ Weiter'; return; }
-  if(lumiRun.scene===LUMI_SCENES.length-1 && lumiRun.step>=LUMI_SCENES[lumiRun.scene].steps.length){ lumiGo(0); return; }
+  if(lumiRun.scene===curScenes().length-1 && lumiRun.step>=curScenes()[lumiRun.scene].steps.length){ lumiGo(0); return; }
   document.getElementById('lumiStart').style.display='none';
   lumiRun.playing=true; document.getElementById('lumiPP').textContent='⏸ Pause'; lumiRunStep();
 };
 window.lumiFinish = function(){
   lumiHalt(); lumiRun.playing=false;
-  state.discoverSeen[LUMI_SEEN_KEY] = true;
-  saveProgress();
+  if(lumiRun.vid==='lumi'){ state.discoverSeen[LUMI_SEEN_KEY] = true; saveProgress(); }
+  if(lumiRun.returnTo==='map'){ state.screen='map'; render(); return; }
   state.screen='goal'; render(); speakGoal();
 };
 
@@ -3183,7 +3197,7 @@ window.openDomain = function(domainId){
   }
   // Erster Besuch der Buchstabenbrücke: zuerst das kurze Erklärvideo.
   if(domainId==='buchstabe' && !state.pendingReview && !state.discoverSeen[LUMI_SEEN_KEY]){
-    showLumi();
+    showLumi('lumi','goal');
     return;
   }
   state.screen = 'goal';
@@ -3311,7 +3325,7 @@ function screenGoal(){
       <p style="font-size:1.1rem;line-height:1.55;color:var(--harbor-dark);font-family:'Baloo 2';font-weight:600;">${goal}</p>
       <button class="speak-btn" onclick="speakGoal()">🔊</button>
       <button class="btn btn-primary btn-block" style="margin-top:14px;" onclick="startPracticeSession()">Los geht's! ▶️</button>
-      ${d.id==='buchstabe' ? '<button class="btn btn-ghost btn-block" style="margin-top:10px;" onclick="showLumi()">🎬 Erklärvideo ansehen</button>' : ''}
+      ${d.id==='buchstabe' ? '<button class="btn btn-ghost btn-block" style="margin-top:10px;" onclick="showLumi(\'lumi\',\'goal\')">🎬 Erklärvideo ansehen</button>' : ''}
     </div>
   </main>`;
 }
