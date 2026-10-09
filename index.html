@@ -299,6 +299,9 @@
   .lumi-ctrl{display:flex;gap:10px;justify-content:center;}
   .lumi-ctrl .btn{min-width:64px;min-height:56px;font-size:1.3rem;}
   .syl-0{color:#C44F1D;} .syl-1{color:#1B6E7F;}
+  .gap-word{font-size:2.6rem;font-weight:800;letter-spacing:.06em;margin:2px 0 8px;line-height:1.2;}
+  .gap-box{display:inline-block;width:1.1em;height:1.15em;border:3px dashed #8a7a55;border-radius:10px;vertical-align:-.22em;margin:0 .06em;background:#fff8e6;}
+  .gap-fill{display:inline-block;padding:0 .12em;border-radius:10px;background:#d9f3dc;color:#1e7a34;}
   .m-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;}
   .m-col{display:flex;flex-direction:column;gap:10px;}
   .m-btn{min-height:68px;border:3px solid var(--line);border-radius:14px;background:var(--sand);font-family:'Andika',sans-serif;font-weight:700;font-size:1.5rem;color:var(--ink);cursor:pointer;padding:6px 10px;}
@@ -413,14 +416,14 @@ const MASTERY_STARS = 12; // ab so vielen Sternen bei Stufe 3 gilt ein Bereich a
 // ------------------------------------------------------------------
 const DEPS = {
   // Aufschreiben setzt Buchstabenkenntnis (Laut -> Buchstabe) und Anlaut-Hören voraus
-  silbendock:      {1:[['buchstabe',2],['phon',2]], 4:[['buchstabe',3]]},
+  silbendock:      {1:[['buchstabe',2],['phon',2]], 4:[['buchstabe',4]]},
   // Wörter lesen: Buchstabenbrücke Stufe 2 ("ganze Wörter mit ihren Buchstaben verbinden")
-  lesen:           {1:[['buchstabe',2]], 3:[['buchstabe',3]]},
+  lesen:           {1:[['buchstabe',3]], 3:[['buchstabe',4]]},
   // Lesekai: Wörter zum Bild; Silbenfarben brauchen Silbenbewusstheit; Sätze/Anweisungen brauchen Satzlesen
-  lesekai:         {1:[['buchstabe',2]], 2:[['phon',2]], 3:[['lesen',2]], 4:[['lesen',3]]},
+  lesekai:         {1:[['buchstabe',3]], 2:[['phon',2]], 3:[['lesen',2]], 4:[['lesen',3]]},
   // ganze Wörter schreiben: Laute heraushören (Silbendock bis Silben) + Buchstaben;
   // Konsonantenhäufungen (Stern, Schlange, Pfanne) erst nach Buchstabenbrücke Stufe 3
-  schreib1:        {1:[['silbendock',3],['buchstabe',2]], 3:[['buchstabe',3],['silbendock',4]], 4:[['buchstabe',4]]},
+  schreib1:        {1:[['silbendock',3],['buchstabe',3]], 3:[['buchstabe',4],['silbendock',4]], 4:[['buchstabe',4]]},
   // Rechtschreibregeln bauen auf sicherem lautgetreuem Schreiben und Wörterlesen auf
   schreib2:        {1:[['schreib1',3],['lesen',2]], 3:[['schreib1',4]]},
   grundwortschatz: {1:[['schreib1',3],['lesen',2]], 3:[['schreib1',4]], 4:[['lesen',3]]},
@@ -485,6 +488,26 @@ function migrateStationsV1(){
     if(state.mastery[d.id] && !state.trophies[d.id]) state.trophies[d.id] = t;
   });
   state.stationsVersion = 2;
+}
+
+// Buchstabenbrücke wurde umgebaut (alt: 1 Laute, 2 ganze Wörter, 3 Verwechslungen, 4 Häufungen;
+// neu: 1 Laute, 2 Lückenwörter, 3 ganze Wörter, 4 Verwechslungen + Häufungen).
+// Alte Stufe 1 -> 1 (Lückenwörter kommen neu dazu), 2 -> 3 (ganze Wörter wurden schon geübt;
+// der alte Versuchsverlauf entfällt, damit kein Pokal ohne neue Übung entsteht), 3 und 4 -> 4.
+function migrateStationsV3(){
+  const old = state.levels.buchstabe;
+  if(old){
+    const map = {1:1, 2:3, 3:4, 4:4};
+    const nw = map[old] || old;
+    state.levels.buchstabe = nw;
+    const al = state.attemptLogs && state.attemptLogs.buchstabe;
+    if(al){
+      if(old===2) delete state.attemptLogs.buchstabe;
+      else al.level = map[al.level] || al.level;
+    }
+    if(state.mastery && state.mastery.buchstabe && nw<3) delete state.mastery.buchstabe;
+  }
+  state.stationsVersion = 3;
 }
 
 // Ein einmal verdienter Pokal bleibt für immer im Pokal-Regal.
@@ -556,9 +579,9 @@ const iCanStatements = {
   },
   buchstabe: {
     1:'Ich kann hören, mit welchem Buchstaben ein Wort beginnt oder endet.',
-    2:'Ich kann ein Wort in seine Buchstaben zerlegen.',
-    3:'Ich kann Buchstaben unterscheiden, die leicht verwechselt werden (b, d, p) oder besonders klingen (Qu, Pf, St).',
-    4:'Ich kann auch lange, zusammengesetzte Wörter mit mehreren Konsonantenverbindungen sicher lesen.',
+    2:'Ich kann einen fehlenden Buchstaben am Anfang, am Ende und in der Mitte eines Wortes finden.',
+    3:'Ich kann das passende geschriebene Wort zu einem Bild finden.',
+    4:'Ich kann Buchstaben unterscheiden, die leicht verwechselt werden (b, d, p), und besondere Laute und Konsonantenhäufungen (Qu, Pf, St, Str) richtig zuordnen.',
   },
   silbendock: {
     1:'Ich kann den ersten Laut eines Wortes aufschreiben.',
@@ -631,9 +654,9 @@ const levelGoals = {
   },
   buchstabe: {
     1:'Hier lernst du, welcher Buchstabe zu welchem Laut gehört – die Basis für Lesen und Schreiben.',
-    2:'Du verbindest jetzt schon ganze Wörter mit ihren Buchstaben.',
-    3:'Kniffliger: Buchstaben, die leicht verwechselt werden (b, d, p) oder besonders klingen (Qu, Pf, St).',
-    4:'Profi-Stufe: mehrere Konsonantenverbindungen und zusammengesetzte Wörter in einem Wort.',
+    2:'Ein Buchstabe fehlt im Wort. Du hörst genau hin und findest den fehlenden Buchstaben: erst am Anfang, dann am Ende, dann in der Mitte.',
+    3:'Jetzt suchst du das ganze Wort, das zum Bild passt. Zuerst hast du nur zwei Wörter zur Auswahl, dann drei.',
+    4:'Profi-Stufe: Buchstaben, die leicht verwechselt werden (b, d, p), besondere Laute (Qu, Pf, St, Sp) und mehrere Konsonanten hintereinander.',
   },
   silbendock: {
     1:'Hier übst du, einen einzelnen Laut aufzuschreiben – der erste Schritt zum Wörter-Schreiben. Wir starten mit dem ersten Laut, weil man den beim Zuhören am leichtesten heraushört.',
@@ -777,8 +800,36 @@ function silbchoice(prompt, options, answerIdx, tip, speakText, pictureEmoji){
 // Bildbasierte Aufgabe: kein Lesen von Wörtern nötig, um die Aufgabe zu
 // verstehen. taskIcon zeigt den Aufgabentyp, targetEmoji das Zielwort als
 // Bild, options sind große Symbole/Buchstaben/Wörter zum Antippen.
-function pic(taskIcon, targetEmoji, targetWord, options, answerIdx, tip, niko, audioKey){
-  return {type:'pic', taskIcon, targetEmoji, options, answer:answerIdx, tip, speak:targetWord, niko:!!niko, audioKey};
+function pic(taskIcon, targetEmoji, targetWord, options, answerIdx, tip, niko, audioKey, seq){
+  const o = {type:'pic', taskIcon, targetEmoji, options, answer:answerIdx, tip, speak:targetWord, niko:!!niko, audioKey};
+  if(seq) o.seq = seq;
+  return o;
+}
+// Papier-Schreibaufgabe: Das Kind hört das Wort, schreibt es mit der Hand auf sein Blatt
+// und vergleicht danach Buchstabe für Buchstabe mit der richtigen Schreibung
+// ("|" trennt Silben und färbt sie ein). Ohne Handschrift gibt es keinen Transfer vom
+// Antippen zum Schreiben.
+function papier(word, pictureEmoji, tip){
+  return {type:'papier', word, pictureEmoji, tip, speak:word.replace(/\|/g,'')};
+}
+// Lückenwort: Bild + Wort mit einer Lücke ("_a|se"; | trennt Silben, _ = fehlender Buchstabe).
+// seq ordnet die Aufgaben (1 Anfang, 2 Ende, 3 Mitte): die Übungsreihe wechselt
+// in kleinen Runden durch alle Gruppen, so ist jedes Sechserfenster gemischt.
+function gap(taskIcon, targetEmoji, targetWord, gapPattern, options, answerIdx, tip, seq){
+  const o = pic(taskIcon, targetEmoji, targetWord, options, answerIdx, tip, false, null, seq);
+  o.gap = gapPattern;
+  return o;
+}
+function gapHtml(item, fillIdx){
+  if(!item || !item.gap) return '';
+  const fill = (fillIdx===null || fillIdx===undefined) ? null : item.options[fillIdx];
+  const parts = item.gap.split('|').map((seg,i)=>{
+    const inner = seg.split('').map(c=> c==='_'
+      ? (fill!==null ? `<span class="gap-fill">${fill}</span>` : '<span class="gap-box"></span>')
+      : c).join('');
+    return `<span class="syl syl-${i%2}">${inner}</span>`;
+  }).join('');
+  return `<div class="gap-word">${parts}</div>`;
 }
 
 // Blitzlesen: Wort erscheint, ein sichtbarer Countdown läuft, das passende
@@ -1156,7 +1207,7 @@ const content = {
   },
   buchstabe: {
     1:[
-      pic('🔡','🐵','Affe', ['A','O','I'], 0, 'Sprich „Affe" langsam: A-ffe.', true),
+      pic('🔡','🐵','Affe', ['A','O','I'], 0, 'Affe fängt mit „A" an.', true),
       pic('🔡','🫏','Esel', ['E','I','A'], 0, 'E-sel: erster Laut „E".', true),
       pic('🔡','🪶','Feder', ['F','W','S'], 0, 'F-eder: erster Laut „F".', true),
       pic('🔡','☀️','Sonne', ['S','Z','T'], 0, 'S-onne: erster Laut „S".', true),
@@ -1202,39 +1253,55 @@ const content = {
       pic('🔠','M','M', ['m','n','w'], 0, 'Großes M und kleines m klingen gleich – nur die Form ist anders.'),
       pic('🔠','S','S', ['s','z','f'], 0, 'Großes S und kleines s klingen gleich – nur die Form ist anders.'),
     ],
-    2:[
-      pic('🔤','🐟','Fisch', ['Fisch','Wisch','Tisch'], 0, 'F wie Fisch – achte auf den Anlaut.'),
-      pic('🔤','🌳','Baum', ['Baum','Traum','Raum'], 0, 'B-au-m: setze die Laute zusammen.'),
-      pic('🔤','🏫','Schule', ['Schule','Kule','Zule'], 0, '„Sch" ist ein eigener Laut aus drei Buchstaben.'),
-      pic('🔤','🎩','Hut', ['Hut','Hud','Huht'], 0, 'H-u-t, ganz lauttreu geschrieben.'),
-      pic('🔤','🐝','Biene', ['Biene','Piene','Diene'], 0, 'Biene: B-i-e-ne.'),
-      pic('🔤','🦆','Ente', ['Ente','Änte','Emte'], 0, 'Ente: E-n-t-e.'),
-      pic('🔤','🐑','Schaf', ['Schaf','Schaaf','Chaf'], 0, 'Schaf: „Sch" ist ein eigener Laut.'),
-      pic('🔤','🧥','Jacke', ['Jacke','Wacke','Nacke'], 0, 'J-acke: achte auf den ersten Laut.'),
-      pic('🔤','☁️','Wolke', ['Wolke','Volke','Wolge'], 0, 'Wolke: W-o-l-ke.'),
-      pic('🔤','img:Lampe.png','Lampe', ['Lampe','Rampe','Lambe'], 0, 'Lampe: L-a-m-pe.'),
+    2:[ // Lückenwörter: Ein Buchstabe fehlt. Reihenfolge Anfang -> Ende -> Mitte (Vokal),
+        // weil Konsonanten am Silbenanfang am verlässlichsten sind, Vokale am wenigsten
+        // (SCHNABEL, Handreichung 2024). Nur Kernwörter (trochäische Zweisilber, lauttreue Einsilber).
+      gap('🔡','🐰','Hase','_a|se', ['H','N','R'], 0, 'Am Anfang fehlt ein Laut. Höre das Wort: Hase.', 1),
+      gap('🔡','👃','Nase','_a|se', ['N','M','H'], 0, 'Am Anfang fehlt ein Laut. Höre das Wort: Nase.', 1),
+      gap('🔡','🌹','Rose','_o|se', ['R','H','L'], 0, 'Am Anfang fehlt ein Laut. Höre das Wort: Rose.', 1),
+      gap('🔡','img:Lampe.png','Lampe','_am|pe', ['L','R','N'], 0, 'Am Anfang fehlt ein Laut. Höre das Wort: Lampe.', 1),
+      gap('🔡','☁️','Wolke','_ol|ke', ['W','M','B'], 0, 'Am Anfang fehlt ein Laut. Höre das Wort: Wolke.', 1),
+      gap('🔡','☀️','Sonne','_on|ne', ['S','T','N'], 0, 'Am Anfang fehlt ein Laut. Höre das Wort: Sonne.', 1),
+      gap('🔚','🌳','Baum','Bau_', ['m','n','l'], 0, 'Am Ende fehlt ein Laut. Höre das Wort: Baum.', 2),
+      gap('🔚','🐋','Wal','Wa_', ['l','n','r'], 0, 'Am Ende fehlt ein Laut. Höre das Wort: Wal.', 2),
+      gap('🔚','🐭','Maus','Mau_', ['s','z','f'], 0, 'Am Ende fehlt ein Laut. Höre das Wort: Maus.', 2),
+      gap('🔚','🚌','Bus','Bu_', ['s','z','t'], 0, 'Am Ende fehlt ein Laut. Höre das Wort: Bus.', 2),
+      gap('🔍','🐰','Hase','H_|se', ['a','o','u'], 0, 'Jede Silbe hat einen Vokal (a, e, i, o, u). Welcher fehlt in Ha-se?', 3),
+      gap('🔍','🌹','Rose','R_|se', ['o','a','i'], 0, 'Jede Silbe hat einen Vokal (a, e, i, o, u). Welcher fehlt in Ro-se?', 3),
+      gap('🔍','☁️','Wolke','W_l|ke', ['o','a','u'], 0, 'Jede Silbe hat einen Vokal (a, e, i, o, u). Welcher fehlt in Wol-ke?', 3),
+      gap('🔍','img:Lampe.png','Lampe','L_m|pe', ['a','e','o'], 0, 'Jede Silbe hat einen Vokal (a, e, i, o, u). Welcher fehlt in Lam-pe?', 3),
+      gap('🔍','🎩','Hut','H_t', ['u','a','o'], 0, 'Jedes Wort hat einen Vokal (a, e, i, o, u). Welcher fehlt in Hut?', 3),
+      gap('🔍','🐟','Fisch','F_sch', ['i','a','e'], 0, 'Jedes Wort hat einen Vokal (a, e, i, o, u). Welcher fehlt in Fisch?', 3),
     ],
-    3:[
-      pic('🔤','🏠','Dach', ['Dach','Bach','Pach'], 0, 'b, d und p sehen ähnlich aus – höre genau hin: D-ach.'),
-      pic('🔤','🪼','Qualle', ['Qualle','Kralle','Walle'], 0, '„Qu" klingt wie „Kw" – Qu-alle.'),
-      pic('🔤','🍳','Pfanne', ['Pfanne','Fanne','Blanne'], 0, 'Pf-anne: zwei Laute direkt hintereinander.'),
-      pic('🔤','⭐','Stern', ['Stern','Zern','Fern'], 0, 'St-ern, ein häufiger Wortanfang im Deutschen.'),
-      pic('🔤','🐦','Vogel', ['Vogel','Fogel','Wogel'], 0, 'Vogel klingt wie „Fogel", wird aber mit V geschrieben.'),
-      pic('🔤','🐍','Schlange', ['Schlange','Slange','Schlamge'], 0, 'Schlange: „Schl" – drei Laute direkt hintereinander.'),
-      pic('🔤','🕷️','Spinne', ['Spinne','Pinne','Schpinne'], 0, 'Sp klingt wie „Schp", geschrieben wird nur Sp-inne.'),
+    3:[ // Ganze Wörter. Erst nur 2 Wörter zur Auswahl, dann 3 - immer echte, richtig geschriebene Wörter.
+      pic('🔤','🐟','Fisch', ['Fisch','Tisch'], 0, 'Fisch fängt mit „F" an.', false, null, 1),
+      pic('🔤','🌳','Baum', ['Baum','Raum'], 0, 'Baum fängt mit „B" an.', false, null, 1),
+      pic('🔤','🏫','Schule', ['Schule','Spule'], 0, '„Sch" ist ein eigener Laut aus drei Buchstaben.', false, null, 1),
+      pic('🔤','🎩','Hut', ['Hut','Mut'], 0, 'Hut fängt mit „H" an.', false, null, 1),
+      pic('🔤','🐝','Biene', ['Biene','Birne'], 0, 'Hör genau auf die Mitte: Bie-ne.', false, null, 1),
+      pic('🔤','🦆','Ente', ['Ente','Ecke'], 0, 'Hör genau auf die Mitte: En-te.', false, null, 1),
+      pic('🔤','🐑','Schaf', ['Schaf','Schal','Schlaf'], 0, 'Schau auf das Ende des Wortes: Schaf.', false, null, 2),
+      pic('🔤','🧥','Jacke', ['Jacke','Backe','Hacke'], 0, 'Jacke fängt mit „J" an.', false, null, 2),
+      pic('🔤','☁️','Wolke', ['Wolke','Wolle','Wonne'], 0, 'Hör genau auf die Mitte: Wol-ke.', false, null, 2),
+      pic('🔤','img:Lampe.png','Lampe', ['Lampe','Rampe','Kampf'], 0, 'Lampe fängt mit „L" an.', false, null, 2),
+    ],
+    4:[ // Profi-Stufe: Verwechslungen (b, d, p), besondere Laute (Qu, Pf, St, Sp), Konsonantenhäufungen
+      pic('🔤','🏠','Dach', ['Dach','Bach','Fach'], 0, 'b, d und p sehen ähnlich aus – höre genau hin: D-ach.'),
+      pic('🔤','🪼','Qualle', ['Qualle','Kralle','Halle'], 0, '„Qu" klingt wie „Kw" – Qu-alle.'),
+      pic('🔤','🍳','Pfanne', ['Pfanne','Wanne','Kanne'], 0, 'Pf-anne: zwei Laute direkt hintereinander.'),
+      pic('🔤','⭐','Stern', ['Stern','Fern','Kern'], 0, 'St-ern, ein häufiger Wortanfang im Deutschen.'),
+      pic('🔤','🐍','Schlange', ['Schlange','Zange','Stange'], 0, 'Schlange fängt mit „Schl" an – drei Laute direkt hintereinander.'),
+      pic('🔤','🕷️','Spinne', ['Spinne','Sonne','Spange'], 0, 'Sp klingt wie „Schp", geschrieben wird nur Sp-inne.'),
       pic('🔡','💶','Euro', ['Eu','Ei','Au'], 0, 'Eu-ro: der Zwielaut „Eu".', false, 'EU'),
       pic('🔡','🛢️','Öl', ['Ö','O','U'], 0, 'Ö klingt anders als O – Ö-l.', false, 'OE'),
       pic('🔡','img:Ueberraschungsei.png','Überraschungsei', ['Ü','U','I'], 0, 'Ü klingt anders als U – Ü-berraschung.', false, 'UE'),
-      pic('🔤','🎺','Trompete', ['Trompete','Drompete','Tropete'], 0, 'Tr am Anfang: zwei Konsonanten.'),
-      pic('🔤','🖍️','Kreide', ['Kreide','Kleide','Greide'], 0, 'Kr am Anfang: zwei Konsonanten.'),
-    ],
-    4:[ // Profi-Stufe: mehrere Konsonantenhäufungen, zusammengesetzte Wörter
-      pic('🔤','🌉','Brücke', ['Brücke','Prücke','Brügge'], 0, 'Br am Anfang, „ck" nach kurzem Vokal.'),
-      pic('🔤','🏰','Schloss', ['Schloss','Schlos','Sloss'], 0, 'Schl am Anfang, doppeltes „s" am Ende.'),
-      pic('🔤','🦷','Zahnbürste', ['Zahnbürste','Zahnbürzte','Sahnbürste'], 0, 'Zusammengesetztes Wort: Zahn + Bürste.'),
-      pic('🔤','🌪️','Sturm', ['Sturm','Sturn','Storm'], 0, 'St am Anfang.'),
-      pic('🔤','img:Strumpf.png','Strumpf', ['Strumpf','Strump','Ztrumpf'], 0, 'Str am Anfang UND mpf am Ende – gleich zwei Häufungen.'),
-      pic('🔤','🦅','Adler', ['Adler','Atler','Adla'], 0, 'Adler wird immer mit „d" geschrieben.'),
+      pic('🔤','🖍️','Kreide', ['Kreide','Reise','Kleid'], 0, 'Kr am Anfang: zwei Konsonanten.'),
+      pic('🔤','🌉','Brücke', ['Brücke','Krücke','Brause'], 0, 'Br am Anfang, „ck" nach kurzem Vokal.'),
+      pic('🔤','🏰','Schloss', ['Schloss','Schlauch','Schlaf'], 0, 'Schl am Anfang, doppeltes „s" am Ende.'),
+      pic('🔤','🦷','Zahnbürste', ['Zahnbürste','Zahnpasta','Zahnarzt'], 0, 'Zusammengesetztes Wort: Zahn + Bürste.'),
+      pic('🔤','🌪️','Sturm', ['Sturm','Sturz','Turm'], 0, 'St am Anfang.'),
+      pic('🔤','img:Strumpf.png','Strumpf', ['Strumpf','Strauß','Strand'], 0, 'Str am Anfang UND mpf am Ende – gleich zwei Häufungen.'),
+      pic('🔤','🦅','Adler', ['Adler','Ader','Alter'], 0, 'Adler wird immer mit „d" geschrieben.'),
     ],
   },
   // Fehlende Zwischenstufe zwischen Lauthören und Wörter-Schreiben:
@@ -1274,6 +1341,8 @@ const content = {
       inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'se', 'Se-gel: ein Konsonant, ein Vokal – „se".', 'Segel', 'img:Segel.png'),
       inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'ra', 'Ra-ke-te: ein Konsonant, ein Vokal – „ra".', 'Rakete', '🚀'),
       inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'ro', 'Ro-se: ein Konsonant, ein Vokal – „ro".', 'Rose', '🌹'),
+      papier("Na|se", "👃", "Sprich leise mit: Na-se. Zwei Silben, in jeder steckt ein Vokal."),
+      papier("Ho|se", "👖", "Ho-se: zwei Silben, in jeder steckt ein Vokal."),
     ],
     4:[ // Profi-Stufe: die ersten ZWEI Silben schreiben (schwerer als nur eine)
       inp('Schreibe die ersten zwei Silben des Wortes, das du hörst.', 'bana', 'Ba-na-ne: die ersten beiden Silben zusammen.', 'Banane', '🍌'),
@@ -1282,6 +1351,8 @@ const content = {
       inp('Schreibe die ersten zwei Silben des Wortes, das du hörst.', 'toma', 'To-ma-te: die ersten beiden Silben zusammen.', 'Tomate', '🍅'),
       inp('Schreibe die ersten zwei Silben des Wortes, das du hörst.', 'gitar', 'Gi-tar-re: die ersten beiden Silben zusammen.', 'Gitarre', '🎸'),
       inp('Schreibe die ersten zwei Silben des Wortes, das du hörst.', 'rake', 'Ra-ke-te: die ersten beiden Silben zusammen.', 'Rakete', '🚀'),
+      papier("Ra|ke|te", "🚀", "Ra-ke-te: drei Silben, in jeder steckt ein Vokal."),
+      papier("Wol|ke", "☁️", "Wol-ke: zwei Silben, in jeder steckt ein Vokal."),
     ],
   },
   lesen: {
@@ -1421,6 +1492,8 @@ const content = {
       inp('Schreibe das Wort, das du hörst.', 'sofa', 'So-fa: zwei offene Silben, ganz lautgetreu.', 'Sofa', '🛋️'),
       inp('Schreibe das Wort, das du hörst.', 'hase', 'Ha-se: zwei offene Silben, ganz lautgetreu.', 'Hase', '🐰'),
       inp('Schreibe das Wort, das du hörst.', 'rasen', 'Ra-sen: zwei offene Silben, ganz lautgetreu.', 'Rasen', 'img:Rasen.png'),
+      papier("Ha|se", "🐰", "Ha-se: zwei offene Silben."),
+      papier("Na|se", "👃", "Na-se: zwei offene Silben."),
     ],
     2:[ // Phonemstufe 2: + Stoppkonsonanten (b,d,g,t,p,k) und h,ch, weiterhin ohne Häufung
       inp('Schreibe das Wort, das du hörst.', 'hut', 'Hu-t: ganz lautgetreu geschrieben.', 'Hut', '🎩'),
@@ -1431,6 +1504,8 @@ const content = {
       inp('Schreibe das Wort, das du hörst.', 'kuchen', 'Ku-chen: „ch" ist ein eigener Laut.', 'Kuchen', '🎂'),
       inp('Schreibe das Wort, das du hörst.', 'gabel', 'Ga-bel: ganz lautgetreu.', 'Gabel', 'img:Gabel.png'),
       inp('Schreibe das Wort, das du hörst.', 'besen', 'Be-sen: ganz lautgetreu.', 'Besen', '🧹'),
+      papier("Be|sen", "🧹", "Be-sen: zwei Silben, ganz lautgetreu."),
+      papier("Do|se", "🥫", "Do-se: zwei Silben, ganz lautgetreu."),
     ],
     3:[ // Reine Konsonantenhäufungen (mehrere verschiedene, echt hörbare Konsonanten hintereinander) - bewusst OHNE Doppelkonsonanten, da die Verdopplung eine Rechtschreibregel ist, keine Hörwahrnehmung
       inp('Schreibe das Wort, das du hörst.', 'frosch', 'Fr am Anfang: zwei Konsonanten hintereinander.', 'Frosch', '🐸'),
@@ -1443,6 +1518,8 @@ const content = {
       inp('Schreibe das Wort, das du hörst.', 'pflaume', 'Pfl am Anfang: drei Konsonanten hintereinander.', 'Pflaume'),
       inp('Schreibe das Wort, das du hörst.', 'bremse', 'Br am Anfang: zwei Konsonanten hintereinander.', 'Bremse'),
       inp('Schreibe das Wort, das du hörst.', 'trompete', 'Tr am Anfang: zwei Konsonanten hintereinander.', 'Trompete', '🎺'),
+      papier("Frosch", "🐸", "Fr am Anfang, „sch“ am Ende."),
+      papier("Stern", "⭐", "St am Anfang."),
     ],
     4:[ // Profi-Stufe: Konsonantenhäufungen am Anfang UND am Ende desselben Wortes
       inp('Schreibe das Wort, das du hörst.', 'strand', 'Str am Anfang, nd am Ende – zwei Häufungen in einem Wort.', 'Strand', '🏖️'),
@@ -1451,6 +1528,8 @@ const content = {
       inp('Schreibe das Wort, das du hörst.', 'herbst', 'H am Anfang, rbst am Ende – vier Konsonanten hintereinander!', 'Herbst', '🍂'),
       inp('Schreibe das Wort, das du hörst.', 'knopf', 'Kn am Anfang, pf am Ende.', 'Knopf', '🔘'),
       inp('Schreibe das Wort, das du hörst.', 'fenster', 'F am Anfang, nst am Ende.', 'Fenster', '🪟'),
+      papier("Strand", "🏖️", "Str am Anfang, nd am Ende."),
+      papier("Fens|ter", "🪟", "Fens-ter: erst nd/ns hören, dann die zweite Silbe."),
     ],
   },
   schreib2: {
@@ -1464,6 +1543,8 @@ const content = {
       ch('Welches Wort ist richtig geschrieben?', ['Hammer','Hamer'], 0, 'Ham-mer: kurzer Vokal, doppeltes „m".', 'Hammer', 'doppelkonsonant'),
       ch('Welches Wort ist richtig geschrieben?', ['Bett','Bet'], 0, 'Be-tt: kurzer Vokal, doppeltes „t".', 'Bett', 'doppelkonsonant'),
       ch('Welches Wort ist richtig geschrieben?', ['Zettel','Zetel'], 0, 'Zet-tel: kurzer Vokal, doppeltes „t".', 'Zettel', 'doppelkonsonant'),
+      papier("Ball", "⚽", "Kurzer Vokal: danach kommt der Buchstabe doppelt."),
+      papier("Son|ne", "☀️", "Son-ne: nach dem kurzen o kommt „nn“."),
     ],
     2:[
       ch('Welches Wort ist richtig geschrieben?', ['Wohnung','Wonung'], 0, 'Verlängere: wohnen – das „h" hört man nicht, aber es macht das „o" davor lang.', 'Wohnung', 'dehnung_auslaut'),
@@ -1475,6 +1556,8 @@ const content = {
       ch('Welches Wort ist richtig geschrieben?', ['Schuh','Schu'], 0, 'Dehnungs-h nach langem „u": Schuh.', 'Schuh', 'dehnung_auslaut'),
       ch('Welches Wort ist richtig geschrieben?', ['Stuhl','Stul'], 0, 'Dehnungs-h nach langem „u": Stuhl.', 'Stuhl', 'dehnung_auslaut'),
       ch('Welches Wort ist richtig geschrieben?', ['Hemd','Hemt'], 0, 'Verlängere: die Hemden – du hörst das „d".', 'Hemd', 'dehnung_auslaut'),
+      papier("Hund", "🐶", "Verlängern: Hunde – da hörst du das d."),
+      papier("Mond", "🌙", "Verlängern: Monde – da hörst du das d."),
     ],
     3:[
       ch('Welches Wort ist richtig geschrieben?', ['Fahrrad','Farrad'], 0, 'Ableiten von „fahren": Fahr-rad, zwei r wie bei „fahren" + „Rad".', 'Fahrrad', 'wortfamilie'),
@@ -1486,6 +1569,8 @@ const content = {
       ch('Welches Wort ist richtig geschrieben?', ['Regenschirm','Regenschirrm'], 0, 'Zusammengesetztes Wort: Regen + Schirm.', 'Regenschirm', 'wortfamilie'),
       ch('Welches Wort ist richtig geschrieben?', ['verstehen','ferstehen'], 0, 'Die Vorsilbe „ver-" wird immer mit „v" geschrieben.', 'verstehen', 'wortfamilie'),
       ch('Welches Wort ist richtig geschrieben?', ['Freundlichkeit','Freuntlichkeit'], 0, 'Von „Freund" abgeleitet – das „d" bleibt erhalten.', 'Freundlichkeit', 'wortfamilie'),
+      papier("Bäu|me", "🌳🌳", "Ableiten: Baum – darum mit „äu“."),
+      papier("Häu|ser", "🏠🏠", "Ableiten: Haus – darum mit „äu“."),
     ],
     4:[ // Profi-Stufe: längere zusammengesetzte Wörter, kombinierte Regeln, echte Merkwörter
       ch('Welches Wort ist richtig geschrieben?', ['Fahrradkette','Farradkette'], 0, 'Zusammengesetzt: fahren + Rad + Kette.', 'Fahrradkette', 'wortfamilie'),
@@ -1512,6 +1597,8 @@ const content = {
       ch('Welches Wort ist richtig geschrieben?', ['Krone','Krome'], 0, 'Offene Silbe: Kro-ne.', 'Krone', 'offene_silbe'),
       ch('Welches Wort ist richtig geschrieben?', ['Wiese','Wiesse'], 0, 'Offene Silbe: Wie-se.', 'Wiese', 'offene_silbe'),
       ch('Welches Wort ist richtig geschrieben?', ['Birne','Birrne'], 0, 'Offene Silbe: Bir-ne.', 'Birne', 'offene_silbe'),
+      papier("Blu|me", "🌸", "Blu-me: zwei Silben, am Ende steht „e“."),
+      papier("Lam|pe", "img:Lampe.png", "Lam-pe: erst „m“, dann „p“."),
     ],
     2:[ // Diphthonge & Konsonantenverdopplung/ck
       ch('Welches Wort ist richtig geschrieben?', ['Haus','Hous'], 0, 'Zwielaut „au": Haus – Häuser.', 'Haus', 'zwielaut'),
@@ -1523,6 +1610,8 @@ const content = {
       ch('Welches Wort ist richtig geschrieben?', ['Räuber','Reuber'], 0, 'Zwielaut „äu", nicht „eu": Räuber.', 'Räuber', 'zwielaut'),
       ch('Welches Wort ist richtig geschrieben?', ['Locke','Loke'], 0, '„ck" nach kurzem Vokal: Lo-cke.', 'Locke', 'doppelkonsonant'),
       ch('Welches Wort ist richtig geschrieben?', ['Mücke','Müke'], 0, '„ck" nach kurzem Vokal: Mü-cke.', 'Mücke', 'doppelkonsonant'),
+      papier("Haus", "🏠", "Haus: der Zwielaut „au“."),
+      papier("Baum", "🌳", "Baum: der Zwielaut „au“."),
     ],
     3:[ // Stammprinzip: Dehnungs-h, ie, Auslautverhärtung, zusammengesetzte Wörter
       ch('Welches Wort ist richtig geschrieben?', ['Bahn','Ban'], 0, 'Dehnungs-h macht den Vokal davor lang: Bahn.', 'Bahn', 'dehnung_auslaut'),
@@ -1534,6 +1623,8 @@ const content = {
       ch('Welches Wort ist richtig geschrieben?', ['Hand','Hant'], 0, 'Verlängere: die Hände – du hörst das „d".', 'Hand', 'dehnung_auslaut'),
       ch('Welches Wort ist richtig geschrieben?', ['Freundin','Freuntin'], 0, 'Von „Freund" abgeleitet – das „d" bleibt.', 'Freundin', 'wortfamilie'),
       ch('Welches Wort ist richtig geschrieben?', ['Frühstück','Frühstük'], 0, '„ck" nach kurzem Vokal am Wortende: Frühstück.', 'Frühstück', 'doppelkonsonant'),
+      papier("Fuß|ball", "⚽", "Zusammengesetzt: Fuß + Ball."),
+      papier("Fahr|rad", "🚲", "Zusammengesetzt: fahren + Rad; „rr“ ist die Nahtstelle."),
     ],
     4:[ // Profi-Stufe: längere Wörter, ß-Regel, das/dass-Unterscheidung
       ch('Welches Wort ist richtig geschrieben?', ['Fußballspiel','Fusballspiel'], 0, 'Zusammengesetzt: Fuß + Ball + Spiel, „ß" bleibt erhalten.', 'Fußballspiel', 'wortfamilie'),
@@ -1751,7 +1842,7 @@ let state = {
   levels:{}, stars:{}, diagDone:false, history:[], errorCounts:{}, attemptLogs:{},
   mastery:{}, selfChecks:[], pendingSelfCheck:null, pendingReview:false,
   wordStore:[], onboardStep:0, errorProfile:{}, discoverSeen:{},
-  trophies:{}, knownAtStart:{}, stationsVersion:2, showMoreStations:false, showAllStations:false, showStarHelp:false,
+  trophies:{}, knownAtStart:{}, stationsVersion:3, showMoreStations:false, showAllStations:false, showStarHelp:false,
   childLabel:'', className:'',
   needsBasicLetterDrill:false, drill:null,
   practice:{domainId:null, level:1, attemptLog:[], queue:[], current:null, itemsDone:0, answered:false, lastCorrect:null},
@@ -1795,7 +1886,7 @@ function saveProgress(){
       needsBasicLetterDrill: state.needsBasicLetterDrill,
       diagReports: state.diagReports, wordStore: state.wordStore, errorProfile: state.errorProfile, discoverSeen: state.discoverSeen,
       childLabel: state.childLabel, className: state.className,
-      trophies: state.trophies, knownAtStart: state.knownAtStart, stationsVersion: 2,
+      trophies: state.trophies, knownAtStart: state.knownAtStart, stationsVersion: 3,
     }));
   }catch(e){}
 }
@@ -1822,6 +1913,7 @@ function loadProgress(){
       state.trophies = d.trophies || {};
       state.knownAtStart = d.knownAtStart || {};
       if(!d.stationsVersion) migrateStationsV1();   // Altbestand: Pokale übernehmen
+      if((d.stationsVersion||0) < 3) migrateStationsV3();   // Buchstabenbrücke umgebaut
     }
   }catch(e){}
 }
@@ -1834,7 +1926,7 @@ window.exportData = function(){
     needsBasicLetterDrill: state.needsBasicLetterDrill,
     diagReports: state.diagReports, wordStore: state.wordStore, errorProfile: state.errorProfile, discoverSeen: state.discoverSeen,
     childLabel: state.childLabel, className: state.className,
-    trophies: state.trophies, knownAtStart: state.knownAtStart, stationsVersion: 2,
+    trophies: state.trophies, knownAtStart: state.knownAtStart, stationsVersion: 3,
     exportedAt: new Date().toISOString(),
   };
   try{
@@ -1881,6 +1973,7 @@ window.importData = function(file){
       state.trophies = d.trophies || {};
       state.knownAtStart = d.knownAtStart || {};
       if(!d.stationsVersion) migrateStationsV1();   // alte Sicherung: Pokale übernehmen
+      if((d.stationsVersion||0) < 3) migrateStationsV3();   // Buchstabenbrücke umgebaut
       saveProgress();
       alert('Daten erfolgreich importiert!');
       state.screen = 'start';
@@ -2194,6 +2287,8 @@ window.speakCurrent = function(){
   if(item.type==='pic'){
     const instr = taskInstructions[item.taskIcon] || '';
     speak(instr + (instr ? '. ' : '') + item.speak);
+  } else if(item.type==='papier'){
+    speak(item.speak, 0.7);
   } else if(item.type==='input' || item.type==='silbchoice'){
     speak(item.prompt);
     speak(item.speak, 0.7);
@@ -2202,6 +2297,55 @@ window.speakCurrent = function(){
   }
 };
 
+
+// ---- Papier-Schreibaufgabe (Wort auf Papier schreiben, dann vergleichen) ----
+function papierLetters(item){
+  // Liste von {c, syl} je Buchstabe
+  const out = []; item.word.split('|').forEach((seg,si)=>{ seg.split('').forEach(c=>out.push({c, syl:si})); });
+  return out;
+}
+function renderPapier(item, isStatic){
+  const p = state.practice, marks = p.papierMarks || [];
+  const pic = item.pictureEmoji ? `<div class="pic-target">${renderPicVal(item.pictureEmoji)}</div>` : '';
+  if(!isStatic && p.papierPhase!=='compare'){
+    return `
+      <div class="task-instr">✏️ Schreibe das Wort auf dein Blatt.</div>
+      ${pic}
+      <button class="speak-btn" onclick="speakCurrent()">🔊</button>
+      <p style="font-size:0.92rem;color:#4B6473;margin:10px 0;">Hör das Wort so oft du magst. Schreibe es mit dem Stift auf dein Blatt oder in dein Heft. Dann vergleichst du.</p>
+      <button class="btn btn-primary btn-block" style="margin-top:10px;" onclick="papierCompare()">👀 Jetzt vergleichen</button>`;
+  }
+  const letters = papierLetters(item).map((l,i)=>{
+    const m = !!marks[i];
+    const bg = isStatic ? (m ? '#F1A38B' : '#d9f3dc') : (m ? '#F1A38B' : 'var(--sand)');
+    const col = m && !isStatic ? '#fff' : 'inherit';
+    const click = isStatic ? 'disabled' : `onclick="togglePapierLetter(${i})"`;
+    return `<button ${click} class="syl-${l.syl%2}" style="margin:3px;min-width:48px;padding:10px 6px;border-radius:12px;border:2px solid var(--line);font-size:1.9rem;font-family:'Andika';font-weight:800;background:${bg};">${l.c}</button>`;
+  }).join('');
+  return `
+    <div class="task-instr">${isStatic ? '👀 So wird das Wort geschrieben.' : '👀 Vergleiche mit deinem Blatt. Tippe auf jeden Buchstaben, der bei dir anders ist oder fehlt.'}</div>
+    ${pic}
+    <button class="speak-btn" onclick="speakCurrent()">🔊</button>
+    <div style="text-align:center;margin:10px 0;">${letters}</div>
+    ${isStatic ? '' : '<button class="btn btn-primary btn-block" style="margin-top:10px;" onclick="papierSubmit()">✅ Fertig</button>'}`;
+}
+window.papierCompare = function(){ state.practice.papierPhase='compare'; render(); };
+window.togglePapierLetter = function(i){
+  const p = state.practice; if(!p.papierMarks) return;
+  p.papierMarks[i] = !p.papierMarks[i]; render(true);
+};
+window.papierSubmit = function(){
+  const p = state.practice, item = p.current;
+  const wrong = (p.papierMarks||[]).filter(Boolean).length;
+  if(wrong){
+    const w = item.word.replace(/\|/g,'');
+    const key = w.toLowerCase();
+    const ex = state.wordStore.find(x=>x.word.toLowerCase()===key);
+    if(ex) ex.streak = 0;
+    else state.wordStore.push({word:w, tip:tipForWord(w), streak:0, added:todayStr()});
+  }
+  window.practiceAnswer(wrong);
+};
 
 // ---- Lesekai: Kreuze an als Seite (6 Aufgaben) ----
 function ksDiff(w, other){
@@ -2392,7 +2536,7 @@ window.malCheck = function(){
 
 function checkAnswer(item, given){
   if(item.type==='choice' || item.type==='pic' || item.type==='flash' || item.type==='silbchoice') return given===item.answer;
-  if(item.type==='dictate' || item.type==='match' || item.type==='malen' || item.type==='kreuzseite') return given===0;
+  if(item.type==='dictate' || item.type==='papier' || item.type==='match' || item.type==='malen' || item.type==='kreuzseite') return given===0;
   if(item.type==='satzbau') return given===0;
   const norm = s => (s||'').toString().trim().toLowerCase().replace(/ß/g,'ss');
   return norm(given)===norm(item.answer).replace(/ß/g,'ss');
@@ -2570,6 +2714,7 @@ function screenDiagnose(){
 function renderItemBody(item, handlerName){
   if(item.type==='match') return renderMatchBody(item, false);
   if(item.type==='kreuzseite') return renderKreuzseite(item, false);
+  if(item.type==='papier') return renderPapier(item, false);
   if(item.type==='malen') return renderMalenBody(item, false);
   if(item.type==='silbchoice'){
     const boxW = 58;
@@ -2735,6 +2880,7 @@ function renderItemBody(item, handlerName){
     return `
       <div class="task-instr">${item.taskIcon} ${taskInstructions[item.taskIcon]||''}</div>
       <div class="pic-target">${renderPicVal(item.targetEmoji)}</div>
+      ${gapHtml(item,null)}
       <button class="speak-btn" onclick="speakCurrent()">🔊</button>
       <div class="${cls}">${item.options.map((opt,i)=>
         `<button class="pic-opt-btn" onclick="${handlerName}(${i})">${renderPicVal(opt)}</button>`
@@ -3456,6 +3602,15 @@ function pickPracticeItem(){
   if(!p.queue || p.queue.length === 0){
     const pool = content[p.domainId][p.level];
     let shuffled = shuffle(pool);
+    if(pool.some(i=>i.seq)){
+      // Gruppen (seq) abwechselnd in Zweierrunden: 2 aus Gruppe 1, 2 aus Gruppe 2, ...
+      const g = {}; shuffled.forEach(i=>{ (g[i.seq||0] = g[i.seq||0] || []).push(i); });
+      const keys = Object.keys(g).map(Number).sort((x,y)=>x-y), out = [];
+      while(keys.some(k=>g[k].length)){
+        keys.forEach(k=>{ for(let n=0;n<2&&g[k].length;n++) out.push(g[k].shift()); });
+      }
+      shuffled = out;
+    }
     if(p.current && shuffled[0]===p.current && shuffled.length>1){
       [shuffled[0], shuffled[1]] = [shuffled[1], shuffled[0]];
     }
@@ -3479,6 +3634,10 @@ function pickPracticeItem(){
     p.sbBasketIndex = 0;
     p.sbWordIndex = 0;
     p.sbMarked = [];
+  }
+  if(p.current && p.current.type==='papier'){
+    p.papierPhase = 'write';
+    p.papierMarks = p.current.word.replace(/\|/g,'').split('').map(()=>false);
   }
   if(p.current && p.current.type==='kreuzseite'){
     p.current = {...p.current, rows: buildKreuzseiteRows(p.current.pool, p.current.size)};
@@ -3509,6 +3668,8 @@ function screenPractice(){
       feedback = ksFeedback(p);
     } else if(p.lastCorrect){
       feedback = `<div class="feedback-box feedback-good">✅ ${p.levelUpMsg ? (p.correctPhrase+' '+p.levelUpMsg) : p.correctPhrase}${p.isWordReview ? '' : ' <b class="plus-star">+1 ⭐</b>'}</div>`;
+    } else if(item.type==='papier'){
+      feedback = `<div class="feedback-box feedback-tip">💡 Gut, dass du genau verglichen hast! Schreibe das Wort jetzt noch einmal richtig auf dein Blatt. ${item.tip}${p.levelDownMsg?('<br><br>'+p.levelDownMsg):''}</div>`;
     } else if(item.type==='dictate'){
       feedback = `<div class="feedback-box feedback-tip">💡 Okay, dieses Wort hast du noch nicht ganz richtig geschrieben. Das üben wir einfach noch mal.${p.levelDownMsg?('<br><br>'+p.levelDownMsg):''}</div>`;
     } else if(item.type==='satzbau'){
@@ -3523,7 +3684,7 @@ function screenPractice(){
   }
 
   const bodyHtml = p.answered ? renderItemBodyStatic(item, p.lastGiven) : renderItemBody(item, 'practiceAnswer');
-  const skipBtn = (!p.answered && !['flash','dictate','satzbau','wordstudy','match','malen','kreuzseite'].includes(item.type) && p.level>=2)
+  const skipBtn = (!p.answered && !['flash','dictate','papier','satzbau','wordstudy','match','malen','kreuzseite'].includes(item.type) && p.level>=2)
     ? `<button class="btn btn-ghost" style="margin-top:14px;font-size:0.95rem;" onclick="practiceDontKnow()">🤷 Weiß ich nicht</button>`
     : '';
 
@@ -3793,6 +3954,7 @@ window.startCategoryReview = function(category){
 function renderItemBodyStatic(item, given){
   if(item.type==='match') return renderMatchBody(item, true);
   if(item.type==='kreuzseite') return renderKreuzseite(item, true);
+  if(item.type==='papier') return renderPapier(item, true);
   if(item.type==='malen') return renderMalenBody(item, true);
   if(item.type==='wordstudy'){
     return `
@@ -3840,6 +4002,7 @@ function renderItemBodyStatic(item, given){
     return `
       <div class="task-instr">${item.taskIcon} ${taskInstructions[item.taskIcon]||''}</div>
       <div class="pic-target">${renderPicVal(item.targetEmoji)}</div>
+      ${gapHtml(item,item.answer)}
       <button class="speak-btn" onclick="speakCurrent()">🔊</button>
       <div class="${cls}">${item.options.map((opt,i)=>{
         let cls2='pic-opt-btn';
@@ -3983,6 +4146,8 @@ window.practiceAnswer = function(given){
     speak(ksSpeech(p));
   } else if(correct){
     speak(p.levelUpMsg ? (p.correctPhrase + ' ' + p.levelUpMsg) : p.correctPhrase);
+  } else if(item.type==='papier'){
+    speak('Gut, dass du genau verglichen hast! Schreibe das Wort noch einmal richtig auf dein Blatt. ' + item.tip + (p.levelDownMsg ? ' ' + p.levelDownMsg : ''));
   } else if(item.type==='dictate'){
     speak('Okay, dieses Wort hast du noch nicht ganz richtig geschrieben. Das üben wir einfach noch mal.' + (p.levelDownMsg ? ' ' + p.levelDownMsg : ''));
   } else if(item.type==='satzbau'){
