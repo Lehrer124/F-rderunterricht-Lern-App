@@ -2569,6 +2569,7 @@ function renderScreen(){
   if(state.screen==='diagnose') return screenDiagnose();
   if(state.screen==='map') return screenMap();
   if(state.screen==='goal') return screenGoal();
+  if(state.screen==='paper') return screenPaper();
   if(state.screen==='practice') return screenPractice();
   if(state.screen==='selfcheck') return screenSelfCheck();
   if(state.screen==='drilloffer') return screenDrillOffer();
@@ -3471,9 +3472,33 @@ window.startPracticeSession = function(){
     state.practice.queue = shuffle(pool);
   }
   pickPracticeItem();
-  state.screen='practice';
+  state.screen = needsPaper(domainId, level, isReview) ? 'paper' : 'practice';
   render();
 };
+
+// Braucht diese Übung ein Blatt Papier zum Aufschreiben? (Papier-Aufgaben, Diktat, Satzwerft)
+function needsPaper(domainId, level, isReview){
+  if(domainId==='satzbau' || domainId==='diktat') return true;
+  const lv = isReview ? [2,3] : [level];
+  return lv.some(l => (content[domainId]&&content[domainId][l]||[]).some(i=>i.type==='papier' || i.type==='dictate'));
+}
+const PAPER_HINT = 'Für die nächste Übung brauchst du ein Blatt zum Aufschreiben.';
+function screenPaper(){
+  const d = anyDomain(state.practice.domainId);
+  return `
+  ${topbar(d.name, d.sub, true)}
+  <main>
+    <div class="prompt-card" style="text-align:center;">
+      <div class="domain-tag" style="background:${d.color}22;">${d.icon} ${d.name}</div>
+      <div style="font-size:4.5rem;line-height:1.1;margin:14px 0 6px;">📄✏️</div>
+      <div class="task-instr" style="font-size:1.35rem;">${PAPER_HINT}</div>
+      <button class="speak-btn" onclick="speak(PAPER_HINT)">🔊</button>
+      <p style="font-size:0.95rem;color:#4B6473;margin:10px 0;">Hole dein Schreibblatt oder dein Heft und einen Stift.</p>
+      <button class="btn btn-primary btn-block" style="margin-top:10px;" onclick="paperReady()">✅ Ich habe mein Blatt</button>
+    </div>
+  </main>`;
+}
+window.paperReady = function(){ state.screen='practice'; render(); };
 
 function discoveryPairsFor(domainId, level){
   return (content[domainId][level]||[]).filter(it=>it.options && it.options.length===2).slice(0,3);
