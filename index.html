@@ -148,6 +148,15 @@
   .opt-btn.wrong{background:#F1A38B;border-color:var(--coral-dark);color:var(--white);}
   .opt-btn[disabled]{cursor:default;}
 
+  .kb-display{min-height:58px;border:2px solid var(--line);border-radius:14px;background:#fff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:2rem;letter-spacing:.06em;color:var(--harbor-dark);display:flex;align-items:center;justify-content:center;padding:4px 12px;margin-top:16px;word-break:break-all;}
+  .kb-ph{font-size:1.05rem;font-weight:500;letter-spacing:0;color:#8A9BA6;}
+  .kb-caret{display:inline-block;width:2px;height:1.9rem;background:var(--coral);margin-left:2px;animation:kbblink 1s steps(1) infinite;}
+  @keyframes kbblink{50%{opacity:0}}
+  .kb-keys{margin-top:10px;display:flex;flex-direction:column;gap:6px;-webkit-user-select:none;user-select:none;touch-action:manipulation;}
+  .kb-row{display:flex;gap:5px;justify-content:center;}
+  .kb-key{flex:1 1 0;max-width:62px;min-height:54px;border:2px solid var(--line);border-radius:10px;background:#fff;font-family:'Baloo 2',sans-serif;font-size:1.5rem;font-weight:700;color:var(--harbor-dark);padding:0;cursor:pointer;}
+  .kb-key:active{background:#D7EEF3;}
+  .kb-key.kb-wide{flex:1.6 1 0;max-width:100px;font-size:1.2rem;} .kb-key.kb-space{flex:6 1 0;max-width:none;} .kb-key.kb-on{background:var(--coral);color:#fff;border-color:var(--coral);}
   .text-input-row{display:flex;gap:10px;margin-top:18px;}
   .text-input-row input{
     flex:1;font-size:1.2rem;padding:14px 16px;border-radius:var(--radius-sm);
@@ -310,6 +319,22 @@
   .m-sel{border-color:var(--harbor-mid);background:#E4F2F4;box-shadow:0 0 0 3px #1B6E7F55;}
   .m-done{border-color:#2E8B57;background:#E3F4EA;opacity:.85;}
   .m-wrong{border-color:var(--coral);background:#FDE9DD;animation:mshake .3s;}
+  .sess-bar{position:relative;height:30px;margin:2px 0 6px;border-radius:15px;background:linear-gradient(#D7EEF3,#BFE0EA);overflow:hidden;}
+  .sess-ship{position:absolute;top:1px;font-size:1.35rem;line-height:28px;transition:left 1s linear;}
+  .sess-port{position:absolute;right:6px;top:2px;font-size:1.2rem;line-height:26px;opacity:.7;}
+  .sess-hold{position:fixed;left:0;bottom:0;width:60px;height:60px;z-index:4;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;background:transparent;}
+  @keyframes pz-up{0%,100%{transform:translateY(0)}50%{transform:translateY(-22px)}}
+  @keyframes pz-shake{0%,100%{transform:rotate(-14deg)}50%{transform:rotate(14deg)}}
+  @keyframes pz-spread{0%,100%{transform:scaleX(.8)}50%{transform:scaleX(1.25)}}
+  @keyframes pz-eyes{0%,100%{transform:translateX(-26px)}50%{transform:translateX(26px)}}
+  @keyframes pz-neck{0%,100%{transform:rotate(-16deg)}50%{transform:rotate(16deg)}}
+  @keyframes pz-feet{0%,100%{transform:translateY(0)}50%{transform:translateY(12px)}}
+  @keyframes pz-br{0%,100%{transform:scale(.5)}50%{transform:scale(1.15)}}
+  @keyframes pz-bar{from{width:0}to{width:100%}}
+  .pz-up{animation:pz-up 3s ease-in-out infinite;} .pz-shake{animation:pz-shake .5s ease-in-out infinite;} .pz-spread{animation:pz-spread 3s ease-in-out infinite;}
+  .pz-eyes{animation:pz-eyes 4s ease-in-out infinite;} .pz-neck{animation:pz-neck 4s ease-in-out infinite;} .pz-feet{animation:pz-feet 2s ease-in-out infinite;}
+  .pz-breath-dot{width:110px;height:110px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#BFE9F2,#4FA8C2);margin:6px auto;animation:pz-br 8s ease-in-out infinite;}
+  .pz-track{height:10px;border-radius:5px;background:#E1ECEF;overflow:hidden;margin:4px 12px 2px;} .pz-fill{height:100%;background:#4FA893;width:0;animation:pz-bar 18s linear forwards;}
   @keyframes mshake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
   .m-rows{display:flex;flex-direction:column;gap:8px;margin-top:12px;}
   .m-row{display:flex;align-items:center;justify-content:center;gap:14px;font-size:1.5rem;font-weight:700;}
@@ -508,6 +533,23 @@ function migrateStationsV3(){
     if(state.mastery && state.mastery.buchstabe && nw<3) delete state.mastery.buchstabe;
   }
   state.stationsVersion = 3;
+}
+
+// Verlaufsdaten (Wochenstände, Diagnosen) aus der Zeit vor dem Umbau der Buchstabenbrücke
+// auf das neue Stufenschema umrechnen, damit Lernzuwächse nicht verfälscht werden.
+function fixHistoryV3(onlyBefore){
+  const map = {1:1, 2:3, 3:4, 4:4};
+  (state.history||[]).forEach(h=>{
+    if(h.sv || !h.levels) return;
+    if(!(onlyBefore && h.date >= onlyBefore) && h.levels.buchstabe) h.levels.buchstabe = map[h.levels.buchstabe] || h.levels.buchstabe;
+    h.sv = 3;
+  });
+  (state.diagReports||[]).forEach(r=>{
+    if(r.sv) return;
+    const b = r.results && r.results.buchstabe;
+    if(!(onlyBefore && r.date >= onlyBefore) && b && b.level) b.level = map[b.level] || b.level;
+    r.sv = 3;
+  });
 }
 
 // Ein einmal verdienter Pokal bleibt für immer im Pokal-Regal.
@@ -1841,7 +1883,7 @@ let state = {
   diag:{domainIndex:0, stage:'mid', midCorrect:null, current:null, answeredThisStep:false},
   levels:{}, stars:{}, diagDone:false, history:[], errorCounts:{}, attemptLogs:{},
   mastery:{}, selfChecks:[], pendingSelfCheck:null, pendingReview:false,
-  wordStore:[], onboardStep:0, errorProfile:{}, discoverSeen:{},
+  wordStore:[], onboardStep:0, errorProfile:{}, errorLog:[], fpSnapshots:[], sessionMin:30, showOsk:true, endurance:null, sessionLog:[], session:null, pauseReturn:'practice', pauseIdx:0, pauseStep:0, discoverSeen:{},
   trophies:{}, knownAtStart:{}, stationsVersion:3, showMoreStations:false, showAllStations:false, showStarHelp:false,
   childLabel:'', className:'',
   needsBasicLetterDrill:false, drill:null,
@@ -1869,7 +1911,7 @@ const STORAGE_KEY = 'buchstabenhafen_progress_v1';
 function saveProgress(){
   const now = new Date();
   const wk = weekKey(now);
-  const snapshot = {week:wk, date:now.toISOString().slice(0,10), levels:{...state.levels}, stars:{...state.stars}};
+  const snapshot = {week:wk, date:now.toISOString().slice(0,10), levels:{...state.levels}, stars:{...state.stars}, sv:3};
   const history = state.history || [];
   if(history.length && history[history.length-1].week === wk){
     const prevNote = history[history.length-1].note;
@@ -1884,7 +1926,7 @@ function saveProgress(){
       errorCounts: state.errorCounts, attemptLogs: state.attemptLogs,
       mastery: state.mastery, selfChecks: state.selfChecks,
       needsBasicLetterDrill: state.needsBasicLetterDrill,
-      diagReports: state.diagReports, wordStore: state.wordStore, errorProfile: state.errorProfile, discoverSeen: state.discoverSeen,
+      diagReports: state.diagReports, wordStore: state.wordStore, errorProfile: state.errorProfile, errorLog: state.errorLog, fpSnapshots: state.fpSnapshots, sessionMin: state.sessionMin, showOsk: state.showOsk, endurance: state.endurance, sessionLog: state.sessionLog, histV3: true, discoverSeen: state.discoverSeen,
       childLabel: state.childLabel, className: state.className,
       trophies: state.trophies, knownAtStart: state.knownAtStart, stationsVersion: 3,
     }));
@@ -1907,13 +1949,20 @@ function loadProgress(){
       state.diagReports = d.diagReports || [];
       state.wordStore = d.wordStore || [];
       state.errorProfile = d.errorProfile || {};
+      state.errorLog = d.errorLog || [];
+      state.fpSnapshots = d.fpSnapshots || [];
+      state.sessionMin = d.sessionMin || state.sessionMin || 30;
+      state.showOsk = (d.showOsk===false) ? false : true;
+      state.endurance = d.endurance || null;
+      state.sessionLog = d.sessionLog || [];
       state.discoverSeen = d.discoverSeen || {};
       state.childLabel = d.childLabel || '';
       state.className = d.className || '';
       state.trophies = d.trophies || {};
       state.knownAtStart = d.knownAtStart || {};
       if(!d.stationsVersion) migrateStationsV1();   // Altbestand: Pokale übernehmen
-      if((d.stationsVersion||0) < 3) migrateStationsV3();   // Buchstabenbrücke umgebaut
+      if((d.stationsVersion||0) < 3){ migrateStationsV3(); fixHistoryV3(null); }   // Buchstabenbrücke umgebaut
+      else if(!d.histV3) fixHistoryV3(FP_V3_DATE);
     }
   }catch(e){}
 }
@@ -1924,7 +1973,7 @@ window.exportData = function(){
     errorCounts: state.errorCounts, attemptLogs: state.attemptLogs,
     mastery: state.mastery, selfChecks: state.selfChecks,
     needsBasicLetterDrill: state.needsBasicLetterDrill,
-    diagReports: state.diagReports, wordStore: state.wordStore, errorProfile: state.errorProfile, discoverSeen: state.discoverSeen,
+    diagReports: state.diagReports, wordStore: state.wordStore, errorProfile: state.errorProfile, errorLog: state.errorLog, fpSnapshots: state.fpSnapshots, sessionMin: state.sessionMin, showOsk: state.showOsk, endurance: state.endurance, sessionLog: state.sessionLog, histV3: true, discoverSeen: state.discoverSeen,
     childLabel: state.childLabel, className: state.className,
     trophies: state.trophies, knownAtStart: state.knownAtStart, stationsVersion: 3,
     exportedAt: new Date().toISOString(),
@@ -1967,13 +2016,20 @@ window.importData = function(file){
       state.diagReports = d.diagReports || [];
       state.wordStore = d.wordStore || [];
       state.errorProfile = d.errorProfile || {};
+      state.errorLog = d.errorLog || [];
+      state.fpSnapshots = d.fpSnapshots || [];
+      state.sessionMin = d.sessionMin || state.sessionMin || 30;
+      state.showOsk = (d.showOsk===false) ? false : true;
+      state.endurance = d.endurance || null;
+      state.sessionLog = d.sessionLog || [];
       state.discoverSeen = d.discoverSeen || {};
       state.childLabel = d.childLabel || '';
       state.className = d.className || '';
       state.trophies = d.trophies || {};
       state.knownAtStart = d.knownAtStart || {};
       if(!d.stationsVersion) migrateStationsV1();   // alte Sicherung: Pokale übernehmen
-      if((d.stationsVersion||0) < 3) migrateStationsV3();   // Buchstabenbrücke umgebaut
+      if((d.stationsVersion||0) < 3){ migrateStationsV3(); fixHistoryV3(null); }   // Buchstabenbrücke umgebaut
+      else if(!d.histV3) fixHistoryV3(FP_V3_DATE);
       saveProgress();
       alert('Daten erfolgreich importiert!');
       state.screen = 'start';
@@ -2033,104 +2089,586 @@ function currentSchulhalbjahr(){
   }
 }
 
-function foerderplanDomainRow(d){
+/* ---------- Fehlererfassung (Grundlage für die Fehleranalyse im Förderplan) ---------- */
+const ERRLOG_MAX = 500;
+const LETTER_VOWELS = 'aeiouäöüy';
+function errPlain(s){ return (typeof s==='string' && s.indexOf('<')<0 && s.indexOf('img:')!==0) ? s.replace(/\|/g,'') : null; }
+function errGapPos(gap){ if(!gap) return ''; if(gap.charAt(0)==='_') return 'Anlaut'; if(gap.charAt(gap.length-1)==='_') return 'Auslaut'; return 'Inlaut'; }
+// Baut den Fehlereintrag zu einer Aufgabe. given = Antwort des Kindes (oder null, wenn unbekannt).
+function errorEntryFor(item, given, p){
+  const t = item.type, o = {t};
+  const w = errPlain(String(item.speak || item.word || item.answer || ''));
+  if(w) o.w = w.slice(0,40);
+  if(t==='pic' || t==='silbchoice' || t==='choice' || t==='flash'){
+    const g = (given===null||given===undefined) ? null : errPlain(item.options[given]);
+    const c = errPlain(item.options[item.answer]);
+    if(g) o.g = g.slice(0,40);
+    if(c) o.c = c.slice(0,40);
+    if(item.taskIcon) o.ti = item.taskIcon;
+    if(item.errorCategory) o.cat = item.errorCategory;
+    if(t==='pic' && c && c.length<=2){
+      o.pos = item.gap ? errGapPos(item.gap) : ({'🔡':'Anlaut','🔚':'Auslaut','🔍':'Inlaut'}[item.taskIcon] || '');
+    }
+    if(t==='silbchoice' && item.prompt){
+      if(/ersten/.test(item.prompt)) o.pos='Anlaut'; else if(/letzten/.test(item.prompt)) o.pos='Auslaut'; else if(/mittleren|Mitte/.test(item.prompt)) o.pos='Inlaut';
+    }
+    if(t==='choice' && item.prompt && !item.errorCategory) o.q = item.prompt.replace(/_+/g,'…').slice(0,60);
+  } else if(t==='input'){
+    o.c = String(item.answer||''); o.g = String(given||'').slice(0,40);
+  } else if(t==='papier'){
+    o.c = item.word.replace(/\|/g,'');
+    if(p && p.papierMarks) o.m = p.papierMarks.map((x,i)=>x?i:-1).filter(i=>i>=0);
+  } else if(t==='kreuzseite' && item.rows && item.rows.length){
+    const r = item.rows[item.rows.length-1];
+    o.c = (r.opts.find(x=>x.ok)||{}).w; o.g = (r.opts.find(x=>!x.ok)||{}).w; o.cat = 'lese_'+r.typ; o.w = o.c;
+  }
+  return o;
+}
+function logError(domainId, level, entry){
+  state.errorLog = state.errorLog || [];
+  state.errorLog.push(Object.assign({d:todayStr(), dom:domainId, lv:level}, entry));
+  while(state.errorLog.length > ERRLOG_MAX) state.errorLog.shift();
+}
+
+/* ============================================================
+   FÖRDERPLAN – Auswertung
+   ============================================================ */
+/* Teilkompetenzen des Schriftspracherwerbs (wissenschaftliche Trennschärfe):
+   A Phonologie (ohne/mit Buchstaben), B Lesen (Dekodieren, Flüssigkeit, Verstehen),
+   C Schreiben (lautorientiert, orthografisch, Wortschatz, Satzebene).
+   Bezüge: Frith 1985 (logographisch–alphabetisch–orthographisch); Gough & Tunmer 1986
+   (Simple View of Reading: Dekodieren × Sprachverstehen); May 2002 via Martens 2007
+   (alphabetische, orthografische, morphematische Strategie); SCHNABEL 2024. */
+const FP_BEREICHE = [
+  {id:'phon', title:'A · Hören und Zuordnen', sub:'Phonologie: Sprache hören, Laute und Buchstaben verbinden'},
+  {id:'lesen', title:'B · Lesen', sub:'Wörter erlesen, flüssig lesen, Texte verstehen'},
+  {id:'schreiben', title:'C · Schreiben und Rechtschreiben', sub:'Laute verschriften, Regeln anwenden, Wörter und Sätze schreiben'},
+];
+const FP_TK = [
+  {id:'pb', bereich:'phon', n:'Phonologische Bewusstheit', doms:['phon'],
+   erkl:'Gesprochene Sprache in Silben, Reime und einzelne Laute gliedern – nur mit dem Ohr, ohne Schrift. Wichtigste Vorläuferfähigkeit des Lesen- und Schreibenlernens.',
+   foerder:'Silben schwingen, Reime und Anlaute hören und bilden, Laute heraushören (mit Lautgebärden). Die Übungen immer mit Buchstaben verknüpfen: Die Kombination aus phonologischer Bewusstheit und Buchstaben-Laut-Zuordnung ist am wirksamsten.'},
+  {id:'blz', bereich:'phon', n:'Buchstaben-Laut-Wissen', doms:['buchstabe'],
+   erkl:'Wissen, welcher Buchstabe zu welchem Laut gehört (Graphem-Phonem-Zuordnung), auch bei leicht verwechselbaren Buchstaben (b/d/p) und Buchstabengruppen (Qu, Pf, Sp, St).',
+   foerder:'Anlauttabelle nutzen, Buchstaben mit Lautgebärde verbinden, verwechselbare Buchstaben gegenüberstellen, Wörter mit Buchstabenkarten legen.'},
+  {id:'dek', bereich:'lesen', n:'Dekodieren / Lesegenauigkeit', doms:['lesen','lesekai'],
+   erkl:'Wörter und Sätze Buchstabe für Buchstabe bzw. Silbe für Silbe genau erlesen und den Sinn erfassen (Dekodieren). Typisch bei Schwierigkeiten: Wörter werden erraten oder ähnliche Wörter verwechselt.',
+   foerder:'Lautes Lesen mit Silbenfarben, Lesetandem, Wiederholtes Lesen kurzer Texte; Minimalpaare lesen und Unterschiede einkreisen.'},
+  {id:'flu', bereich:'lesen', n:'Leseflüssigkeit / Worterkennung', doms:['blitzlesen'],
+   erkl:'Bekannte Wörter automatisch und schnell als Ganzes erkennen. Voraussetzung dafür, dass beim Lesen Aufmerksamkeit für das Verstehen frei bleibt.',
+   foerder:'Kurze Blitzlese-Phasen mit Wortkarten, bekannte Wörter immer wieder erlesen, Lesezeit festhalten.'},
+  {id:'ver', bereich:'lesen', n:'Leseverstehen (Textebene)', doms:['lesekompetenz'],
+   erkl:'Kurze Texte verstehen, Informationen finden, Schlüsse ziehen (Sprachverstehen als zweite Säule des Lesens).',
+   foerder:'Lesestrategien: Frage zuerst lesen, Textstelle unterstreichen, Antwort begründen („Wo steht das?“).'},
+  {id:'lsch', bereich:'schreiben', n:'Lautorientiertes Schreiben (Verschriften)', doms:['silbendock','schreib1'],
+   erkl:'Gesprochene Wörter in Laute und Silben zerlegen und Buchstabe für Buchstabe aufschreiben (alphabetische Strategie). Fehler sind hier lautlich nachvollziehbar, z. B. fehlende Vokale oder Auslassungen in Konsonantenhäufungen.',
+   foerder:'Wörter in Silben sprechen, Silbenbögen einzeichnen, Laut für Laut mit der Anlauttabelle verschriften, Wörter mit dem Schreibblatt aufschreiben und Buchstabe für Buchstabe kontrollieren.'},
+  {id:'orth', bereich:'schreiben', n:'Orthografische und morphematische Strategien', doms:['schreib2'],
+   erkl:'Rechtschreibregeln anwenden: Schwingen (Silbengelenk, doppelter Konsonant), Verlängern (Auslautverhärtung) und Ableiten (Wortstamm, ä/äu).',
+   foerder:'Schwingen-, Verlängern- und Ableiten-Trick mit Strategiekarten; Wörter nach Rechtschreibmustern sortieren; Silbenhäuschen und Strukturtypen (SCHNABEL).'},
+  {id:'rws', bereich:'schreiben', n:'Rechtschreibwortschatz (Merkwörter)', doms:['grundwortschatz'],
+   erkl:'Häufige Wörter, die sich nicht aus Regeln ableiten lassen (Hamburger Grundwortschatz), sicher abrufen und richtig schreiben.',
+   foerder:'Täglich 5 Minuten Abdecken–Schreiben–Vergleichen mit 3–5 Wörtern aus dem Hamburger Grundwortschatz.'},
+  {id:'satz', bereich:'schreiben', n:'Schreiben von Sätzen (Satzebene)', doms:['satzbau','diktat'],
+   erkl:'Wörter zu Sätzen verbinden und nach Hören oder aus dem Kopf aufschreiben (Wortgrenzen, Satzanfang und -ende, Rechtschreibung unter Satzbedingungen – Transfer).',
+   foerder:'Satz zuerst sprechen, dann Wort für Wort schreiben; Lernwörter vor dem Diktat sichern, nach dem Diktat Fehler markieren und berichtigen.'},
+];
+const FP_TK_ORDER = ['pb','blz','lsch','dek','orth','flu','rws','ver','satz'];  // Entwicklungslogik: Grundlagen zuerst
+const STATION_INFO = {
+  phon:{kurz:'Silben, Reime, Anlaute hören', tut:'Das Kind hört ein Wort und wählt zwischen Bildern oder Silbenbögen: Wie viele Silben? Reimt sich das? Mit welchem Laut beginnt das Wort? Keine Schrift nötig.', bsp:'Elefant – wie viele Silben? (3 Silbenbögen antippen)', stufen:'1 Reime, Silben, Anlaute · 2 kniffligere Wörter · 3 schwierige Reime und Anlaute · 4 mehrsilbige Wörter, ähnliche Anlaute (Bl/Br)'},
+  buchstabe:{kurz:'Buchstabe ↔ Laut', tut:'Zu Bildern Buchstaben und Wörter zuordnen: Anlaut- und Auslautbuchstabe, fehlender Buchstabe im Wort (Lückenwort), dann das ganze passende Wort wählen.', bsp:'Bild Sonne: S_nne – welcher Buchstabe fehlt? (o / a / u)', stufen:'1 Anlaut/Auslaut-Buchstabe · 2 fehlender Buchstabe (Anfang, Ende, Mitte) · 3 passendes Wort zum Bild · 4 verwechselbare Buchstaben (b/d/p), Qu/Pf/St/Sp, Konsonantenhäufungen'},
+  silbendock:{kurz:'Laute und Silben aufschreiben', tut:'Das Kind hört ein Wort und schreibt einen Laut oder eine Silbe selbst auf (am Gerät, teils auf Papier).', bsp:'Hörwort „Mond“ – den letzten Laut schreiben: d', stufen:'1 erster Laut · 2 letzter Laut · 3 eine Silbe · 4 die ersten zwei Silben'},
+  lesen:{kurz:'Wörter und Sätze genau lesen', tut:'Ähnlich aussehende Wörter unterscheiden, Lückensätze lesen und den Sinn von Sätzen verstehen.', bsp:'„Der Hund ___ im Garten.“ – bellt / Bälle / bellen', stufen:'1 ähnliche Wörter unterscheiden · 2 kurzer Satz mit Lücke · 3 längerer Satz verstehen · 4 Sätze mit Nebensatz'},
+  lesekai:{kurz:'Wörter und Sätze zu Bildern lesen', tut:'Wort–Bild- und Satz–Bild-Zuordnung, lange Wörter mit Silbenfarben, „Lies und male“. Prüft genaues Erlesen ohne Raten.', bsp:'Satz „Der Hund sitzt unter dem Tisch.“ – das passende Bild wählen', stufen:'1 Wort–Bild · 2 lange Wörter mit Silbenfarben · 3 Satz–Bild · 4 lesen und malen'},
+  schreib1:{kurz:'Wörter lauttreu schreiben', tut:'Das Kind schreibt Wörter nach Gehör, die so geschrieben werden, wie sie klingen (am Gerät und auf Papier).', bsp:'Bild Lampe – „Lampe“ schreiben', stufen:'1 einfache lauttreue Wörter · 2 neue Buchstaben · 3 Konsonantenhäufungen · 4 Häufungen am Anfang und Ende'},
+  schreib2:{kurz:'Rechtschreib-Tricks anwenden', tut:'Wörter mit Rechtschreibstrategien richtig schreiben: Schwingen (doppelter Konsonant), Verlängern (Hund – Hunde), Ableiten (Fahrrad – fahren).', bsp:'Hun_ – d oder t? Verlängern: Hunde → Hund', stufen:'1 Schwingen · 2 Verlängern · 3 Ableiten · 4 zusammengesetzte Wörter, Merkwörter'},
+  grundwortschatz:{kurz:'Merkwörter üben', tut:'Häufige Wörter des Hamburger Grundwortschatzes richtig schreiben (Auswählen, Schreiben, Abdecken–Schreiben–Vergleichen auf Papier).', bsp:'Vater oder Fater? – richtig wählen und aufschreiben', stufen:'1 Wörter mit unbetontem e · 2 Doppellaute und doppelte Konsonanten · 3 Verlängern/Ableiten · 4 ß, das/dass, lange Wörter'},
+  satzbau:{kurz:'Eigene Sätze schreiben', tut:'Ein Wort einprägen und aus dem Kopf schreiben, dann eigene Sätze aus Bildbausteinen bauen und Wort für Wort aufschreiben (Papier).', bsp:'Bausteine: Der Hund / rennt / im Park – Satz schreiben', stufen:'1 Wort einprägen und schreiben · 2 Satz mit drei Bausteinen · 3 mehr Bausteine · 4 Satz mit vier Bausteinen'},
+  diktat:{kurz:'Sätze nach Diktat schreiben', tut:'Das Kind hört einen Satz, schreibt ihn auf Papier und vergleicht selbst mit der Lösung.', bsp:'Hörsatz: „Die Katze schläft.“', stufen:'1 kurze Sätze · 2 längere Sätze, Selbstkontrolle · 3 kniffligere Sätze · 4 sehr lange Sätze'},
+  blitzlesen:{kurz:'Wörter blitzschnell erkennen', tut:'Ein Wort erscheint nur kurz, danach wird das passende Bild gewählt. Trainiert automatisierte Worterkennung unter Zeitdruck.', bsp:'Wort „Schmetterling“ blitzt auf – Bild wählen', stufen:'1 kurze bekannte Wörter · 2 längere zusammengesetzte · 3 lange, ungewöhnliche · 4 sehr lange Wörter, kürzeste Zeit'},
+  lesekompetenz:{kurz:'Texte verstehen', tut:'Eine kurze Geschichte lesen und Fragen beantworten (Antwort steht im Text oder muss erschlossen werden).', bsp:'Text über Mia und ihren Hund – „Wo war Mia?“', stufen:'1 Antwort steht im Text · 2 Schlüsse ziehen · 3 längere Texte · 4 mehrere Gedankenschritte'},
+};
+const FP_V3_DATE = '2026-10-09';   // Buchstabenbrücke wurde umgebaut: ältere Stufenwerte gehören zum alten Schema
+const FP_CLS = {
+  ressource:{label:'Ressource', color:'#1E7A34', bg:'#E3F4E6'},
+  aufbau:{label:'im Aufbau', color:'#7A5A00', bg:'#FFF3CC'},
+  schwerpunkt:{label:'Förderschwerpunkt', color:'#A23A12', bg:'#FDE3D6'},
+  offen:{label:'nicht geprüft', color:'#55656F', bg:'#ECEFF1'},
+};
+const FP_CAT_INFO = {
+  offene_silbe:{label:'Offene Silbe / Silbenstruktur', desc:'Vokalbuchstabe in jeder Silbe, Unterscheidung lang/kurz (offene vs. geschlossene Stammsilbe).', mass:'Silbenbögen oder Silbenhäuschen zeichnen, in jeder Silbe den Vokal markieren; Wörter in Silben schwingen und dabei lang/kurz unterscheiden (SCHNABEL: Strukturtypen 1–5).'},
+  doppelkonsonant:{label:'Doppelkonsonant / ck, tz', desc:'Nach kurzem Vokal fehlt der doppelte Konsonant (Silbengelenk), z. B. Schif statt Schiff.', mass:'Schwingen-Trick: Wort schwingen, kurzen Vokal hören, Silbengelenk (zwei Konsonanten) markieren; Kontrastpaare (Hüte/Hütte).'},
+  dehnung_auslaut:{label:'Auslautverhärtung / Dehnung', desc:'b/p, d/t, g/k am Wortende oder Dehnungs-h werden nach dem Hören geschrieben.', mass:'Verlängerungsprobe (Hund – Hunde), Dehnungs-h als Merkmal langer Vokale vor l, m, n, r.'},
+  wortfamilie:{label:'Wortfamilie / Wortbausteine', desc:'Wortstamm wird in verwandten Wörtern nicht erkannt (z. B. Freund → Freundlichkeit).', mass:'Ableiten-Trick: Wortstamm farbig markieren, Wortfamilien sammeln (ä/äu aus a/au ableiten).'},
+  zwielaut:{label:'Zwielaute ei/ai, eu/äu, au', desc:'Zwielaute werden verwechselt oder nicht als Einheit erkannt.', mass:'Merkwörter sammeln, Wörter mit ei/eu/au nach Zwielaut sortieren, Abdecken–Schreiben–Vergleichen.'},
+};
+const FP_MASS = {
+  phon:{aus:'Silben klatschen, Reime und Anlaute im Gespräch üben; zusätzlich Lautbewusstheits-Spiele ohne Schrift.'},
+  buchstabe:{aus:'Anlauttabelle (Niko) nutzen, Buchstaben-Laut-Zuordnung mit Handzeichen, verwechselbare Buchstaben gegenüberstellen.'},
+  silbendock:{aus:'Wörter in Silben sprechen und mit Silbenbögen/Silbenhäuschen markieren, erste Silbe vor/nach dem Hören aufschreiben.'},
+  lesen:{aus:'Lautes Lesen mit Silbenfarben (Lesetandem), Wiederholtes Lesen kurzer Texte, Lesezeit festhalten.'},
+  lesekai:{aus:'Wort-Bild-Zuordnung mit „Lies mal"-Material, Minimalpaare lesen und die Unterschiede einkreisen.'},
+  blitzlesen:{aus:'Kurze Blitzlese-Phasen im Heft oder mit Wortkarten, bekannte Wörter immer wieder erlesen.'},
+  lesekompetenz:{aus:'Lesestrategien: Frage zuerst lesen, Textstelle unterstreichen, Antwort begründen („Wo steht das?").'},
+  schreib1:{aus:'Wörter lauttreu mit Papier-Schreibblatt schreiben, Selbstkontrolle Buchstabe für Buchstabe, Silbenbögen einzeichnen.'},
+  schreib2:{aus:'Schreibblatt mit Selbstkontrolle, Rechtschreibstrategien (Schwingen, Verlängern, Ableiten) mit Strategiekarten.'},
+  grundwortschatz:{aus:'Täglich 5 Minuten Abdecken–Schreiben–Vergleichen mit 3–5 Wörtern aus dem Hamburger Grundwortschatz.'},
+  satzbau:{aus:'Satz zuerst sprechen, dann Wort für Wort schreiben; Wortgrenzen und Satzanfang/Satzende markieren.'},
+  diktat:{aus:'Lernwörter vor dem Diktat sichern; nach dem Diktat Fehler markieren und berichtigen.'},
+};
+
+function fpAllDomains(){ return domains.concat(advancedDomains); }
+// Einstiegsdiagnostik (Lotsen-Check): erste bzw. letzte Diagnose je Station
+function fpDiagFor(id, last){
+  const reps = state.diagReports || [];
+  const order = last ? reps.slice().reverse() : reps;
+  for(let i=0;i<order.length;i++){
+    const r = (order[i].results||{})[id];
+    if(r && r.level){
+      const st = ['mid','second','confirm'].filter(s=>r[s]);
+      return {date:order[i].date, level:r.level, ok:st.filter(s=>r[s].correct).length, n:st.length};
+    }
+  }
+  return null;
+}
+// Stufe zu Beginn der Förderung (Einstiegsdiagnostik; sonst erster Verlaufseintrag; sonst 0 = nicht begonnen)
+function fpBaseLevel(id){
+  const dg = fpDiagFor(id, false);
+  if(dg) return dg.level;
+  const h = (state.history||[])[0];
+  return (h && h.levels && h.levels[id]) ? h.levels[id] : 0;
+}
+function fpBaseDate(){
+  const reps = state.diagReports || [];
+  if(reps.length) return reps[0].date;
+  const h = (state.history||[])[0];
+  return h ? h.date : null;
+}
+const FP_DIAGCLS = {1:'schwerpunkt', 2:'aufbau', 3:'ressource'};
+function fpAssess(d){
+  const lvl = state.levels[d.id]||0, stars = state.stars[d.id]||0, err = state.errorCounts[d.id]||0;
+  const al = state.attemptLogs[d.id];
+  const log = (al && al.level===lvl) ? al.log : [];
   const status = domainStatus(d).status;
-  const lvl = state.levels[d.id] || 1;
-  const stmts = iCanStatements[d.id] || {};
-  const current = stmts[lvl] || '–';
-  const nextLvl = lvl + 1;
-  const next = stmts[nextLvl] || 'Zielstufen im Prototyp erreicht – Bereich fortlaufend auffrischen.';
-  const stars = state.stars[d.id] || 0;
-  const err = state.errorCounts[d.id] || 0;
-  return {d, status, lvl, current, next, stars, err};
+  const total = stars+err;
+  const trophy = !!state.trophies[d.id] || status==='mastered' || status==='review';
+  const started = total>0 || trophy || !!state.mastery[d.id];
+  const errRate = total ? err/total : null;
+  const last6 = log.slice(-6);
+  const rc = last6.length>=4 ? {ok:last6.filter(Boolean).length, n:last6.length, seq:last6} : null;
+  const rec = rc ? rc.ok/rc.n : null;
+  const maxLvl = Math.max.apply(null, Object.keys(content[d.id]||{1:1}).map(Number));
+  const dgLast = fpDiagFor(d.id, true), dgFirst = fpDiagFor(d.id, false);
+  let cls, basis;
+  if(started && (total>=8 || trophy)){
+    basis = 'practice';
+    if(trophy || (lvl>=maxLvl && (errRate===null || errRate<0.35))) cls = 'ressource';
+    else if((rec!==null && rec<0.6) || (errRate!==null && errRate>=0.35)) cls = 'schwerpunkt';
+    else cls = 'aufbau';
+  } else if(dgLast){
+    basis = 'diag';
+    cls = FP_DIAGCLS[Math.min(3, Math.max(1, lvl||dgLast.level))];
+  } else if(started){ basis = 'practice'; cls = 'aufbau'; }
+  else { basis = 'none'; cls = 'offen'; }
+  const base = fpBaseLevel(d.id);
+  return {d, lvl, stars, err, total, errRate, rc, rec, cls, basis, trophy, status, maxLvl, started, dgFirst, dgLast, base, tested:!!(started||dgLast)};
+}
+function fpICan(d, lvl){
+  const s = (iCanStatements[d.id]||{})[lvl] || '';
+  return s.replace(/\.$/,'').replace(/^Ich kann /,'kann ').replace(/\bmir\b/g,'sich').replace(/\bmein(e|en|em|er)?\b/g,'sein$1');
+}
+const FP_RANK = {schwerpunkt:3, aufbau:2, ressource:1, offen:0};
+function fpTKs(byId){
+  return FP_TK.map(tk=>{
+    const rows = tk.doms.map(id=>byId[id]).filter(Boolean);
+    const tested = rows.filter(r=>r.tested);
+    let cls;
+    if(!tested.length) cls = 'offen';
+    else if(tested.some(r=>r.cls==='schwerpunkt')) cls = 'schwerpunkt';
+    else if(tested.every(r=>r.cls==='ressource') && tested.length===rows.length) cls = 'ressource';
+    else cls = 'aufbau';
+    const ok = rows.reduce((s,r)=>s+r.stars,0), bad = rows.reduce((s,r)=>s+r.err,0);
+    return Object.assign({}, tk, {rows, tested, cls, ok, bad, total:ok+bad});
+  });
+}
+function fpMain(tks){
+  const by = {}; tks.forEach(t=>by[t.id]=t);
+  const ordered = FP_TK_ORDER.map(i=>by[i]);
+  const sw = ordered.filter(t=>t.cls==='schwerpunkt');
+  if(sw.length) return {kind:'schwerpunkt', main:sw[0], more:sw.slice(1)};
+  const au = ordered.filter(t=>t.cls==='aufbau');
+  if(au.length) return {kind:'aufbau', main:au[0], more:au.slice(1)};
+  if(ordered.some(t=>t.cls==='ressource')) return {kind:'keiner', main:null, more:[]};
+  return {kind:'offen', main:null, more:[]};
+}
+function fpBereichCls(tks, bid){
+  const l = tks.filter(t=>t.bereich===bid && t.cls!=='offen');
+  if(!l.length) return 'offen';
+  return l.reduce((w,t)=>FP_RANK[t.cls]>FP_RANK[w]?t.cls:w, 'ressource');
+}
+function fpRoundsByDate(){
+  const by = {};
+  (state.selfChecks||[]).forEach(s=>{ const b = by[s.date] = by[s.date]||{items:0,err:0,n:0}; b.items+=s.items||0; b.err+=s.errors||0; b.n++; });
+  return Object.keys(by).sort().map(d=>({d, n:by[d].n, items:by[d].items, err:by[d].err, ok:Math.max(0,by[d].items-by[d].err)}));
+}
+function fpAlign(given, correct){
+  const g = (given||'').toLowerCase(), c = (correct||'').toLowerCase();
+  const n = g.length, m = c.length, D = [];
+  for(let i=0;i<=n;i++){ D[i]=[i]; }
+  for(let j=0;j<=m;j++){ D[0][j]=j; }
+  for(let i=1;i<=n;i++) for(let j=1;j<=m;j++){
+    D[i][j] = Math.min(D[i-1][j]+1, D[i][j-1]+1, D[i-1][j-1] + (g[i-1]===c[j-1]?0:1));
+  }
+  const ops = []; let i=n, j=m;
+  while(i>0 || j>0){
+    if(i>0 && j>0 && D[i][j]===D[i-1][j-1] + (g[i-1]===c[j-1]?0:1)){
+      if(g[i-1]!==c[j-1]) ops.push({k:'sub', g:g[i-1], c:c[j-1], j:j-1}); i--; j--;
+    } else if(j>0 && D[i][j]===D[i][j-1]+1){ ops.push({k:'del', c:c[j-1], j:j-1}); j--; }
+    else { ops.push({k:'ins', g:g[i-1], j:Math.min(j,m-1)}); i--; }
+  }
+  const V = x => LETTER_VOWELS.indexOf(x)>=0;
+  return ops.reverse().map(op=>{
+    const pos = op.j<=0 ? 'Anlaut' : (op.j>=m-1 ? 'Auslaut' : 'Inlaut');
+    let label;
+    if(op.k==='del'){
+      if(V(op.c)) label = 'Vokalbuchstabe fehlt (Silbenkern)';
+      else if(c[op.j]===c[op.j-1] || c[op.j]===c[op.j+1]) label = 'Doppelkonsonant verkürzt';
+      else if(!V(c[op.j-1]||'a') || !V(c[op.j+1]||'a')) label = 'Konsonant in Häufung fehlt';
+      else label = 'Konsonant fehlt';
+    } else if(op.k==='ins'){
+      label = (!V(op.g) && (g.split(op.g).length>2)) ? 'Konsonant zu viel / verdoppelt' : 'Buchstabe zu viel';
+    } else {
+      const pair = [op.g,op.c].sort().join('');
+      if(pos==='Auslaut' && (pair==='bp'||pair==='dt'||pair==='gk')) label = 'Auslautverhärtung (b/p, d/t, g/k)';
+      else if(V(op.g)&&V(op.c)) label = 'Vokal verwechselt';
+      else if(!V(op.g)&&!V(op.c)) label = 'Konsonant verwechselt';
+      else label = 'Vokal und Konsonant vertauscht';
+    }
+    return {label, pos, g:op.g||'', c:op.c||''};
+  });
+}
+// Alle erfassten Fehler: Detailprotokoll (ab diesem Update) + Fehler aus den Eingangs-/Wiederholungsdiagnosen
+function fpAllErrors(){
+  const out = (state.errorLog||[]).map(e=>Object.assign({src:'log'}, e));
+  (state.diagReports||[]).forEach(rep=>{
+    Object.keys(rep.results||{}).forEach(dom=>{
+      ['mid','second','confirm'].forEach(st=>{
+        const r = rep.results[dom][st];
+        if(r && r.item && r.correct===false){
+          const e = errorEntryFor(r.item, null, null);
+          out.push(Object.assign({src:'diag', d:rep.date, dom, lv:rep.results[dom].level||null}, e));
+        }
+      });
+    });
+  });
+  return out;
+}
+const FP_SPELL_DOMS = ['silbendock','schreib1','schreib2','grundwortschatz','satzbau','diktat'];
+const FP_READ_DOMS = ['lesen','lesekai','blitzlesen','lesekompetenz'];
+
+function fpAnalyse(){
+  const errs = fpAllErrors();
+  // Wörter
+  const words = {};
+  const addWord = (key, e)=>{
+    const k = key.toLowerCase();
+    (words[k] = words[k] || {w:key, n:0, ist:[], doms:new Set(), dates:new Set()});
+    words[k].n++; words[k].doms.add(e.dom); words[k].dates.add(e.d);
+    if(e.g && e.g!==e.c && (e.t==='input' || (e.t==='choice' && FP_SPELL_DOMS.indexOf(e.dom)>=0))) words[k].ist.push(e.g);
+  };
+  errs.filter(e=>FP_SPELL_DOMS.indexOf(e.dom)>=0 && e.w && (e.t==='input'||e.t==='choice'||e.t==='papier'||e.t==='dictate'||e.t==='satzbau'||e.t==='wordstudy')).forEach(e=>addWord(e.w || e.c, e));
+  (state.wordStore||[]).forEach(ws=>{ const k=ws.word.toLowerCase(); if(!words[k]) words[k]={w:ws.word,n:0,ist:[],doms:new Set(),dates:new Set()}; words[k].inStore=true; words[k].streak=ws.streak||0; });
+  const wordList = Object.keys(words).map(k=>words[k]).sort((a,b)=>(b.n-a.n)||a.w.localeCompare(b.w,'de'));
+  // Laute / Buchstaben
+  const sound = errs.filter(e=>e.pos && (e.t==='pic'||e.t==='silbchoice'));
+  const posCount = {Anlaut:0, Inlaut:0, Auslaut:0};
+  sound.forEach(e=>{ if(posCount[e.pos]!==undefined) posCount[e.pos]++; });
+  const conf = {};
+  sound.forEach(e=>{ if(e.c){ const k=(e.g?e.g:'?')+'|'+e.c; (conf[k] = conf[k]||{g:e.g||null,c:e.c,n:0,pos:{},ws:new Set()}); conf[k].n++; conf[k].pos[e.pos]=1; conf[k].ws.add(e.w); } });
+  const confList = Object.keys(conf).map(k=>conf[k]).sort((a,b)=>b.n-a.n);
+  const phonErr = {};
+  errs.filter(e=>e.dom==='phon').forEach(e=>{ const k = ({'👏':'Silben gliedern','🔁':'Reime erkennen','🎯':'Anlaute vergleichen'}[e.ti]||'Lautbewusstheit'); phonErr[k]=(phonErr[k]||0)+1; });
+  // Schreibmuster
+  const patterns = {};
+  const addPat = (label,pos,ex)=>{ const p = patterns[label] = patterns[label] || {n:0,pos:{},ex:[]}; p.n++; p.pos[pos]=(p.pos[pos]||0)+1; if(ex && p.ex.length<3 && p.ex.indexOf(ex)<0) p.ex.push(ex); };
+  errs.filter(e=>e.t==='input' && e.g!==undefined && e.g!=='' && e.c).forEach(e=>{
+    fpAlign(e.g, e.c).forEach(op=>addPat(op.label, op.pos, e.g+' → '+e.c));
+  });
+  errs.filter(e=>e.t==='papier' && e.m && e.c).forEach(e=>{
+    e.m.forEach(i=>{ const m=e.c.length; const pos = i<=0?'Anlaut':(i>=m-1?'Auslaut':'Inlaut'); const isV = LETTER_VOWELS.indexOf(e.c[i].toLowerCase())>=0; addPat(isV?'Vokalbuchstabe auf Papier abweichend':'Konsonant auf Papier abweichend', pos, e.c+' (Buchstabe „'+e.c[i]+'")'); });
+  });
+  // Leseauffälligkeiten (Kreuzseite, Wort-Bild, Verstehen)
+  const readCnt = {};
+  Object.keys(READ_ERROR_LABELS).forEach(k=>{ if(state.errorProfile[k]) readCnt[k] = state.errorProfile[k]; });
+  const readPairs = {};
+  errs.filter(e=>FP_READ_DOMS.indexOf(e.dom)>=0 && e.g && e.c && e.t!=='flash').forEach(e=>{ const k=e.g+' ↔ '+e.c; readPairs[k]=(readPairs[k]||0)+1; });
+  // Spelling-Kategorien mit Beispielen
+  const cats = Object.keys(FP_CAT_INFO).map(k=>({k, n:state.errorProfile[k]||0, info:FP_CAT_INFO[k],
+    ex: errs.filter(e=>e.cat===k && e.t==='choice' && e.c).map(e=>(e.g?e.g+' → ':'')+e.c).filter((x,i,a)=>a.indexOf(x)===i).slice(0,3)})).filter(x=>x.n>0).sort((a,b)=>b.n-a.n);
+  return {errs, wordList, posCount, confList, phonErr, patterns, readCnt, readPairs:Object.keys(readPairs).map(k=>({k,n:readPairs[k]})).sort((a,b)=>b.n-a.n), cats, detail:(state.errorLog||[]).length};
+}
+
+function fpSnapshotNow(){
+  const A = fpAllDomains().map(fpAssess);
+  const byId = {}; A.forEach(a=>byId[a.d.id]=a);
+  const tks = fpTKs(byId), M = fpMain(tks);
+  const cls = {}; tks.forEach(t=>cls[t.id]=t.cls);
+  const levels = {}; A.forEach(a=>{ if(a.tested) levels[a.d.id] = a.lvl; });
+  const goals = (M.main ? [M.main] : []).concat(M.more).map(t=>t.id).slice(0,3);
+  return {date:todayStr(), hj:currentSchulhalbjahr().label, cls, levels, main:M.main?M.main.id:null, kind:M.kind, goals};
 }
 
 function buildFoerderplanHTML(){
-  const activeAdvanced = advancedDomains.filter(d => (state.levels[d.id]||0) > 0 || (state.stars[d.id]||0) > 0);
-  const allDomains = domains.concat(activeAdvanced);
-  const rows = allDomains.map(foerderplanDomainRow);
-
-  const relevantRows = rows.filter(r => r.status!=='mastered');
-  const lernausgangTable = relevantRows.map(r => `
-    <tr>
-      <td>${r.d.icon} ${escapeHtml(r.d.name)}<br><span class="fp-sub">${escapeHtml(r.d.sub)}</span></td>
-      <td>${escapeHtml(STATUS_LABELS[r.status]||r.status)}</td>
-      <td style="text-align:center;">${r.lvl}</td>
-      <td>${escapeHtml(r.current)}</td>
-      <td style="text-align:center;">${r.stars}</td>
-      <td style="text-align:center;">${r.err}</td>
-    </tr>`).join('');
-
-  const zieleRows = rows.filter(r => r.status!=='locked' && r.status!=='mastered').map(r => `
-    <tr>
-      <td>${r.d.icon} ${escapeHtml(r.d.name)}</td>
-      <td>${escapeHtml(r.next)}</td>
-      <td>Adaptives Üben in Buchstabenhafen (Station „${escapeHtml(r.d.name)}"), ca. 1x wöchentlich Lernförderstunde<br>&nbsp;<br><em>Ergänzende Maßnahme(n) außerhalb der App:</em> ____________________________</td>
-      <td>____________________________</td>
-    </tr>`).join('');
-
-  const errorEntries = Object.keys(ERROR_CATEGORIES)
-    .map(cat => ({name: ERROR_CATEGORIES[cat], count: state.errorProfile[cat]||0}))
-    .filter(e => e.count > 0).sort((a,b)=>b.count-a.count);
-  const errorHtml = errorEntries.length ? `
-    <table class="fp-table">
-      <tr><th>Fehlerschwerpunkt (Rechtschreibmuster)</th><th>Häufigkeit erfasst</th></tr>
-      ${errorEntries.map(e=>`<tr><td>${escapeHtml(e.name)}</td><td style="text-align:center;">${e.count}</td></tr>`).join('')}
-    </table>` : '<p class="fp-muted">Noch keine kategorisierten Rechtschreib-Fehlerschwerpunkte erfasst.</p>';
-
-  const readEntries = Object.keys(READ_ERROR_LABELS)
-    .map(k => ({name: READ_ERROR_LABELS[k], count: state.errorProfile[k]||0}))
-    .filter(e => e.count > 0).sort((a,b)=>b.count-a.count);
-  const readHtml = readEntries.length ? `
-    <table class="fp-table">
-      <tr><th>Leseschwerpunkt (Lesekai)</th><th>Häufigkeit erfasst</th></tr>
-      ${readEntries.map(e=>`<tr><td>${escapeHtml(e.name)}</td><td style="text-align:center;">${e.count}</td></tr>`).join('')}
-    </table>` : '';
-
-  const history = state.history || [];
-  const historyHtml = history.length ? `
-    <p class="fp-muted">Erfasster Zeitraum: ${history[0].date} bis ${history[history.length-1].date} (${history.length} Woche(n))</p>
-    <table class="fp-table">
-      <tr><th>Bereich</th><th>Stufe je erfasster Woche</th></tr>
-      ${allDomains.map(d => {
-        const trend = history.map(h => (h.levels && h.levels[d.id]) || '–').join(' → ');
-        return `<tr><td>${d.icon} ${escapeHtml(d.name)}</td><td class="fp-mono">${trend}</td></tr>`;
-      }).join('')}
-    </table>
-    ${history.some(h=>h.note) ? `
-    <p class="fp-muted" style="margin-top:10px;"><strong>Notizen aus dem Wochenverlauf:</strong></p>
-    <ul>${history.filter(h=>h.note).map(h=>`<li>${escapeHtml(h.date)}: ${escapeHtml(h.note)}</li>`).join('')}</ul>` : ''}
-    ` : '<p class="fp-muted">Noch kein wochenweiser Verlauf erfasst.</p>';
-
-  const lastDiag = (state.diagReports && state.diagReports.length) ? state.diagReports[state.diagReports.length-1].date : null;
-
   const today = todayStr();
-  const child = escapeHtml(state.childLabel||'') || '____________________';
+  const childRaw = (state.childLabel||'').trim();
+  const child = escapeHtml(childRaw) || '____________________';
+  const who = escapeHtml(childRaw) || 'Das Kind';
   const klass = escapeHtml(state.className||'') || '______';
   const hj = currentSchulhalbjahr();
+  const A = fpAllDomains().map(fpAssess);
+  const byId = {}; A.forEach(a=>byId[a.d.id]=a);
+  const An = fpAnalyse();
+  const rounds = fpRoundsByDate();
+  const nRounds = (state.selfChecks||[]).length;
+  const tks = fpTKs(byId), M = fpMain(tks);
+  const tkBy = {}; tks.forEach(t=>tkBy[t.id]=t);
+  const baseDate = fpBaseDate();
+  const diagReps = state.diagReports || [];
+  const prevSnap = (state.fpSnapshots||[]).filter(s=>s.date!==today).slice(-1)[0] || null;
+  const firstSnap = (state.fpSnapshots||[]).filter(s=>s.date!==today)[0] || null;
+  const mode = prevSnap ? 'fort' : 'erst';
+
+  const chip = (cls, txt) => `<span class="fp-chip" style="background:${FP_CLS[cls].bg};color:${FP_CLS[cls].color};">${txt || FP_CLS[cls].label}</span>`;
+  const stn = (id, long) => { const d = anyDomain(id); const i = STATION_INFO[id]||{}; return d ? `${d.icon} <strong>${escapeHtml(d.name)}</strong>${long ? ` <span class="fp-sub">(${escapeHtml(i.kurz||'')})</span>` : ''}` : escapeHtml(id); };
+  const dots = rc => rc ? rc.seq.map(x=>x?'<span class="fp-ok">●</span>':'<span class="fp-no">○</span>').join('') : '';
+  const lvTxt = a => a.tested ? `Stufe ${a.lvl||a.base} von ${a.maxLvl}` : 'noch nicht geprüft';
+  const evid = a => {
+    const parts = [];
+    if(a.total>0) parts.push(`${a.stars} von ${a.total} Aufgaben richtig`);
+    if(a.rc) parts.push(`zuletzt ${dots(a.rc)} <span class="fp-sub">(${a.rc.ok} von ${a.rc.n})</span>`);
+    if(!a.total && a.dgLast) parts.push(`Einstiegscheck: ${a.dgLast.ok} von ${a.dgLast.n} Aufgaben richtig`);
+    if(!parts.length) parts.push(a.status==='locked' ? '<span class="fp-sub">wird freigeschaltet, sobald die Voraussetzung erreicht ist</span>' : '<span class="fp-sub">noch keine Aufgaben bearbeitet</span>');
+    return parts.join('<br>');
+  };
+  const canNow = a => (a.lvl>1) ? `${who} ${escapeHtml(fpICan(a.d, a.lvl-1))}` : '';
+  const workOn = a => a.lvl ? `${who} übt gerade: ${escapeHtml(fpICan(a.d, a.lvl).replace(/^kann /,''))}` : '';
+
+  /* ---------- Hauptförderbedarf ---------- */
+  let mainBox;
+  const gains = A.filter(a=>a.tested && a.base>0).map(a=>(a.lvl||a.base)-a.base);
+  const lernLine = (mode==='fort' && gains.length) ? `<p><strong>Lernzuwachs seit Förderbeginn:</strong> ${gains.filter(g=>g>0).length} von ${gains.length} Stationen mit höherer Stufe (zusammen +${gains.filter(g=>g>0).reduce((s,g)=>s+g,0)} Stufen), ${gains.filter(g=>g<0).length} mit niedrigerer Stufe. Einzelheiten in Abschnitt 2.</p>` : '';
+  const bereichChips = FP_BEREICHE.map(b=>{ const c = fpBereichCls(tks, b.id); return `<span class="fp-bchip"><span class="fp-sub">${escapeHtml(b.title)}</span><br>${chip(c)}</span>`; }).join('');
+  const ressT = tks.filter(t=>t.cls==='ressource');
+  const ressLine = ressT.length ? `<p><strong>Stärken (Ressourcen):</strong> ${ressT.map(t=>escapeHtml(t.n)).join(' · ')}. Diese Bereiche sind gesichert und werden nicht mehr gefördert, sondern als Stütze für die Förderung der anderen Bereiche genutzt.</p>` : '';
+  if(M.main){
+    const t = M.main, b = FP_BEREICHE.find(x=>x.id===t.bereich);
+    const weakRows = t.rows.filter(r=>r.tested && r.cls!=='ressource').sort((x,y)=>FP_RANK[y.cls]-FP_RANK[x.cls]);
+    const okRows = t.rows.filter(r=>r.tested && r.cls==='ressource');
+    const evRows = okRows.map(a=>`<li>${stn(a.d.id,true)}: ${lvTxt(a)} – ${a.basis==='diag'?'im Einstiegscheck sicher':'bereits gesichert'}${a.trophy?' (Pokal)':''}.</li>`).join('') + weakRows.map(a=>`<li>${stn(a.d.id,true)}: ${lvTxt(a)} – ${evid(a)}${canNow(a)?`<br><span class="fp-sub">${canNow(a)}.</span>`:''}${workOn(a)?`<br><span class="fp-sub">${workOn(a)}.</span>`:''}</li>`).join('');
+    const more = M.more.length ? `<p><strong>Weitere Förderbereiche:</strong> ${M.more.map(x=>escapeHtml(x.n)+' ('+escapeHtml(FP_BEREICHE.find(y=>y.id===x.bereich).title.replace(/^[A-C] · /,''))+')').join(' · ')}.</p>` : '';
+    mainBox = `
+      <div class="fp-main">
+        <div class="fp-main-h">${M.kind==='schwerpunkt' ? 'Hauptförderbedarf' : 'Nächster Entwicklungsschritt (kein ausgeprägter Förderschwerpunkt)'}</div>
+        <div class="fp-main-t">${escapeHtml(t.n)}</div>
+        <div class="fp-sub" style="font-size:0.82rem;">Bereich ${escapeHtml(b.title)} – ${escapeHtml(b.sub)}</div>
+        <p style="margin-top:8px;"><strong>Was ist damit gemeint?</strong> ${escapeHtml(t.erkl)}</p>
+        <p><strong>Woran ist das erkennbar?</strong></p>
+        <ul class="fp-ul">${evRows || '<li>Noch keine Übungsdaten.</li>'}</ul>
+        ${more}
+        ${ressLine}
+        ${lernLine}
+        <p><strong>Förderrichtung:</strong> ${escapeHtml(t.foerder)}</p>
+        <div class="fp-bprof"><span class="fp-sub" style="display:block;margin-bottom:3px;">Profil nach Bereichen:</span>${bereichChips}</div>
+      </div>`;
+  } else if(M.kind==='keiner'){
+    mainBox = `<div class="fp-main"><div class="fp-main-h">Hauptförderbedarf</div><div class="fp-main-t">Kein Förderbedarf in den geprüften Bereichen</div>${ressLine}<div class="fp-bprof">${bereichChips}</div></div>`;
+  } else {
+    mainBox = `<div class="fp-main"><div class="fp-main-h">Hauptförderbedarf</div><div class="fp-main-t">Noch nicht beurteilbar</div><p>Es liegen noch keine Einstiegsdiagnostik und keine Übungsdaten vor.</p></div>`;
+  }
+
+  /* ---------- 1 Kompetenzkarte ---------- */
+  const tkRowsHtml = FP_BEREICHE.map(b=>{
+    const list = tks.filter(t=>t.bereich===b.id);
+    return `<tr class="fp-band"><td colspan="4"><strong>${escapeHtml(b.title)}</strong> <span class="fp-sub">– ${escapeHtml(b.sub)}</span></td></tr>` + list.map(t=>{
+      const rowsHtml = t.rows.map(a=>`<div class="fp-stline">${stn(a.d.id,true)}<br><span class="fp-sub">${lvTxt(a)}${a.basis==='diag'?' (aus Einstiegscheck)':''}${a.tested&&a.base&&a.lvl&&a.lvl!==a.base&&mode==='fort'?', Start: Stufe '+a.base:''}</span><br><span class="fp-ev">${evid(a)}</span></div>`).join('');
+      const isMain = M.main && M.main.id===t.id;
+      return `<tr${isMain?' class="fp-hl"':''}>
+        <td style="width:30%;"><strong>${escapeHtml(t.n)}</strong>${isMain?' <span class="fp-star">◀ Hauptförderbedarf</span>':''}<br><span class="fp-sub">${escapeHtml(t.erkl)}</span></td>
+        <td style="width:14%;text-align:center;">${chip(t.cls)}${t.cls==='offen'?'<br><span class="fp-sub">'+(t.rows.some(r=>r.status==='locked')?'folgt später (Voraussetzung fehlt noch)':'bisher nicht geprüft')+'</span>':''}</td>
+        <td>${rowsHtml}</td>
+      </tr>`;
+    }).join('');
+  }).join('');
+
+  /* ---------- 2 Lernzuwachs / Ausgangslage ---------- */
+  const band = (base, now, max) => {
+    let c = '';
+    for(let i=1;i<=max;i++){
+      let cl = 'fp-sc-e';
+      if(i<=base) cl = 'fp-sc-b'; else if(i<=now) cl = 'fp-sc-g';
+      c += `<span class="fp-sc ${cl}${i===now?' fp-sc-now':''}">${i}</span>`;
+    }
+    return c;
+  };
+  const redia = diagReps.length>1;
+  const zuwachsRows = FP_TK_ORDER.map(id=>tkBy[id]).map(t=>t.rows.filter(a=>a.tested).map(a=>{
+    const now = a.lvl||a.base, base = a.base||0, gain = now-base;
+    const gtxt = base===0 ? 'neu begonnen' : (gain>0 ? `+${gain} Stufe${gain>1?'n':''} ↗` : (gain<0 ? `${gain} Stufe${gain<-1?'n':''} ↘` : 'gleich geblieben'));
+    const gcol = gain>0 ? '#1E7A34' : (gain<0 ? '#A23A12' : '#55656F');
+    const first = a.dgFirst, lastD = (diagReps.length>1) ? a.dgLast : null;
+    const einstieg = first ? `Stufe ${first.level} · ${first.ok} von ${first.n} richtig<br><span class="fp-sub">${escapeHtml(first.date)}</span>` : (base?`Stufe ${base}`:'–');
+    return `<tr><td>${stn(a.d.id,false)}<br><span class="fp-sub">${escapeHtml(t.n)}</span></td><td>${einstieg}</td>
+      ${redia ? `<td>${lastD && lastD.date!==(first&&first.date) ? `Stufe ${lastD.level} · ${lastD.ok} von ${lastD.n} richtig<br><span class="fp-sub">${escapeHtml(lastD.date)}</span>` : '<span class="fp-sub">–</span>'}</td>` : ''}
+      <td>${band(base, now, a.maxLvl)}<br><span style="font-size:0.78rem;font-weight:bold;color:${gcol};">${gtxt}</span></td></tr>`;
+  }).join('')).join('');
+  const maxRound = Math.max.apply(null, rounds.map(r=>r.items).concat([1]));
+  const roundHtml = rounds.length ? `
+    <h3>Übungsrunden: Wie viele Aufgaben wurden richtig gelöst?</h3>
+    <p class="fp-muted" style="margin:2px 0 4px;">Je Übungstag alle Stationen zusammen. Der Balken zeigt die Aufgaben: <span class="fp-ok">■</span> richtig, <span class="fp-no">■</span> falsch. Wächst der grüne Anteil, wird das Kind sicherer.</p>
+    <table class="fp-table fp-small">${rounds.map(r=>`<tr><td style="width:84px;">${escapeHtml(r.d)}</td><td style="width:128px;">${r.ok} von ${r.items} richtig</td><td><div style="display:flex;height:11px;width:${Math.round(r.items/maxRound*100)}%;min-width:8px;border-radius:5px;overflow:hidden;"><div style="background:#2E9B49;flex:${r.ok};"></div><div style="background:#E3A58E;flex:${r.err};"></div></div></td></tr>`).join('')}</table>` : '';
+  let rueck = '';
+  if(mode==='fort' && prevSnap){
+    const chg = FP_TK_ORDER.map(id=>tkBy[id]).filter(t=>prevSnap.cls && prevSnap.cls[t.id] && prevSnap.cls[t.id]!==t.cls);
+    const prevMain = prevSnap.main ? (FP_TK.find(x=>x.id===prevSnap.main)||{}).n : null;
+    rueck = `
+    <h3>Rückblick auf den letzten Förderplan (${escapeHtml(prevSnap.date)})</h3>
+    <p>Hauptförderbedarf damals: <strong>${escapeHtml(prevMain || 'keiner festgestellt')}</strong>. Heute: <strong>${M.main?escapeHtml(M.main.n):'kein Förderbedarf in den geprüften Bereichen'}</strong>${prevSnap.main && M.main && prevSnap.main===M.main.id ? ' – der Schwerpunkt bleibt bestehen.' : (prevSnap.main && (!M.main || M.main.id!==prevSnap.main) ? ' – der frühere Schwerpunkt ist nicht mehr der Hauptbedarf.' : '.')}</p>
+    ${chg.length ? `<table class="fp-table"><tr><th>Teilkompetenz</th><th>damals</th><th>heute</th></tr>${chg.map(t=>`<tr><td>${escapeHtml(t.n)}</td><td>${chip(prevSnap.cls[t.id])}</td><td>${chip(t.cls)} ${FP_RANK[t.cls]<FP_RANK[prevSnap.cls[t.id]] && t.cls!=='offen' ? '↗ besser' : (FP_RANK[t.cls]>FP_RANK[prevSnap.cls[t.id]] && prevSnap.cls[t.id]!=='offen' ? '↘ schwächer' : '')}</td></tr>`).join('')}</table>` : '<p class="fp-muted">Die Einschätzung der Teilkompetenzen hat sich seit dem letzten Förderplan nicht verändert.</p>'}`;
+  }
+  const zTitle = mode==='fort' ? '2. Lernzuwachs seit Beginn der Förderung' : '2. Ausgangslage (Einstiegsdiagnostik)';
+  const zIntro = mode==='fort'
+    ? `Verglichen werden die Stufen bei Förderbeginn (${baseDate?escapeHtml(baseDate):'–'}) mit dem heutigen Stand. ${redia?'Die Spalte „Neue Diagnose“ zeigt die Wiederholung der Einstiegsdiagnostik.':''}`
+    : `Stand nach der Einstiegsdiagnostik${baseDate?' vom '+escapeHtml(baseDate):''}. Zu jeder Station wurden drei Aufgaben gestellt; daraus ergibt sich die Startstufe. Der Lernzuwachs wird mit der Fortschreibung am Ende des Halbjahres ausgewiesen.`;
+  const zSec = `
+    <h2>${zTitle}</h2>
+    <p class="fp-muted">${zIntro}</p>
+    ${zuwachsRows ? `<p class="fp-sub" style="margin-top:6px;">Stufenband: <span class="fp-sc fp-sc-b">1</span> Stufen bei Förderbeginn · <span class="fp-sc fp-sc-g">2</span> Zuwachs seitdem · <span class="fp-sc fp-sc-e">3</span> noch nicht erreicht · Rahmen = heutige Stufe</p>
+    <table class="fp-table"><tr><th>Station</th><th>Einstiegsdiagnostik</th>${redia?'<th>Neue Diagnose</th>':''}<th>Stufenband</th></tr>${zuwachsRows}</table>` : '<p class="fp-muted">Noch keine Stationen geprüft.</p>'}
+    ${roundHtml}
+    ${rueck}`;
+
+  /* ---------- 3 Fehleranalyse ---------- */
+  const catHtml = An.cats.length ? `
+    <table class="fp-table">
+      <tr><th>Rechtschreibmuster</th><th>Anzahl</th><th>So äußert sich der Fehler</th><th>Beispiele</th></tr>
+      ${An.cats.map(c=>`<tr><td><strong>${escapeHtml(c.info.label)}</strong></td><td style="text-align:center;">${c.n}</td><td>${escapeHtml(c.info.desc)}</td><td>${c.ex.length? c.ex.map(escapeHtml).join('<br>') : '<span class="fp-sub">noch keine Wortbeispiele erfasst</span>'}</td></tr>`).join('')}
+    </table>` : '<p class="fp-muted">Noch keine kategorisierten Rechtschreibfehler erfasst.</p>';
+  const patKeys = Object.keys(An.patterns).sort((a,b)=>An.patterns[b].n-An.patterns[a].n);
+  const patHtml = patKeys.length ? `
+    <p style="margin-top:8px;"><strong>Fehlerarten beim Aufschreiben</strong> <span class="fp-sub">(Vergleich der Kinderschreibung mit dem Zielwort)</span></p>
+    <table class="fp-table">
+      <tr><th>Fehlerart</th><th>Anzahl</th><th>Wortstelle</th><th>Beispiele</th></tr>
+      ${patKeys.slice(0,8).map(k=>{ const p=An.patterns[k]; const pos=Object.keys(p.pos).map(x=>x+' ('+p.pos[x]+')').join(', ');
+        return `<tr><td>${escapeHtml(k)}</td><td style="text-align:center;">${p.n}</td><td>${escapeHtml(pos)}</td><td>${p.ex.map(escapeHtml).join('<br>')}</td></tr>`; }).join('')}
+    </table>` : '';
+  const posTotal = An.posCount.Anlaut + An.posCount.Inlaut + An.posCount.Auslaut;
+  const confHtml = An.confList.length ? `
+    <table class="fp-table">
+      <tr><th>Laut / Buchstabe</th><th>Anzahl</th><th>Wortstelle</th><th>Wörter</th></tr>
+      ${An.confList.slice(0,10).map(c=>`<tr><td>${c.g?escapeHtml(c.g)+' statt ':'Gesucht: '}<strong>${escapeHtml(c.c)}</strong></td><td style="text-align:center;">${c.n}</td><td>${Object.keys(c.pos).join(', ')}</td><td>${Array.from(c.ws).slice(0,4).map(escapeHtml).join(', ')}</td></tr>`).join('')}
+    </table>` : '';
+  const lautHtml = (posTotal || An.confList.length || Object.keys(An.phonErr).length) ? `
+    <p>${posTotal ? `Laute, die nicht sicher zugeordnet wurden, nach Wortstelle: <strong>Anlaut ${An.posCount.Anlaut}</strong> · <strong>Inlaut (Mitte) ${An.posCount.Inlaut}</strong> · <strong>Auslaut ${An.posCount.Auslaut}</strong>.` : ''} ${Object.keys(An.phonErr).length ? 'Fehler beim reinen Hören (ohne Schrift): '+Object.keys(An.phonErr).map(k=>escapeHtml(k)+' ('+An.phonErr[k]+')').join(', ')+'.' : ''}</p>
+    ${confHtml}` : '<p class="fp-muted">Für einzelne Laute und Buchstaben liegen noch keine Fehler vor. Sie werden ab jetzt beim Üben mit Wort, gewählter Antwort und Wortstelle (Anlaut/Inlaut/Auslaut) erfasst.</p>';
+  const recurring = An.wordList.filter(w=>w.n>=2);
+  const single = An.wordList.filter(w=>w.n<2);
+  const wordRow = w=>`<tr><td><strong>${escapeHtml(w.w)}</strong></td><td style="text-align:center;">${w.n||'–'}</td><td>${Array.from(w.doms).map(id=>{const d=anyDomain(id);return d?d.icon+' '+escapeHtml(d.name):''}).join(', ')}</td><td>${w.ist.length?Array.from(new Set(w.ist)).slice(0,3).map(escapeHtml).join(', '):'<span class="fp-sub">–</span>'}${w.inStore?'<br><span class="fp-sub">liegt im Wortspeicher der App</span>':''}</td></tr>`;
+  const wordHtml = An.wordList.length ? `
+    ${recurring.length ? `<p><strong>Wiederholt falsch geschrieben:</strong></p>
+    <table class="fp-table"><tr><th>Wort</th><th>Fehler</th><th>Station</th><th>Falsche Schreibung</th></tr>${recurring.map(wordRow).join('')}</table>` : '<p class="fp-muted">Bisher wurde kein Wort mehr als einmal falsch geschrieben.</p>'}
+    ${single.length ? `<p class="fp-muted" style="margin-top:8px;">Einmal auffällig (Diagnose oder Übung): ${single.slice(0,20).map(w=>escapeHtml(w.w)).join(', ')}.</p>` : ''}` : '<p class="fp-muted">Noch keine einzelnen Wörter erfasst.</p>';
+  const readKeys = Object.keys(An.readCnt).sort((a,b)=>An.readCnt[b]-An.readCnt[a]);
+  const readHtml = readKeys.length ? `
+    <table class="fp-table"><tr><th>Leseauffälligkeit</th><th>Anzahl</th></tr>${readKeys.map(k=>`<tr><td>${escapeHtml(READ_ERROR_LABELS[k])}</td><td style="text-align:center;">${An.readCnt[k]}</td></tr>`).join('')}</table>
+    ${An.readPairs.length ? `<p class="fp-muted" style="margin-top:6px;">Verwechselte Wörter beim Lesen: ${An.readPairs.slice(0,8).map(p=>escapeHtml(p.k)+(p.n>1?' ('+p.n+'×)':'')).join(', ')}.</p>` : ''}` : '<p class="fp-muted">Keine kategorisierten Leseauffälligkeiten erfasst.</p>';
+  const readSummary = tks.filter(t=>t.bereich==='lesen').map(t=>`${escapeHtml(t.n)}: ${FP_CLS[t.cls].label}`).join(' · ');
+
+  /* ---------- 4 Ziele ---------- */
+  const prioTK = (M.main?[M.main]:[]).concat(M.more).concat(tks.filter(t=>t.cls==='aufbau' && (!M.main||M.main.id!==t.id) && M.more.indexOf(t)<0)).slice(0,3);
+  const goalRows = prioTK.map((t,i)=>{
+    const cand = t.rows.filter(r=>r.tested);
+    const a = cand.sort((x,y)=>(FP_RANK[y.cls]-FP_RANK[x.cls]) || ((x.lvl||9)-(y.lvl||9)))[0];
+    if(!a) return '';
+    const next = (iCanStatements[a.d.id]||{})[a.lvl+1];
+    const obs = `${stn(a.d.id,true)}: ${lvTxt(a)}.<br>${a.total>0?`${a.stars} von ${a.total} Aufgaben richtig.`:(a.dgLast?`Einstiegscheck: ${a.dgLast.ok} von ${a.dgLast.n} richtig.`:'')}`;
+    const ziel = next ? `${who} ${escapeHtml(fpICan(a.d,a.lvl+1))}.<br><span class="fp-sub">Erreicht, wenn von 6 Aufgaben mindestens 5 richtig sind – in zwei Übungsrunden hintereinander.</span>` : `${who} festigt Stufe ${a.lvl}: mindestens 5 von 6 Aufgaben richtig.`;
+    const mass = `<strong>${escapeHtml(t.n)}:</strong> ${escapeHtml(t.foerder)}<br><em>In der App:</em> ${stn(a.d.id,false)}, ca. 1× wöchentlich Lernförderstunde.<br><em>Ergänzend:</em> ${escapeHtml((FP_MASS[a.d.id]||{}).aus||'')}`;
+    return `<tr><td style="text-align:center;font-weight:bold;">${i+1}</td><td>${obs}</td><td>${ziel}</td><td>${mass}<br>&nbsp;<br>Weitere Maßnahmen: ______________________</td><td>____________<br>&nbsp;<br>Überprüfung am: ________</td></tr>`;
+  }).join('');
+
+  /* ---------- Arbeitsverhalten ---------- */
+  const sl = (state.sessionLog||[]).slice(-8);
+  const eh = (state.endurance && state.endurance.hist) || [];
+  let arbeitHtml;
+  if(!sl.length){
+    arbeitHtml = '<p class="fp-muted">Noch keine vollständige Förderstunde erfasst. Die App misst ab jetzt, wie lange das Kind am Stück konzentriert arbeitet.</p>';
+  } else {
+    const avg = sl.reduce((s,x)=>s+x.min,0)/sl.length, avgSoll = sl.reduce((s,x)=>s+x.soll,0)/sl.length;
+    const maxSoll = Math.max.apply(null, sl.map(x=>Math.max(x.soll,x.min)));
+    const startBlock = eh.length ? eh[0].from : (state.endurance?state.endurance.blockMin:5), nowBlock = state.endurance?state.endurance.blockMin:startBlock;
+    const guessSum = sl.reduce((s,x)=>s+(x.guess||0),0);
+    const blkTxt = nowBlock>startBlock ? `von ${startBlock} auf ${nowBlock} Minuten gestiegen ↗` : (nowBlock<startBlock ? `von ${startBlock} auf ${nowBlock} Minuten gesunken ↘` : `unverändert bei ${nowBlock} Minuten`);
+    arbeitHtml = `
+    <p>Die App teilt jede Förderstunde in Arbeitsblöcke mit stillen Bewegungspausen. Die <strong>Blocklänge</strong> ist die Zeit, die das Kind am Stück konzentriert arbeitet, bevor Genauigkeit oder Tempo nachlassen. Sie wird für jedes Kind selbst angepasst.</p>
+    <table class="fp-table">
+      <tr><td style="width:34%;"><strong>Blocklänge (Konzentration am Stück)</strong></td><td>${blkTxt}</td></tr>
+      <tr><td><strong>Arbeitszeit netto je Förderstunde</strong></td><td>im Mittel ${avg.toFixed(1).replace('.',',')} Minuten (Ziel ${Math.round(avgSoll)} Minuten), ${sl.length} Stunde(n) erfasst</td></tr>
+      <tr><td><strong>Schnelles Raten</strong></td><td>${guessSum ? guessSum+' Antworten wurden als Raten erkannt und nicht als Fehler gewertet.' : 'Kein Raten erkannt.'}</td></tr>
+    </table>
+    <p class="fp-muted" style="margin:6px 0 2px;">Arbeitszeit netto je Förderstunde (grün: erreicht, grauer Rahmen: Ziel):</p>
+    <table class="fp-table fp-small">${sl.map(x=>`<tr><td style="width:84px;">${escapeHtml(x.d)}</td><td style="width:120px;">${String(x.min).replace('.',',')} von ${x.soll} Min.</td><td><div style="border:1px solid #B9C4CC;border-radius:5px;height:11px;width:${Math.round(x.soll/maxSoll*100)}%;"><div style="background:#2E9B49;height:11px;border-radius:5px;width:${Math.min(100,Math.round(x.min/x.soll*100))}%;"></div></div></td><td style="width:130px;" class="fp-sub">${x.pauses} Pause(n), Block ${x.blockMin} Min.</td></tr>`).join('')}</table>
+    <p class="fp-muted">Gemessen wird aus dem Antwortverhalten in der App. Das ersetzt nicht die Beobachtung durch die Lehrkraft.</p>`;
+  }
+
+  /* ---------- Anhang ---------- */
+  const stationRows = FP_TK_ORDER.map(id=>tkBy[id]).map(t=>t.doms.map(id=>{
+    const d = anyDomain(id), i = STATION_INFO[id]||{};
+    return `<tr><td>${d.icon} <strong>${escapeHtml(d.name)}</strong></td><td>${escapeHtml(t.n)}</td><td>${escapeHtml(i.tut||'')}<br><span class="fp-sub">Beispiel: ${escapeHtml(i.bsp||'')}</span></td><td class="fp-sub">${escapeHtml(i.stufen||'')}</td></tr>`;
+  }).join('')).join('');
 
   return `<!DOCTYPE html>
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>Förderplan-Auszug – ${child !== '____________________' ? child : 'Buchstabenhafen'}</title>
+<title>Förderplan – ${child !== '____________________' ? child : 'Buchstabenhafen'}</title>
 <style>
-  body{font-family:Arial,Helvetica,sans-serif;color:#173142;max-width:900px;margin:0 auto;padding:28px 30px 60px;line-height:1.45;}
-  h1{font-size:1.4rem;margin-bottom:2px;}
-  h2{font-size:1.05rem;margin-top:30px;border-bottom:2px solid #173142;padding-bottom:4px;}
-  .fp-meta{font-size:0.92rem;margin-top:4px;color:#334;}
+  @page{size:A4;margin:12mm 12mm}
+  body{font-family:Arial,Helvetica,sans-serif;color:#173142;max-width:900px;margin:0 auto;padding:22px 26px 50px;line-height:1.4;font-size:0.92rem;}
+  h1{font-size:1.35rem;margin:0 0 2px;}
+  h2{font-size:1.05rem;margin-top:24px;border-bottom:2px solid #173142;padding-bottom:3px;page-break-after:avoid;}
+  h3{font-size:0.95rem;margin:16px 0 4px;color:#1B4F5F;page-break-after:avoid;}
+  p{margin:5px 0;}
+  .fp-meta{font-size:0.9rem;color:#334;}
   .fp-meta div{margin:2px 0;}
-  .fp-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:0.86rem;}
-  .fp-table th, .fp-table td{border:1px solid #B9C4CC;padding:6px 8px;text-align:left;vertical-align:top;}
+  .fp-table{width:100%;border-collapse:collapse;margin-top:6px;font-size:0.82rem;}
+  .fp-table th,.fp-table td{border:1px solid #B9C4CC;padding:5px 7px;text-align:left;vertical-align:top;}
   .fp-table th{background:#EEF2F4;}
-  .fp-sub{font-size:0.78rem;color:#617685;}
-  .fp-muted{font-size:0.85rem;color:#5A6B76;}
-  .fp-mono{font-family:'Courier New',monospace;font-size:0.8rem;}
-  .fp-fill{border-bottom:1px solid #173142;display:inline-block;min-width:220px;}
-  .fp-note{background:#FFF7E6;border:1px solid #E8C77E;border-radius:6px;padding:10px 14px;font-size:0.86rem;margin-top:10px;}
-  .fp-sig{margin-top:14px;font-size:0.86rem;}
+  .fp-table tr{page-break-inside:avoid;}
+  .fp-band td{background:#DDE9ED;font-size:0.84rem;}
+  .fp-hl td{background:#FFF8EA;}
+  .fp-small td{border:none;padding:2px 6px;}
+  .fp-sub{font-size:0.76rem;color:#617685;}
+  .fp-ev{font-size:0.8rem;}
+  .fp-stline{margin-bottom:6px;}
+  .fp-muted{font-size:0.84rem;color:#5A6B76;}
+  .fp-chip{display:inline-block;border-radius:10px;padding:1px 8px;font-size:0.78rem;font-weight:bold;margin:1px 2px;}
+  .fp-ok{color:#2E9B49;font-weight:bold;} .fp-no{color:#C4562B;font-weight:bold;}
+  .fp-star{font-size:0.72rem;font-weight:bold;color:#A23A12;}
+  .fp-ul{margin:4px 0 4px 18px;padding:0;} .fp-ul li{margin:4px 0;}
+  .fp-main{border:2.5px solid #A23A12;border-radius:10px;background:#FFF8F2;padding:12px 16px;margin-top:12px;page-break-inside:avoid;}
+  .fp-main-h{font-size:0.78rem;font-weight:bold;letter-spacing:0.05em;text-transform:uppercase;color:#A23A12;}
+  .fp-main-t{font-size:1.3rem;font-weight:bold;margin:2px 0;}
+  .fp-bprof{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;}
+  .fp-bchip{background:#fff;border:1px solid #D5DEE3;border-radius:8px;padding:4px 10px;}
+  .fp-sc{display:inline-block;width:22px;height:18px;line-height:18px;text-align:center;font-size:0.72rem;border-radius:4px;margin-right:2px;border:1px solid #B9C4CC;}
+  .fp-sc-b{background:#BFD9E3;color:#173142;} .fp-sc-g{background:#2E9B49;color:#fff;border-color:#2E9B49;} .fp-sc-e{background:#fff;color:#99A8B2;}
+  .fp-sc-now{outline:2px solid #173142;outline-offset:1px;}
+  .fp-fill{border-bottom:1px solid #173142;display:inline-block;min-width:200px;}
+  .fp-note{background:#FFF7E6;border:1px solid #E8C77E;border-radius:6px;padding:8px 12px;font-size:0.82rem;margin-top:10px;}
+  .fp-sig{margin-top:18px;font-size:0.86rem;}
   .fp-sig .line{display:inline-block;width:260px;border-bottom:1px solid #173142;margin-right:24px;}
-  @media print{ .no-print{display:none;} body{padding:10px 14px;} }
+  .fp-lit li{margin:2px 0;font-size:0.8rem;}
+  @media print{ .no-print{display:none;} body{padding:0;} .fp-main,.fp-sc,.fp-chip,.fp-hl td,.fp-band td{-webkit-print-color-adjust:exact;print-color-adjust:exact;} }
 </style>
 </head>
 <body>
@@ -2138,45 +2676,82 @@ function buildFoerderplanHTML(){
     <button onclick="window.print()" style="font-family:Arial;font-weight:bold;padding:10px 18px;border-radius:8px;border:none;background:#1B6E7F;color:#fff;cursor:pointer;">🖨️ Drucken / Als PDF speichern</button>
   </div>
 
-  <h1>Diagnosegestützter Förderplan – Auszug</h1>
-  <p class="fp-meta">Bereich: Lesen und/oder Rechtschreiben · erzeugt mit Buchstabenhafen am ${today}</p>
-  <div class="fp-meta" style="margin-top:12px;">
-    <div>Name/Kürzel: <strong>${child}</strong> &nbsp;&nbsp; Klasse: <strong>${klass}</strong></div>
+  <h1>Förderplan Lesen und Rechtschreiben – ${mode==='fort' ? 'Fortschreibung' : 'Erstfassung'}</h1>
+  <div class="fp-meta" style="margin-top:8px;">
+    <div>Name/Kürzel: <strong>${child}</strong> &nbsp;&nbsp; Klasse: <strong>${klass}</strong> &nbsp;&nbsp; Datum: <strong>${today}</strong></div>
     <div>Förderzeitraum: <strong>${hj.label}</strong> (${hj.from} – ${hj.to})</div>
-    ${lastDiag ? `<div>Letzte Einstiegs-/Wiederholungsdiagnostik in Buchstabenhafen: ${lastDiag}</div>` : ''}
+    <div>Grundlage: digitale Förderdiagnostik mit der Lernanwendung „Buchstabenhafen“ (adaptive Übungen mit Stationen); ${diagReps.length?'Einstiegsdiagnostik vom '+escapeHtml(baseDate||''):'ohne Einstiegsdiagnostik'}; ${nRounds} Übungsrunden${rounds.length?' ('+escapeHtml(rounds[0].d)+' bis '+escapeHtml(rounds[rounds.length-1].d)+')':''}.</div>
+    <div class="fp-sub">${mode==='fort' ? 'Fortschreibung zum Plan vom '+escapeHtml(prevSnap.date)+'; zeigt Lernzuwachs und Rückblick.' : 'Erstfassung nach der Einstiegsdiagnostik: zeigt die Ausgangslage. Die Fortschreibung am Ende des Halbjahres dokumentiert den Lernzuwachs.'} Wie Stufen, Einschätzungen und Stationen zu lesen sind, steht im Anhang.</div>
   </div>
 
-  <div class="fp-note">Dieser Auszug fasst den digitalen Übungsverlauf aus Buchstabenhafen zusammen. Er ersetzt weder die schulisch-verbindliche Testung (SCHNABEL/SLS) noch die pädagogische Einschätzung der Lehrkraft und ist kein rechtsgültiger Förderplan nach § 5 VO Notenschutz. Er dient als Arbeitsgrundlage, die von der zuständigen Lehrkraft geprüft wird.</div>
+  ${mainBox}
 
-  <h2>1. Individuelle Lernausgangslage und Förderbereiche</h2>
-  <table class="fp-table">
-    <tr><th>Förderbereich</th><th>Status</th><th>Stufe</th><th>Lernstand (aktuelle „Ich kann"-Aussage)</th><th>Sterne</th><th>Fehler</th></tr>
-    ${lernausgangTable}
-  </table>
-  <p class="fp-muted" style="margin-top:8px;">Ergänzend einzutragen – schulische Testergebnisse (Verfahren, Datum, Prozentrang): <span class="fp-fill">&nbsp;</span></p>
+  <h2 style="page-break-before:always;">1. Kompetenzkarte: Wo genau liegen Stärken und Förderbedarf?</h2>
+  <p class="fp-muted">Die Teilkompetenzen des Schriftspracherwerbs werden getrennt betrachtet, weil sie unterschiedlich gefördert werden. Die Stationen der App (Name und Symbol) sind der jeweiligen Teilkompetenz zugeordnet.</p>
+  <table class="fp-table"><tr><th>Teilkompetenz</th><th>Einschätzung</th><th>Stationen und Belege</th></tr>${tkRowsHtml}</table>
 
-  <h2>2. Konkrete Ziele und Maßnahmen (einschließlich Zuständigkeiten)</h2>
-  ${zieleRows ? `
-  <table class="fp-table">
-    <tr><th>Förderbereich</th><th>Nächstes Förderziel</th><th>Maßnahme</th><th>Zuständigkeit</th></tr>
-    ${zieleRows}
-  </table>` : '<p class="fp-muted">Aktuell kein Bereich mit offenem Förderziel erfasst.</p>'}
-  <h3 style="font-size:0.95rem;margin-top:16px;">Fehlerschwerpunkte Rechtschreiben (Leuchtturm &amp; Speicherstadt)</h3>
-  ${errorHtml}
+  ${zSec}
+
+  <h2>3. Arbeitsverhalten: Konzentration und Durchhalten</h2>
+  ${arbeitHtml}
+
+  <h2>4. Fehleranalyse</h2>
+  <h3>4.1 Hören und Zuordnen: Laute und Buchstaben</h3>
+  ${lautHtml}
+  <h3>4.2 Schreiben: Rechtschreibmuster und Fehlerarten</h3>
+  ${catHtml}
+  ${patHtml}
+  <h3>4.3 Wörter, die wiederholt falsch geschrieben werden</h3>
+  ${wordHtml}
+  <h3>4.4 Lesen</h3>
+  <p class="fp-muted">${readSummary}</p>
   ${readHtml}
 
-  <h2>3. Auswertung der Lernentwicklung und Anpassung der Maßnahmen</h2>
-  ${historyHtml}
-  <div class="fp-meta" style="margin-top:12px;">
-    <div>Auswertung/Fortschreibung erfolgt zum Ende des Schulhalbjahres bzw. Schuljahres. Nächste geplante Auswertung am: <span class="fp-fill">&nbsp;</span></div>
-    <div>Anpassung der Maßnahmen: <span class="fp-fill" style="min-width:500px;">&nbsp;</span></div>
-  </div>
+  <h2>5. Förderziele und Maßnahmen (nach Priorität)</h2>
+  ${goalRows ? `<table class="fp-table"><tr><th style="width:24px;">Nr.</th><th>Ausgangslage</th><th>Ziel (überprüfbar)</th><th>Maßnahmen</th><th>Zuständigkeit</th></tr>${goalRows}</table>
+  ${An.cats.length ? `<h3>Förderung nach Fehlermustern (stationsübergreifend)</h3><table class="fp-table"><tr><th>Fehlermuster</th><th>Maßnahme</th></tr>${An.cats.slice(0,3).map(c=>`<tr><td><strong>${escapeHtml(c.info.label)}</strong> (${c.n}×)</td><td>${escapeHtml(c.info.mass)}</td></tr>`).join('')}</table>` : ''}
+  <p class="fp-muted">Die Ziele und Maßnahmen sind Vorschläge, die aus den Übungsdaten abgeleitet wurden. Sie sind von der Lehrkraft zu prüfen und anzupassen.</p>` : '<p class="fp-muted">Aktuell kein Bereich mit Förderbedarf.</p>'}
 
-  <div class="fp-sig">
-    <span class="line">&nbsp;</span> Unterschrift Förder-/Klassenlehrkraft, Datum
+  <h2>6. Ergänzungen der Lehrkraft</h2>
+  <div class="fp-meta">
+    <div>Schulische Testergebnisse (Verfahren, Datum, Prozentrang; z. B. SCHNABEL, SLS):</div>
+    <div style="margin-top:8px;"><span class="fp-fill" style="min-width:520px;">&nbsp;</span></div>
+    <div style="margin-top:10px;">Nachteilsausgleich / Notenschutz (Beschluss der Zeugniskonferenz):</div>
+    <div style="margin-top:2px;">☐ nicht erforderlich &nbsp;&nbsp; ☐ Nachteilsausgleich &nbsp;&nbsp; ☐ Notenschutz</div>
+    <div style="margin-top:10px;">Nächste Auswertung (Fortschreibung) am: <span class="fp-fill">&nbsp;</span></div>
+    <div style="margin-top:10px;">Anpassung der Maßnahmen: <span class="fp-fill" style="min-width:420px;">&nbsp;</span></div>
   </div>
+  <div class="fp-sig"><span class="line">&nbsp;</span> Unterschrift Förder-/Klassenlehrkraft, Datum</div>
 
-  <p class="fp-muted" style="margin-top:30px;border-top:1px solid #D8C9A8;padding-top:10px;">Buchstabenhafen ist ein schulischer Übungs- und Beobachtungsprototyp (lokale Gerätespeicherung, keine Datenübertragung). Dieser Auszug wurde am ${today} automatisch erzeugt und ist vor Verwendung im Förderplan/DiViS durch die zuständige Lehrkraft zu prüfen.</p>
+  <h2 style="page-break-before:always;">Anhang A: So lesen Sie diesen Förderplan</h2>
+  <table class="fp-table">
+    <tr><th style="width:24%;">Begriff</th><th>Bedeutung</th></tr>
+    <tr><td><strong>Station</strong></td><td>Eine Übungsstation in der App (Name und Symbol, z. B. 🪢 Silbendock). Jede Station trainiert genau eine Teilkompetenz; die Tabelle in Anhang B erklärt alle Stationen.</td></tr>
+    <tr><td><strong>Stufe (z. B. „Stufe 2 von 4“)</strong></td><td>Jede Station hat vier Schwierigkeitsstufen. Die App stellt das Kind automatisch auf die passende Stufe ein: Sie steigt auf, wenn von den letzten 6 Aufgaben mindestens 5 richtig waren (nach mindestens 8 bearbeiteten Aufgaben), und geht zurück, wenn von den letzten 4 Aufgaben mindestens 3 falsch waren. „Stufe 2“ heißt: Die Aufgaben von Stufe 1 sind gesichert, das Kind übt an Stufe 2.</td></tr>
+    <tr><td><strong>„x von y Aufgaben richtig“</strong></td><td>Anzahl der bisher gelösten Aufgaben der Station im Verhältnis zu allen bearbeiteten Aufgaben. Es sind absolute Zahlen, keine Prozentwerte eines Tests.</td></tr>
+    <tr><td><strong>„zuletzt ●●●○●●“</strong></td><td>Die letzten bis zu 6 Aufgaben auf der aktuellen Stufe: <span class="fp-ok">●</span> richtig, <span class="fp-no">○</span> falsch. Zeigt, wie sicher das Kind <em>jetzt</em> ist.</td></tr>
+    <tr><td><strong>Einstiegscheck</strong></td><td>Kurze Einstiegsdiagnostik (3 Aufgaben je Station mit leichterem oder schwererem Nachfolgeitem). Ergibt die Startstufe 1 bis 3.</td></tr>
+    <tr><td>${chip('ressource')}</td><td>Die Teilkompetenz ist gesichert (Pokal oder höchste Stufe erreicht und weniger als ein Drittel der Aufgaben falsch; bei geringer Datenlage: Start auf Stufe 3 im Einstiegscheck). Muss nicht mehr gefördert werden und dient als Stütze.</td></tr>
+    <tr><td>${chip('aufbau')}</td><td>Die Teilkompetenz entwickelt sich. Es gibt Fehler, aber keinen auffälligen Schwerpunkt.</td></tr>
+    <tr><td>${chip('schwerpunkt')}</td><td>Auffällig unsicher: von den letzten 6 Aufgaben weniger als 4 richtig oder insgesamt mehr als ein Drittel der Aufgaben falsch (bei geringer Datenlage: Start auf Stufe 1 im Einstiegscheck).</td></tr>
+    <tr><td>${chip('offen')}</td><td>Bisher nicht geprüft, oder die Station wird erst freigeschaltet, wenn eine Voraussetzung erreicht ist.</td></tr>
+    <tr><td><strong>Blocklänge, Netto-Arbeitszeit</strong></td><td>Netto-Arbeitszeit ist die Zeit mit Aufgaben (ohne Verteilen der iPads und ohne Pausen). Die Blocklänge ist die Zeit bis zur nächsten stillen Pause; sie passt sich an, wenn Genauigkeit oder Tempo nachlassen (kürzer) oder lange stabil bleiben (länger).</td></tr>
+    <tr><td><strong>Hauptförderbedarf</strong></td><td>Die Teilkompetenz mit Förderschwerpunkt, die in der Entwicklung des Schriftspracherwerbs am weitesten vorn liegt (Reihenfolge: Phonologische Bewusstheit, Buchstaben-Laut-Wissen, lautorientiertes Schreiben, Dekodieren, orthografische Strategien, Leseflüssigkeit, Rechtschreibwortschatz, Leseverstehen, Sätze). Denn spätere Teilkompetenzen bauen auf den früheren auf.</td></tr>
+  </table>
+
+  <h2>Anhang B: Die Stationen im Überblick</h2>
+  <table class="fp-table"><tr><th>Station</th><th>Teilkompetenz</th><th>Was das Kind tut</th><th>Die vier Stufen</th></tr>${stationRows}</table>
+
+  <h2>Anhang C: Wissenschaftlicher Rahmen und Grenzen</h2>
+  <ul class="fp-lit">
+    <li>Frith, U. (1985): Beneath the surface of developmental dyslexia. – Entwicklung von der logographischen über die alphabetische zur orthografischen Strategie.</li>
+    <li>Gough, P. B. &amp; Tunmer, W. E. (1986): Decoding, reading, and reading disability. Remedial and Special Education 7 – Lesen als Zusammenspiel von Dekodieren und Sprachverstehen („Simple View of Reading“).</li>
+    <li>May, P. (2002), dargestellt bei Martens, D. (2007): LRS – Der regelzentrierte Förderansatz. – alphabetische, orthografische und morphematische Strategie.</li>
+    <li>Galuschka, K. et al. (2014), dargestellt in: Evidenzbasierte LRS-Förderung (Broschüre 2019) und AWMF-Leitlinie Lese-Rechtschreib-Störung – phonologische Bewusstheit und Buchstaben-Laut-Zuordnung wirken kombiniert am besten.</li>
+    <li>Schnabel – Handreichung Klasse 1–10, Hamburg (Stand April 2024) – Silbenorientierung, Strukturtypen der Silbe.</li>
+    <li>Hardy, I. et al. (2011): Adaptive Lerngelegenheiten. Zeitschrift für Pädagogik 6; Meier, C. (2019): KI-basierte adaptive Lernumgebungen – Anpassung der Aufgabenschwierigkeit an die Leistung.</li>
+  </ul>
+  <div class="fp-note">Diese Auswertung fasst den digitalen Übungsverlauf aus Buchstabenhafen zusammen. Sie beruht auf Aufgaben der App, nicht auf einem standardisierten Test, und ersetzt weder die verbindliche schulische Testung (z. B. SCHNABEL/SLS) noch die pädagogische Einschätzung der Lehrkraft. Sie ist kein rechtsgültiger Förderplan nach § 5 VO Notenschutz. Einschätzungen mit geringer Datenlage (wenige Aufgaben) sind vorläufig. Die Einzelfehler (Wörter, Laute) werden seit dem Update der App erfasst. Vor Verwendung im Förderplan/DiViS ist die Auswertung von der zuständigen Lehrkraft zu prüfen. Daten werden nur lokal auf dem Gerät gespeichert.</div>
 </body>
 </html>`;
 }
@@ -2184,6 +2759,12 @@ function buildFoerderplanHTML(){
 window.exportFoerderplan = function(){
   try{
     const html = buildFoerderplanHTML();
+    try{
+      state.fpSnapshots = (state.fpSnapshots||[]).filter(s=>s.date!==todayStr());
+      state.fpSnapshots.push(fpSnapshotNow());
+      state.fpSnapshots = state.fpSnapshots.slice(-8);
+      saveProgress();
+    }catch(e){}
     const blob = new Blob([html], {type:'text/html'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -2203,7 +2784,7 @@ window.confirmReset = function(){
   if(confirm('Fortschritt wirklich löschen und neu starten?')){
     state.levels={}; state.stars={}; state.diagDone=false; state.history=[];
     state.errorCounts={}; state.attemptLogs={}; state.mastery={}; state.selfChecks=[];
-    state.needsBasicLetterDrill=false; state.diagReports=[]; state.wordStore=[]; state.onboardStep=0; state.errorProfile={}; state.discoverSeen={}; state.trophies={}; state.knownAtStart={};
+    state.needsBasicLetterDrill=false; state.diagReports=[]; state.wordStore=[]; state.onboardStep=0; state.errorProfile={}; state.errorLog=[]; state.fpSnapshots=[]; state.endurance=null; state.sessionLog=[]; state.session=null; try{localStorage.removeItem(SESSION_KEY);}catch(e){} state.discoverSeen={}; state.trophies={}; state.knownAtStart={};
     try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
     state.showTeacher=false;
     state.screen='start';
@@ -2244,10 +2825,135 @@ function playLetterSoundThenWord(key, word){
 }
 
 
+/* ============================================================
+   SPRACHAUSGABE: vorab erzeugte KI-Stimme (Piper "Thorsten") mit
+   Rückfall auf die Browser-Stimme.
+   Alle Sprechtexte liegen als kurze MP3-Clips gebündelt in zwei Dateien:
+   sprache.json (Index) und sprache.bin (Clips hintereinander).
+   Jeder Text wird in Sätze zerlegt; ein Satz ist über einen Schlüssel
+   (Hash des Textes + n=normal / s=langsam) auffindbar. Fehlt auch nur
+   ein Satz oder lädt eine Datei nicht, spricht der ganze Text wie bisher
+   die Browser-Stimme - nichts bricht ab.
+   ============================================================ */
+const TTS = {idx:null, buf:null, q:[], busy:false, el:null, gen:0, urls:{}, rangeOk:true, miss:{}};
+function cyrb53(str){
+  let h1=0xdeadbeef, h2=0x41c6ce57;
+  for(let i=0;i<str.length;i++){ const ch=str.charCodeAt(i); h1=Math.imul(h1^ch,2654435761); h2=Math.imul(h2^ch,1597334677); }
+  h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909);
+  h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909);
+  return (4294967296*(2097151&h2)+(h1>>>0)).toString(36);
+}
+function ttsNorm(t){
+  return String(t==null?'':t)
+    .replace(/([a-zA-ZäöüÄÖÜß])-(?=[a-zA-ZäöüÄÖÜß])/g,'$1')
+    .replace(/\|/g,'')
+    .replace(/[\u{1F000}-\u{1FFFF}\u{2190}-\u{2BFF}\u{FE00}-\u{FE0F}\u{200D}\u{20E3}]/gu,' ')
+    .replace(/([.!?])(?:\s*[.!?])+/g,'$1')
+    .replace(/\s+/g,' ').trim();
+}
+function ttsChunks(t){
+  const n = ttsNorm(t);
+  const parts = n.match(/[^.!?]+[.!?]*/g) || [];
+  return parts.map(x=>x.trim().replace(/\.+$/,'')).filter(x=>/[A-Za-zÄÖÜäöüß0-9]/.test(x));
+}
+function ttsKey(chunk, slow){ return cyrb53(chunk)+(slow?'s':'n'); }
+function ttsInit(){
+  try{
+    fetch('sprache.json').then(r=>r.ok?r.json():null).then(j=>{
+      if(!j) return; TTS.idx=j;
+      TTS.binP = fetch('sprache.bin').then(r=>r.ok?r.arrayBuffer():null).then(b=>{ if(b) TTS.buf=b; return b; }).catch(()=>null);
+    }).catch(()=>{});
+  }catch(e){}
+}
+function ttsHas(chunks, slow){
+  if(!TTS.idx) return false;
+  for(let i=0;i<chunks.length;i++){ if(!TTS.idx[ttsKey(chunks[i], slow)]) return false; }
+  return true;
+}
+function ttsClip(key){
+  if(TTS.urls[key]) return Promise.resolve(TTS.urls[key]);
+  const e = TTS.idx && TTS.idx[key];
+  if(!e) return Promise.reject(new Error('kein Clip'));
+  const done = (ab)=>{ const u = URL.createObjectURL(new Blob([ab],{type:'audio/mpeg'})); TTS.urls[key]=u; return u; };
+  if(TTS.buf) return Promise.resolve(done(TTS.buf.slice(e[0], e[0]+e[1])));
+  // Noch nicht komplett geladen: nur den einen Clip per Range-Anfrage holen,
+  // sonst (Server ohne Range) auf das vollständige Laden warten.
+  const viaFull = ()=> (TTS.binP||Promise.resolve(null)).then(b=>{ if(!b) throw new Error('kein Laden'); return done(b.slice(e[0], e[0]+e[1])); });
+  if(!TTS.rangeOk) return viaFull();
+  return fetch('sprache.bin',{headers:{Range:'bytes='+e[0]+'-'+(e[0]+e[1]-1)}}).then(r=>{
+    if(r.status!==206){ TTS.rangeOk=false; throw new Error('kein Range'); }
+    return r.arrayBuffer();
+  }).then(done, ()=>viaFull());
+}
+function ttsEl(){
+  if(!TTS.el){ TTS.el = new Audio(); TTS.el.preload='auto'; }
+  return TTS.el;
+}
+// iPad/Safari: Audio darf erst nach einer Berührung abgespielt werden. Dieses eine
+// Element wird bei der ersten Berührung freigeschaltet und danach immer wiederverwendet.
+(function(){
+  let unlocked = false;
+  function unlock(){
+    if(unlocked) return; unlocked = true;
+    try{
+      const el = ttsEl();
+      el.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
+      const p = el.play(); if(p && p.catch) p.catch(()=>{});
+    }catch(e){}
+    ['pointerdown','touchend','keydown','click'].forEach(ev=>document.removeEventListener(ev, unlock, true));
+  }
+  ['pointerdown','touchend','keydown','click'].forEach(ev=>document.addEventListener(ev, unlock, true));
+})();
+function ttsStop(){
+  TTS.gen++; TTS.q = []; TTS.busy = false;
+  try{ if(TTS.el) TTS.el.pause(); }catch(e){}
+}
+function ttsNext(){
+  const job = TTS.q.shift();
+  if(!job){ TTS.busy = false; return; }
+  TTS.busy = true;
+  const gen = TTS.gen;
+  let i = 0;
+  const fail = ()=>{
+    if(gen!==TTS.gen) return;
+    const rest = job.chunks.slice(Math.max(0,i-1)).join(' ');
+    speakBrowser(rest, job.slow?0.7:0.95, ()=>{ if(gen!==TTS.gen) return; if(job.onDone) job.onDone(); ttsNext(); });
+  };
+  const step = ()=>{
+    if(gen!==TTS.gen) return;
+    if(i>=job.chunks.length){ if(job.onDone) job.onDone(); ttsNext(); return; }
+    const key = ttsKey(job.chunks[i], job.slow); i++;
+    ttsClip(key).then(url=>{
+      if(gen!==TTS.gen) return;
+      const el = ttsEl();
+      el.onended = step; el.onerror = fail;
+      el.src = url;
+      const p = el.play();
+      if(p && typeof p.catch==='function') p.catch(fail);
+    }).catch(fail);
+  };
+  step();
+}
+// true = wird mit der KI-Stimme gesprochen (bzw. ist stumm, wenn nichts Sprechbares da ist)
+function ttsSpeak(text, slow, onDone){
+  const chunks = ttsChunks(text);
+  if(!chunks.length){ if(onDone) onDone(); return true; }
+  if(!ttsHas(chunks, slow)){ if(TTS.idx) chunks.forEach(c=>{ if(!TTS.idx[ttsKey(c, slow)]) TTS.miss[c+(slow?' [langsam]':'')] = 1; }); return false; }
+  TTS.q.push({chunks:chunks, slow:slow, onDone:onDone});
+  if(!TTS.busy) ttsNext();
+  return true;
+}
+ttsInit();
+
 function speak(text, rate){
   text = stripSyllableHyphens(text);
+  if(ttsSpeak(text, !!(rate && rate<0.85))) return;
+  speakBrowser(text, rate);
+}
+function speakBrowser(text, rate, onEnd){
   if(!('speechSynthesis' in window) || typeof SpeechSynthesisUtterance === 'undefined'){
     warnNoTts();
+    if(onEnd) onEnd();
     return;
   }
   try{
@@ -2257,18 +2963,15 @@ function speak(text, rate){
     const deVoices = cachedVoices.filter(v=>v.lang && v.lang.toLowerCase().startsWith('de'));
     const enhancedVoice = deVoices.find(v=>/enhanced|premium|neural/i.test(v.name||''));
     if(enhancedVoice) u.voice = enhancedVoice;
-    // Ohne besonders gekennzeichnete Stimme: keine Stimme fest vorgeben,
-    // damit der Browser/das Betriebssystem seine eigene Standardauswahl
-    // für "de-DE" trifft - das entspricht eher der auf dem Gerät
-    // eingestellten Stimme, als wenn wir selbst irgendeine erzwingen.
     let started = false;
     u.onstart = ()=>{ started = true; };
-    u.onerror = ()=>{ warnNoTts(); };
+    u.onerror = ()=>{ warnNoTts(); if(onEnd){ const f=onEnd; onEnd=null; f(); } };
+    if(onEnd) u.onend = ()=>{ if(onEnd){ const f=onEnd; onEnd=null; f(); } };
     window.speechSynthesis.speak(u);
-    // Manche eingebetteten WebViews melden weder Fehler noch Start.
     setTimeout(()=>{ if(!started) warnNoTts(); }, 1200);
   }catch(e){
     warnNoTts();
+    if(onEnd) onEnd();
   }
 }
 function warnNoTts(){
@@ -2394,6 +3097,7 @@ window.ksPick = function(i,k){
 // Die letzte läuft durch practiceAnswer (Stufenlogik, Speichern, Rückmeldung).
 window.ksCheck = function(){
   const p = state.practice; if(p.answered) return;
+  try{ sessionEnsure(); sessionTick(); }catch(e){}
   const rows = p.current.rows;
   if(Object.keys(p.ksAnswers).length < rows.length) return;
   const res = rows.map((r,i)=> r.opts[p.ksAnswers[i]].ok);
@@ -2405,6 +3109,7 @@ window.ksCheck = function(){
       state.errorCounts[p.domainId] = (state.errorCounts[p.domainId]||0)+1;
       const key = 'lese_'+rows[i].typ;
       state.errorProfile[key] = (state.errorProfile[key]||0)+1;
+      try{ const ok = rows[i].opts.find(o=>o.ok), bad = rows[i].opts[p.ksAnswers[i]]; logError(p.domainId, p.level, {t:'ks', w:ok.w, c:ok.w, g:bad.w, cat:key}); }catch(e){}
       p.sessionErrors = (p.sessionErrors||0)+1;
     }
   }
@@ -2550,6 +3255,7 @@ function checkAnswer(item, given){
 let currentAudioEl = null;
 
 function stopAllAudio(){
+  ttsStop();
   try{ if('speechSynthesis' in window) window.speechSynthesis.cancel(); }catch(e){}
   if(currentAudioEl){ try{ currentAudioEl.pause(); }catch(e){} currentAudioEl = null; }
 }
@@ -2557,7 +3263,7 @@ function stopAllAudio(){
 function render(skipAudioStop){
   if(!skipAudioStop) stopAllAudio();
   const app = document.getElementById('app');
-  app.innerHTML = renderScreen();
+  app.innerHTML = renderScreen() + holdHtml();
   if(state.showTeacher) app.innerHTML += renderTeacherOverlay();
   if(state.showInfo) app.innerHTML += renderInfoOverlay();
   if(state.showStarHelp) app.innerHTML += renderStarHelpOverlay();
@@ -2579,6 +3285,8 @@ function renderScreen(){
   if(state.screen==='vertiefung') return screenVertiefung();
   if(state.screen==='discover') return screenDiscover();
   if(state.screen==='lumi') return screenLumi();
+  if(state.screen==='pause') return screenPause();
+  if(state.screen==='sessionend') return screenSessionEnd();
   return '';
 }
 
@@ -2771,10 +3479,7 @@ function renderItemBody(item, handlerName){
         <button class="speak-btn" onclick="speakWordstudy()">🔊 Nochmal hören</button>
         <button class="btn btn-ghost" style="margin-left:8px;" onclick="wordstudyPeek()">🖼️ Bild noch mal zeigen</button>
       </div>
-      <div class="text-input-row">
-        <input type="text" id="textAnswer" autocomplete="off" autocapitalize="off" placeholder="Wort eintippen …">
-        <button class="btn btn-primary" onclick="${handlerName}(document.getElementById('textAnswer').value)">✅ OK</button>
-      </div>`;
+      ${kbEntryHtml(handlerName)}`;
   }
   if(item.type==='satzbau'){
     const p = state.practice;
@@ -2897,10 +3602,7 @@ function renderItemBody(item, handlerName){
       `<button class="opt-btn" onclick="${handlerName}(${i})">${fmtOpt(opt)}</button>`
     ).join('') + `</div>`;
   } else {
-    body += `<div class="text-input-row">
-      <input type="text" id="textAnswer" autocomplete="off" placeholder="Wort eintippen …">
-      <button class="btn btn-primary" onclick="${handlerName}(document.getElementById('textAnswer').value)">✅ OK</button>
-    </div>`;
+    body += kbEntryHtml(handlerName);
   }
   return body;
 }
@@ -2965,7 +3667,7 @@ window.diagAnswer = function(given){
       state.needsBasicLetterDrill = true;
     }
     state.diagReports = state.diagReports || [];
-    state.diagReports.push({date: todayStr(), results: state.diag.domainResults});
+    state.diagReports.push({date: todayStr(), results: state.diag.domainResults, sv:3});
     state.diagReports = state.diagReports.slice(-10);
     saveProgress();
     state.screen = 'diagreport';
@@ -3191,6 +3893,7 @@ window.startDiagnose = function(){
   state.screen='diagnose';
   render();
 };
+window.setSessionMin = function(m){ state.sessionMin = (m===45?45:30); saveProgress(); render(); };
 window.goMap = function(){ state.screen='map'; render(); };
 window.toggleTeacher = function(){ state.showTeacher = !state.showTeacher; render(); };
 window.toggleInfo = function(){ state.showInfo = !state.showInfo; render(); };
@@ -3450,6 +4153,324 @@ window.discoverNext = function(){
 
 const REVIEW_TEXT = 'Kurze Auffrischung: Zeig, dass du das hier immer noch sicher kannst!';
 
+
+/* ============================================================
+   EIGENE BILDSCHIRMTASTATUR (QWERTZ) – ohne echtes Eingabefeld
+   Es gibt kein <input>, daher erscheinen weder Wortvorschläge noch Autokorrektur,
+   Diktierfunktion oder Emoji-Taste. Eine angeschlossene Hardware-Tastatur wird
+   über keydown abgefangen und schreibt ebenfalls nur in unsere Anzeige.
+   ============================================================ */
+const KB_ROWS = [['q','w','e','r','t','z','u','i','o','p','ü'], ['a','s','d','f','g','h','j','k','l','ö','ä'], ['⇧','y','x','c','v','b','n','m','ß','⌫']];
+let kbShiftOn = false, kbHwShift = false;
+function kbEntryHtml(handlerName){
+  kbShiftOn = true;   // Wortanfang: zuerst Großbuchstaben (die meisten Wörter sind Nomen), danach automatisch klein
+  const rows = KB_ROWS.map(r=>'<div class="kb-row">' + r.map(k=>{
+    if(k==='⇧') return `<button type="button" class="kb-key kb-wide kb-on" id="kbShiftKey" onclick="kbShift()" aria-label="Großbuchstabe">⇧</button>`;
+    if(k==='⌫') return `<button type="button" class="kb-key kb-wide" onclick="kbBack()" aria-label="Löschen">⌫</button>`;
+    return `<button type="button" class="kb-key" data-k="${k}" onclick="kbPress('${k}')">${k==='ß' ? k : k.toUpperCase()}</button>`;
+  }).join('') + '</div>').join('');
+  return `
+    <input type="hidden" id="textAnswer" value="">
+    <div class="kb-display" id="kbDisplay"><span class="kb-ph">Schreibe das Wort</span></div>
+    ${state.showOsk===false ? '' : `<div class="kb-keys">${rows}<div class="kb-row"><button type="button" class="kb-key kb-space" onclick="kbPress(' ')" aria-label="Leerzeichen">␣</button></div></div>`}
+    <button class="btn btn-primary btn-block kb-ok" style="margin-top:12px;" onclick="${handlerName}(document.getElementById('textAnswer').value)">✅ OK</button>`;
+}
+function kbRefresh(){
+  const h = document.getElementById('textAnswer'), d = document.getElementById('kbDisplay');
+  if(!h || !d) return;
+  d.innerHTML = h.value ? escapeHtml(h.value).replace(/ /g,'&nbsp;') + '<span class="kb-caret"></span>' : '<span class="kb-ph">Schreibe das Wort</span>';
+  const s = document.getElementById('kbShiftKey'); if(s) s.classList.toggle('kb-on', kbShiftOn);
+  document.querySelectorAll('.kb-key[data-k]').forEach(k=>{ const c = k.getAttribute('data-k'); k.textContent = (kbShiftOn && c!=='ß') ? c.toUpperCase() : c; });
+}
+window.kbPress = function(ch, fromHw){
+  const h = document.getElementById('textAnswer'); if(!h) return;
+  if(h.value.length >= 40) return;
+  // Großbuchstabe, wenn die Bildschirm-Umschalttaste aktiv ist ODER die Hardware-Umschalttaste gehalten wird
+  const up = kbShiftOn || (!fromHw && kbHwShift);
+  h.value += (up && ch!=='ß') ? ch.toUpperCase() : ch;
+  kbShiftOn = false;
+  kbRefresh();
+};
+window.kbBack = function(){ const h = document.getElementById('textAnswer'); if(!h) return; h.value = h.value.slice(0,-1); if(!h.value) kbShiftOn = true; kbRefresh(); };
+window.kbShift = function(){ kbShiftOn = !kbShiftOn; kbRefresh(); };
+let kbShiftUsed = false;
+document.addEventListener('keyup', function(e){
+  if(e.key==='Shift'){
+    kbHwShift = false;
+    // Hardware-Umschalttaste kurz angetippt (ohne Buchstaben): schaltet Groß/Klein um, z. B. für ein kleingeschriebenes Wortanfang
+    if(!kbShiftUsed && document.getElementById('kbDisplay')){ kbShiftOn = !kbShiftOn; kbRefresh(); }
+    kbShiftUsed = false;
+  }
+});
+document.addEventListener('keydown', function(e){
+  if(e.key==='Shift') kbHwShift = true;
+  else if(kbHwShift) kbShiftUsed = true;
+  if(!document.getElementById('kbDisplay')) return;
+  const ae = document.activeElement;
+  if(ae && (ae.tagName==='INPUT' || ae.tagName==='TEXTAREA' || ae.isContentEditable) && ae.type!=='hidden') return;
+  if(e.ctrlKey || e.metaKey) return;
+  if(e.key==='Backspace'){ e.preventDefault(); kbBack(); }
+  else if(e.key==='Enter'){ e.preventDefault(); const b = document.querySelector('.kb-ok'); if(b) b.click(); }
+  else if(e.key && e.key.length===1 && /^[a-zA-ZäöüÄÖÜß ]$/.test(e.key)){ e.preventDefault(); kbPress((e.shiftKey && e.key===e.key.toLowerCase() && e.key!=='ß') ? e.key.toUpperCase() : e.key, true); }
+});
+window.toggleOsk = function(){ state.showOsk = (state.showOsk===false); saveProgress(); render(); };
+
+/* ============================================================
+   STUNDENRHYTHMUS: Netto-Arbeitszeit, Arbeitsblöcke, stille Pausen, Abschlussrunde
+   - Alle Kinder arbeiten die gleiche Netto-Zeit (Förderstunde 30 Min. = 20 Min., 45 Min. = 32 Min.).
+   - Die Blocklänge (Zeit bis zur nächsten stillen Pause) passt sich je Kind selbst an.
+   - Pausen kommen nach der Uhr, nie als Folge von Raten (sonst würde Raten belohnt).
+   ============================================================ */
+const NET_TARGET = {30:20, 45:32};
+const BLOCK_START = 5, BLOCK_MIN = 3, BLOCK_MAX = 10;
+const QUICK_MS = 1100, IDLE_CAP_MS = 90000, SESSION_GAP_MS = 20*60000, FINAL_MS = 120000;
+const SESSION_KEY = 'buchstabenhafen_session_v1';
+function netTargetMs(){ return (NET_TARGET[state.sessionMin]||20)*60000; }
+function endur(){ if(!state.endurance) state.endurance = {blockMin:BLOCK_START, stable:0, hist:[]}; return state.endurance; }
+function saveSession(){ try{ localStorage.setItem(SESSION_KEY, JSON.stringify(state.session)); }catch(e){} }
+function loadSession(){
+  try{ const raw = localStorage.getItem(SESSION_KEY); if(raw){ const s = JSON.parse(raw); if(s && s.date===todayStr() && Date.now()-s.last < SESSION_GAP_MS) state.session = s; } }catch(e){}
+}
+function finalizeSession(){
+  const s = state.session;
+  if(s && !s.logged && s.net>=60000){
+    s.logged = true;
+    state.sessionLog = state.sessionLog || [];
+    state.sessionLog.push({d:s.date, min:Math.round(s.net/6000)/10, soll:(NET_TARGET[state.sessionMin]||20), blocks:s.blocks, pauses:s.pauses, guess:s.guess, items:s.items, ok:s.ok||0, blockMin:endur().blockMin, std:state.sessionMin||30});
+    state.sessionLog = state.sessionLog.slice(-40);
+    saveProgress();
+  }
+}
+function sessionEnsure(){
+  const now = Date.now(), day = todayStr();
+  let s = state.session;
+  if(s && (s.date!==day || now - s.last > SESSION_GAP_MS)){ finalizeSession(); s = null; }
+  if(!s){ s = state.session = {date:day, start:now, last:now, net:0, blockNet:0, blockItems:[], blocks:0, pauses:0, guess:0, items:0, ok:0, ended:false, easyNext:false, logged:false}; saveSession(); }
+  return s;
+}
+function sessionTick(){
+  const s = state.session; if(!s) return;
+  const now = Date.now();
+  const d = Math.min(Math.max(0, now - s.last), IDLE_CAP_MS);
+  s.net += d; s.blockNet += d; s.last = now;
+  saveSession();
+}
+function median(a){ const b=a.slice().sort((x,y)=>x-y), m=b.length>>1; return b.length ? (b.length%2 ? b[m] : (b[m-1]+b[m])/2) : 0; }
+function evaluateBlock(s){
+  const it = s.blockItems, n = it.length, e = endur();
+  s.blocks++;
+  if(n<3) return;
+  const h = n>>1, a1 = it.slice(0,h), a2 = it.slice(h);
+  const acc = x => x.filter(i=>i.c).length/x.length;
+  const r1 = a1.map(i=>i.rt).filter(x=>x!=null), r2 = a2.map(i=>i.rt).filter(x=>x!=null);
+  const rtUp = r1.length>=2 && r2.length>=2 && median(r2) > 1.5*median(r1);
+  const decline = it.some(i=>i.g) || (n>=4 && acc(a2) <= acc(a1)-0.3) || rtUp;
+  const from = e.blockMin;
+  if(decline){ e.blockMin = Math.max(BLOCK_MIN, e.blockMin-1); e.stable = 0; s.easyNext = true; }
+  else { e.stable = (e.stable||0)+1; if(e.stable>=2){ e.blockMin = Math.min(BLOCK_MAX, e.blockMin+1); e.stable = 0; } }
+  e.hist.push({d:todayStr(), from, to:e.blockMin, n, decline});
+  if(e.hist.length>40) e.hist.shift();
+}
+// Gibt 'sessionend', 'pause' oder null zurück
+function sessionGate(){
+  const s = sessionEnsure(); sessionTick();
+  const left = netTargetMs() - s.net;
+  if(s.ended || left <= -30000){ s.ended = true; finalizeSession(); return 'sessionend'; }
+  if(s.blockNet >= endur().blockMin*60000 && left > FINAL_MS){
+    evaluateBlock(s); s.blockNet = 0; s.blockItems = []; s.pauses++;
+    saveSession(); saveProgress();
+    return 'pause';
+  }
+  return null;
+}
+// Erfolgsrunde: leichtere Aufgaben (ohne Wertung) nach einem Leistungsabfall und zum Schluss der Stunde
+function maybeEasy(p){
+  if(p.isReview || p.isWordReview) return;
+  const s = state.session; if(!s) return;
+  const left = netTargetMs() - s.net;
+  if(p.easy && !p.final && p.easyUntil && p.itemsDone>=p.easyUntil){ p.easy = false; p.easyUntil = 0; p.queue = []; }
+  if(!p.easy && left <= FINAL_MS){
+    p.easy = true; p.final = true; p.easyUntil = p.itemsDone+3; p.sessionTarget = Math.min(p.sessionTarget||6, p.easyUntil); p.queue = [];
+  } else if(!p.easy && s.easyNext){
+    s.easyNext = false; p.easy = true; p.easyUntil = p.itemsDone+2; p.queue = [];
+  }
+}
+function enterGate(g, ret){
+  if(g==='pause'){ goPause(ret); return; }
+  state.screen = g; render();
+}
+
+/* ---------- Bewegungspause (Anleitung wird vorgelesen) ---------- */
+/* ---------- Bilder für die Pausenübungen (animierte Zeichnungen statt Emoji) ---------- */
+const PZ_SKIN = '#F2C6A0', PZ_SHIRT = '#4FA8C2', PZ_LINE = '#173142', PZ_ARROW = '#E2672E';
+function pzArrowDefs(){ return `<defs><marker id="pzah" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" refX="10" refY="8" orient="auto"><path d="M0 1 L15 8 L0 15 Z" fill="${PZ_ARROW}"/></marker></defs>`; }
+function pzBody(){ return `<path d="M52 190 Q52 112 84 104 L136 104 Q168 112 168 190 Z" fill="${PZ_SHIRT}" stroke="${PZ_LINE}" stroke-width="3"/>`; }
+function pzHead(cx,cy){ return `<rect x="${cx-8}" y="${cy+20}" width="16" height="16" fill="${PZ_SKIN}" stroke="${PZ_LINE}" stroke-width="3"/><circle cx="${cx}" cy="${cy}" r="26" fill="${PZ_SKIN}" stroke="${PZ_LINE}" stroke-width="3"/><circle cx="${cx-9}" cy="${cy-3}" r="3" fill="${PZ_LINE}"/><circle cx="${cx+9}" cy="${cy-3}" r="3" fill="${PZ_LINE}"/><path d="M${cx-9} ${cy+9} Q${cx} ${cy+16} ${cx+9} ${cy+9}" stroke="${PZ_LINE}" stroke-width="3" fill="none" stroke-linecap="round"/>`; }
+function pzHand(withFingers){ const arm = `<rect x="-14" y="2" width="28" height="46" rx="8" fill="${PZ_SHIRT}" stroke="${PZ_LINE}" stroke-width="3"/>`; // Handfläche mit Wurzel im Ursprung, Finger zeigen nach oben
+  const f = (x,len,rot)=>`<g transform="translate(${x},-34)"><g>${withFingers?`<animateTransform attributeName="transform" type="rotate" values="${rot};0;${rot}" dur="3s" repeatCount="indefinite" additive="replace"/>`:''}<rect x="-5" y="${-len}" width="10" height="${len}" rx="5" fill="${PZ_SKIN}" stroke="${PZ_LINE}" stroke-width="2.5"/></g></g>`;
+  return arm + `<rect x="-22" y="-38" width="44" height="42" rx="12" fill="${PZ_SKIN}" stroke="${PZ_LINE}" stroke-width="3"/>` +
+    (withFingers ? f(-15,30,-34)+f(-5,36,-12)+f(5,36,12)+f(15,30,34) : f(-15,26,0)+f(-5,32,0)+f(5,32,0)+f(15,26,0)) +
+    `<rect x="-36" y="-22" width="16" height="9" rx="4.5" transform="rotate(-30 -22 -18)" fill="${PZ_SKIN}" stroke="${PZ_LINE}" stroke-width="2.5"/>`;
+}
+function pauseSvg(key){
+  const W = (inner)=>`<svg viewBox="0 0 220 190" width="250" height="216" style="display:block;margin:6px auto;" aria-hidden="true">${pzArrowDefs()}${inner}</svg>`;
+  if(key==='schulter'){
+    const sh = (cx,dir)=>`<circle r="17" fill="${PZ_SHIRT}" stroke="${PZ_LINE}" stroke-width="3"><animateMotion dur="3.2s" repeatCount="indefinite" path="M${cx} 108 m-10 0 a10 10 0 1 ${dir} 20 0 a10 10 0 1 ${dir} -20 0"/></circle>`;
+    return W(`${pzBody()}${pzHead(110,50)}${sh(60,0)}${sh(160,1)}
+      <path d="M30 80 A22 22 0 1 1 33 118" fill="none" stroke="${PZ_ARROW}" stroke-width="5" stroke-linecap="round" marker-end="url(#pzah)"/>
+      <path d="M190 80 A22 22 0 1 0 187 118" fill="none" stroke="${PZ_ARROW}" stroke-width="5" stroke-linecap="round" marker-end="url(#pzah)"/>`);
+  }
+  if(key==='haende'){
+    const hand = (x,y,v)=>`<g transform="translate(${x},${y})"><g><animateTransform attributeName="transform" type="rotate" values="-22;22;-22" dur="0.5s" repeatCount="indefinite"/><g transform="rotate(${v})">${pzHand(false)}</g></g></g>`;
+    const drop = (x,d)=>`<circle cx="${x}" cy="40" r="5" fill="#6BC3E8"><animate attributeName="cy" values="40;170" dur="1.2s" begin="${d}s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;0" dur="1.2s" begin="${d}s" repeatCount="indefinite"/></circle>`;
+    return W(`${hand(62,150,0)}${hand(158,150,0)}${drop(20,0)}${drop(110,0.4)}${drop(200,0.8)}${drop(86,0.6)}${drop(135,0.2)}
+      <path d="M20 110 Q10 90 20 70" fill="none" stroke="${PZ_ARROW}" stroke-width="4" stroke-linecap="round"/><path d="M200 110 Q210 90 200 70" fill="none" stroke="${PZ_ARROW}" stroke-width="4" stroke-linecap="round"/>`);
+  }
+  if(key==='finger'){
+    return W(`<g transform="translate(110,172)">${pzHand(true)}</g>
+      <path d="M44 70 L20 50 M176 70 L200 50 M110 30 L110 8" stroke="${PZ_ARROW}" stroke-width="5" stroke-linecap="round" marker-end="url(#pzah)"/>`);
+  }
+  if(key==='augen'){
+    const eye = (cx)=>`<ellipse cx="${cx}" cy="95" rx="24" ry="20" fill="#fff" stroke="${PZ_LINE}" stroke-width="3"/><circle cx="${cx}" cy="95" r="9" fill="${PZ_LINE}"><animate attributeName="cx" values="${cx-11};${cx+11};${cx-11}" dur="4s" repeatCount="indefinite"/></circle>`;
+    return W(`<circle cx="110" cy="95" r="80" fill="${PZ_SKIN}" stroke="${PZ_LINE}" stroke-width="3"/>${eye(76)}${eye(144)}
+      <path d="M86 150 Q110 164 134 150" stroke="${PZ_LINE}" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <path d="M40 22 L12 22" stroke="${PZ_ARROW}" stroke-width="5" stroke-linecap="round" marker-end="url(#pzah)"/><path d="M180 22 L208 22" stroke="${PZ_ARROW}" stroke-width="5" stroke-linecap="round" marker-end="url(#pzah)"/>`);
+  }
+  if(key==='atem'){
+    return W(`<circle cx="110" cy="80" r="30" fill="#BFE9F2" stroke="#4FA8C2" stroke-width="4"><animate attributeName="r" values="30;70;30" dur="8s" repeatCount="indefinite"/></circle>
+      <text x="110" y="182" text-anchor="middle" font-size="26" font-weight="700" font-family="Baloo 2,Arial,sans-serif" fill="${PZ_LINE}">einatmen<animate attributeName="opacity" values="1;1;0;0;1" keyTimes="0;0.45;0.5;0.95;1" dur="8s" repeatCount="indefinite"/></text>
+      <text x="110" y="182" text-anchor="middle" font-size="26" font-weight="700" font-family="Baloo 2,Arial,sans-serif" fill="${PZ_LINE}" opacity="0">ausatmen<animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.45;0.5;0.95;1" dur="8s" repeatCount="indefinite"/></text>`);
+  }
+  if(key==='nacken'){
+    return W(`${pzBody()}<g><animateTransform attributeName="transform" type="rotate" values="-20 110 86;20 110 86;-20 110 86" dur="4s" repeatCount="indefinite"/>${pzHead(110,50)}</g>
+      <path d="M52 22 A70 70 0 0 0 30 66" fill="none" stroke="${PZ_ARROW}" stroke-width="5" stroke-linecap="round" marker-end="url(#pzah)"/>
+      <path d="M168 22 A70 70 0 0 1 190 66" fill="none" stroke="${PZ_ARROW}" stroke-width="5" stroke-linecap="round" marker-end="url(#pzah)"/>`);
+  }
+  if(key==='fuesse'){
+    const shoe = (x)=>`<g transform="translate(${x},0)"><g><animateTransform attributeName="transform" type="translate" values="0 0;0 6;0 0" dur="2s" repeatCount="indefinite"/><path d="M-22 120 L-22 150 Q-22 160 -12 160 L36 160 Q46 160 46 150 Q46 138 30 136 L8 128 L8 120 Z" fill="#E2672E" stroke="${PZ_LINE}" stroke-width="3"/><rect x="-26" y="160" width="76" height="9" rx="4" fill="${PZ_LINE}"/></g></g>`;
+    const ar = (x)=>`<path d="M${x} 40 L${x} 100" stroke="${PZ_ARROW}" stroke-width="6" stroke-linecap="round" marker-end="url(#pzah)"><animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/></path>`;
+    return W(`<rect x="10" y="172" width="200" height="8" rx="4" fill="#B9A58A"/>${shoe(50)}${shoe(130)}${ar(70)}${ar(150)}`);
+  }
+  return '';
+}
+
+const PAUSE_EX = [
+  {key:'schulter', title:'Schultern kreisen', text:'Zieh die Schultern hoch bis zu den Ohren. Dann kreise die Schultern ganz langsam: nach hinten, nach unten und wieder nach oben.'},
+  {key:'haende',   title:'Hände ausschütteln', text:'Schüttle deine Hände ganz locker aus, so als wären sie nass. Mach es leise.'},
+  {key:'finger',   title:'Finger strecken', text:'Spreize alle Finger weit auseinander. Dann drücke die Finger wieder zusammen. Wechsle ganz langsam hin und her.'},
+  {key:'augen',    title:'Augen ausruhen', text:'Schau mit den Augen ganz langsam nach links und nach rechts, ohne den Kopf zu bewegen. Danach schau weit weg und zähle leise bis fünf.'},
+  {key:'atem',     title:'Atem-Kreis', text:'Atme durch die Nase ein, während der Kreis größer wird. Atme langsam aus, während er kleiner wird.'},
+  {key:'nacken',   title:'Nacken dehnen', text:'Neige den Kopf langsam zur rechten Schulter, dann zur Mitte, dann zur linken Schulter. Immer ganz langsam.'},
+  {key:'fuesse',   title:'Füße drücken', text:'Drücke deine Füße fest auf den Boden und zähle leise bis fünf. Dann lass ganz locker.'},
+];
+const PAUSE_SEC = 20;
+let pauseTimers = [];
+function clearPauseTimers(){ pauseTimers.forEach(clearTimeout); pauseTimers = []; }
+function pauseExercises(){
+  const i = ((state.pauseIdx||1)-1)*2;
+  return [PAUSE_EX[i%PAUSE_EX.length], PAUSE_EX[(i+1)%PAUSE_EX.length]];
+}
+function goPause(ret){
+  clearPauseTimers();
+  state.pauseReturn = ret || 'practice';
+  state.pauseIdx = (state.pauseIdx||0) + 1;
+  state.pauseStep = 0;
+  state.screen = 'pause';
+  render();
+  speakPause();
+  pauseTimers.push(setTimeout(()=>{ if(state.screen==='pause'){ state.pauseStep = 1; render(); speakPause(); } }, PAUSE_SEC*1000));
+  pauseTimers.push(setTimeout(()=>{ if(state.screen==='pause'){ state.pauseStep = 2; render(); speakPause(); } }, PAUSE_SEC*2000));
+}
+window.speakPause = function(){
+  const ex = pauseExercises(), step = state.pauseStep||0;
+  if(step>=2){ speak('Gut gemacht! Weiter geht es.'); return; }
+  const cur = ex[step];
+  speak((step===0 ? 'Pause. Bleib an deinem Platz. ' : '') + cur.title + '. ' + cur.text);
+};
+function screenPause(){
+  const ex = pauseExercises(), step = state.pauseStep||0;
+  const done = step>=2;
+  const cur = ex[Math.min(step,1)];
+  return `
+  <div class="topbar"><div class="topbar-row"><div></div><div style="text-align:center;flex:1;"><h1>Pause</h1><div class="sub">Leise bleiben und mitmachen</div></div><div></div></div><div class="wave"></div></div>
+  <main>
+    <div class="prompt-card" style="text-align:center;">
+      <div style="margin-bottom:4px;">${mascotIcon(56)}</div>
+      ${done ? `
+        <div class="task-instr" style="font-size:1.4rem;">Gut gemacht! Weiter geht's.</div>
+        <p style="font-size:1rem;color:#4B6473;margin:10px 0;">Dein Kopf ist wieder frisch.</p>
+        <button class="btn btn-primary btn-block" style="margin-top:14px;" onclick="endPause()">✅ Weiter</button>
+      ` : `
+        <div style="font-size:0.85rem;color:#6B7F8C;">Übung ${step+1} von 2 · bleib an deinem Platz</div>
+        ${pauseSvg(cur.key)}
+        <div class="task-instr" style="font-size:1.3rem;">${cur.title} <button class="speak-btn" style="vertical-align:middle;" onclick="speakPause()">🔊</button></div>
+        <p style="font-size:1.05rem;line-height:1.5;color:var(--harbor-dark);margin:8px 6px 14px;">${cur.text}</p>
+        <div class="pz-track"><div class="pz-fill" style="animation-duration:${PAUSE_SEC}s;"></div></div>
+      `}
+    </div>
+  </main>`;
+}
+window.endPause = function(){
+  clearPauseTimers(); try{ stopAllAudio(); }catch(e){}
+  const s = sessionEnsure(); s.last = Date.now(); saveSession();   // Pausenzeit zählt nicht zur Arbeitszeit
+  state.screen = state.pauseReturn || 'practice';
+  if(state.screen==='practice' && state.practice) state.practice.shownAt = Date.now();
+  render();
+};
+
+/* ---------- Abschluss der Stunde ---------- */
+function screenSessionEnd(){
+  const s = state.session || {};
+  return `
+  <div class="topbar"><div class="topbar-row"><div></div><div style="text-align:center;flex:1;"><h1>Geschafft!</h1></div><div></div></div><div class="wave"></div></div>
+  <main>
+    <div class="prompt-card" style="text-align:center;">
+      <div style="font-size:5rem;line-height:1.1;margin:10px 0;">⛵</div>
+      <div style="margin-bottom:6px;">${mascotIcon(56)}</div>
+      <div class="task-instr" style="font-size:1.4rem;">Du hast heute toll gearbeitet!</div>
+      <p style="font-size:1.05rem;line-height:1.5;color:var(--harbor-dark);margin:10px 0;">${s.items ? `Du hast ${s.items} Aufgaben bearbeitet, ${s.ok||0} davon richtig. ` : ''}Dein Schiff ist im Hafen angekommen.</p>
+      <p style="font-size:1rem;color:#4B6473;">Lege das iPad jetzt bitte leise zur Seite.</p>
+    </div>
+  </main>`;
+}
+window.endSessionNow = function(){
+  const s = sessionEnsure(); sessionTick(); s.ended = true; finalizeSession();
+  clearPauseTimers(); state.showTeacher = false; state.screen = 'sessionend'; render();
+};
+window.restartSession = function(){
+  finalizeSession(); state.session = null; saveSession();
+  clearPauseTimers(); state.showTeacher = false; state.screen = 'map'; render();
+};
+let holdTimer = null;
+window.holdStart = function(){ holdEnd(); holdTimer = setTimeout(()=>{ holdTimer=null; if(state.screen==='sessionend') restartSession(); else endSessionNow(); }, 3000); };
+window.holdEnd = function(){ if(holdTimer){ clearTimeout(holdTimer); holdTimer = null; } };
+function holdHtml(){
+  return `<div class="sess-hold" ontouchstart="holdStart()" ontouchend="holdEnd()" ontouchcancel="holdEnd()" onmousedown="holdStart()" onmouseup="holdEnd()" onmouseleave="holdEnd()" oncontextmenu="return false;"></div>`;
+}
+function sessionBar(){
+  const s = state.session; if(!s) return '';
+  const spent = s.net + Math.min(Math.max(0, Date.now()-s.last), IDLE_CAP_MS);
+  const pct = Math.max(0, Math.min(100, spent/netTargetMs()*100));
+  return `<div class="sess-bar"><div class="sess-ship" style="left:calc(${pct.toFixed(1)}% - ${pct*0.28}px);">⛵</div><div class="sess-port">⚓</div></div>`;
+}
+function screenGuessAlert(){
+  const d = anyDomain(state.practice.domainId);
+  setTimeout(()=>{ const b = document.getElementById('guessOk'); if(b){ b.disabled = false; b.style.opacity = '1'; } }, 3000);
+  const txt = 'Stopp! Lies die Aufgabe noch einmal ganz in Ruhe und hör genau hin. Du musst nicht schnell sein.';
+  speak(txt);
+  return `
+  ${topbar(d.name, d.sub, false)}
+  <main>
+    <div class="prompt-card" style="text-align:center;">
+      <div style="margin-bottom:6px;">${mascotIcon(64)}</div>
+      <div class="task-instr" style="font-size:1.35rem;">✋ Stopp – in Ruhe!</div>
+      <p style="font-size:1.05rem;line-height:1.5;color:var(--harbor-dark);margin:10px 6px;">Du musst nicht schnell sein. Lies die Aufgabe noch einmal ganz in Ruhe und hör genau hin.</p>
+      <button id="guessOk" class="btn btn-primary btn-block" style="margin-top:12px;opacity:.45;" disabled onclick="guessOk()">👍 Ich schaue genau hin</button>
+    </div>
+  </main>`;
+}
+window.guessOk = function(){ const p = state.practice; p.guessAlert = false; p.shownAt = Date.now(); render(); };
+
 window.startPracticeSession = function(){
   const domainId = state.pendingDomain;
   const isReview = state.pendingReview;
@@ -3471,8 +4492,13 @@ window.startPracticeSession = function(){
     const pool = [...(content[domainId][2]||[]), ...(content[domainId][3]||[])];
     state.practice.queue = shuffle(pool);
   }
+  sessionEnsure(); sessionTick();
+  state.practice.recent = [];
+  maybeEasy(state.practice);
   pickPracticeItem();
-  state.screen = needsPaper(domainId, level, isReview) ? 'paper' : 'practice';
+  state.screen = 'practice';
+  const g0 = sessionGate();
+  if(g0){ enterGate(g0, 'practice'); return; }
   render();
 };
 
@@ -3498,7 +4524,17 @@ function screenPaper(){
     </div>
   </main>`;
 }
-window.paperReady = function(){ state.screen='practice'; render(); };
+window.paperReady = function(){ state.practice.paperAck = true; state.screen='practice'; render(); };
+// Der Papier-Hinweis erscheint erst, wenn das Kind wirklich auf Papier schreiben soll und danach
+// mit der Lösung auf dem Bildschirm vergleicht (Diktat, Papier-Aufgabe, Satzbau-Schreibphase) –
+// nicht bei Aufgaben, bei denen am Tablet getippt wird.
+function paperNeededNow(p){
+  const it = p.current; if(!it) return false;
+  if(it.type==='dictate') return !p.answered && (!p.dictatePhase || p.dictatePhase==='listen');
+  if(it.type==='papier') return !p.answered && (!p.papierPhase || p.papierPhase==='write');
+  if(it.type==='satzbau') return !p.answered && p.sbStep==='write';
+  return false;
+}
 
 function discoveryPairsFor(domainId, level){
   return (content[domainId][level]||[]).filter(it=>it.options && it.options.length===2).slice(0,3);
@@ -3625,7 +4661,7 @@ function startFlashCountdown(){
 function pickPracticeItem(){
   const p = state.practice;
   if(!p.queue || p.queue.length === 0){
-    const pool = content[p.domainId][p.level];
+    const pool = content[p.domainId][(p.easy && !p.isReview && !p.isWordReview) ? Math.max(1,p.level-1) : p.level];
     let shuffled = shuffle(pool);
     if(pool.some(i=>i.seq)){
       // Gruppen (seq) abwechselnd in Zweierrunden: 2 aus Gruppe 1, 2 aus Gruppe 2, ...
@@ -3642,6 +4678,7 @@ function pickPracticeItem(){
     p.queue = shuffled;
   }
   p.current = shuffleOptions(p.queue.shift());
+  p.shownAt = Date.now();
   p.answered=false;
   p.message=null;
   if(p.current && p.current.type==='flash'){
@@ -3649,6 +4686,7 @@ function pickPracticeItem(){
   } else {
     clearFlashInterval();
   }
+  if(p.current && ['dictate','papier','satzbau'].indexOf(p.current.type)<0) p.paperAck = false;
   if(p.current && p.current.type==='dictate'){
     p.dictatePhase = 'listen';
     p.markedWords = p.current.sentence.split(' ').map(()=>false);
@@ -3685,6 +4723,8 @@ function pickPracticeItem(){
 function screenPractice(){
   const d = anyDomain(state.practice.domainId);
   const p = state.practice;
+  if(p.guessAlert && !p.answered) return screenGuessAlert();
+  if(paperNeededNow(p) && !p.paperAck) return screenPaper();
   const item = p.current;
 
   let feedback='';
@@ -3716,6 +4756,7 @@ function screenPractice(){
   return `
   ${topbar(d.name, d.sub, true)}
   <main>
+    ${sessionBar()}
     <div class="progress-track"><div class="progress-fill" style="width:${Math.min(100,(p.itemsDone/(p.sessionTarget||6))*100)}%; background:${d.color};"></div></div>
     <div class="prompt-card">
       <div class="domain-tag" style="background:${d.color}22;">${d.icon} Stufe ${p.level} von 4</div>
@@ -3842,6 +4883,7 @@ function playTokenSequenced(key, wholeWord, onDone){
   });
 }
 function speakSequenced(text, onDone){
+  if(ttsSpeak(stripSyllableHyphens(text), true, onDone)) return;
   if(!('speechSynthesis' in window) || typeof SpeechSynthesisUtterance === 'undefined'){
     warnNoTts(); if(onDone) onDone(); return;
   }
@@ -4090,10 +5132,21 @@ window.practiceAnswer = function(given){
   p.itemsDone++;
   p.levelUpMsg=null; p.levelDownMsg=null;
   p.correctPhrase = randomCorrectPhrase();
-  if(!correct) p.sessionErrors = (p.sessionErrors||0) + 1;
+  // Raten erkennen: mehrere sehr schnelle Antworten bei Auswahlaufgaben mit mehreren Fehlern.
+  // Solche Antworten werden nicht als Fehler gewertet (kein Abstieg, kein Eintrag im Förderplan).
+  const rtMs = Date.now() - (p.shownAt || Date.now());
+  const isQT = ['pic','choice','silbchoice'].indexOf(item.type)>=0 && given!=='__SKIP__';
+  const quick = isQT && rtMs < QUICK_MS;
+  p.recent = (p.recent||[]).concat([{q:quick, c:correct}]).slice(-4);
+  const ratePattern = !p.easy && p.recent.length>=3 && p.recent.filter(x=>x.q).length>=3 && p.recent.filter(x=>!x.c).length>=2;
+  const guessed = !correct && quick && ratePattern;
+  if(ratePattern){ p.guessAlert = true; p.recent = []; }
+  if(!correct && !guessed && !p.easy) p.sessionErrors = (p.sessionErrors||0) + 1;
 
-  p.attemptLog.push(correct);
-  if(p.attemptLog.length > 12) p.attemptLog.shift();
+  if(!guessed && !p.easy){
+    p.attemptLog.push(correct);
+    if(p.attemptLog.length > 12) p.attemptLog.shift();
+  }
 
   if(p.isWordReview){
     // Wortspeicher-Wiederholung: eigene, einfache Logik statt Phonemstufen.
@@ -4110,11 +5163,14 @@ window.practiceAnswer = function(given){
         }
       }
     }
+  } else if(p.easy){
+    // Erfolgsrunde mit leichteren Aufgaben: keine Wertung, keine Stufenänderung
   } else {
     if(correct){
       state.stars[p.domainId] = (state.stars[p.domainId]||0)+1;
-    } else {
+    } else if(!guessed){
       state.errorCounts[p.domainId] = (state.errorCounts[p.domainId]||0)+1;
+      try{ logError(p.domainId, p.level, errorEntryFor(item, given, p)); }catch(e){}
       if(item.errorCategory){
         state.errorProfile[item.errorCategory] = (state.errorProfile[item.errorCategory]||0) + 1;
       }
@@ -4167,6 +5223,13 @@ window.practiceAnswer = function(given){
     }
   }
 
+  {
+    const ss = sessionEnsure(); sessionTick();
+    if(!p.isWordReview && !p.easy){
+      ss.blockItems.push({c:correct, rt:isQT?rtMs:null, g:guessed});
+      ss.items++; if(correct) ss.ok = (ss.ok||0)+1; if(guessed) ss.guess++;
+    }
+  }
   if(item.type==='kreuzseite'){
     speak(ksSpeech(p));
   } else if(correct){
@@ -4207,8 +5270,11 @@ window.nextPracticeItem = function(){
       return;
     }
   }
+  sessionEnsure(); sessionTick();
+  maybeEasy(p);
   const target = p.sessionTarget || 6;
   if(p.itemsDone >= target){
+    if(p.final && state.session) state.session.ended = true;
     if(p.isWordReview){
       saveProgress();
       state.screen = 'map';
@@ -4231,6 +5297,11 @@ window.nextPracticeItem = function(){
     return;
   }
   pickPracticeItem();
+  const g1 = sessionGate();
+  if(g1){
+    if(g1==='pause'){ const wasEasy = p.easy; maybeEasy(p); if(p.easy && !wasEasy) pickPracticeItem(); }
+    enterGate(g1, 'practice'); return;
+  }
   render();
 };
 
@@ -4272,7 +5343,11 @@ window.selectSelfCheck = function(rating){
   saveProgress();
   const wasAdvanced = !!advancedDomains.find(x=>x.id===info.domainId);
   state.pendingSelfCheck = null;
-  state.screen = wasAdvanced ? 'vertiefung' : 'map';
+  const ret = wasAdvanced ? 'vertiefung' : 'map';
+  sessionEnsure(); sessionTick();
+  const g2 = sessionGate();
+  if(g2){ enterGate(g2, ret); return; }
+  state.screen = ret;
   render();
 };
 
@@ -4560,7 +5635,7 @@ window.saveWeekNote = function(){
   let history = state.history || [];
   let entry = history.find(h => h.week === wk);
   if(!entry){
-    entry = {week:wk, date:new Date().toISOString().slice(0,10), levels:{...state.levels}, stars:{...state.stars}};
+    entry = {week:wk, date:new Date().toISOString().slice(0,10), levels:{...state.levels}, stars:{...state.stars}, sv:3};
     history.push(entry);
   }
   entry.note = val;
@@ -4608,6 +5683,20 @@ function renderTeacherOverlay(){
           <input type="text" id="classNameInput" value="${escapeHtml(state.className||'')}" onchange="updateChildInfo()" placeholder="z. B. 3b" style="width:100%;border:2px solid var(--line);border-radius:var(--radius-sm);padding:7px 9px;font-family:'Andika';font-size:0.88rem;margin-top:2px;">
         </div>
       </div>
+      <div style="margin-top:14px;padding:10px 12px;border:2px solid var(--line);border-radius:12px;">
+        <div style="font-weight:700;font-size:0.95rem;">⏱️ Förderstunde auf diesem iPad</div>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button class="btn ${state.sessionMin===45?'btn-ghost':'btn-primary'}" style="flex:1;" onclick="setSessionMin(30)">30 Min.</button>
+          <button class="btn ${state.sessionMin===45?'btn-primary':'btn-ghost'}" style="flex:1;" onclick="setSessionMin(45)">45 Min.</button>
+        </div>
+        <p style="font-size:0.8rem;color:#4B6473;line-height:1.5;margin-top:8px;">Netto-Arbeitszeit: <strong>${NET_TARGET[state.sessionMin]||20} Min.</strong> (die Zeit fürs Verteilen und Starten ist schon abgezogen; die Uhr läuft ab der ersten Aufgabe). Arbeitsblock dieses Kindes bis zur stillen Pause: <strong>${endur().blockMin} Min.</strong> (passt sich selbst an).${state.session ? ' Aktuelle Stunde: '+(Math.round(state.session.net/6000)/10)+' Min. gearbeitet.' : ''}</p>
+        <label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;margin-top:8px;"><input type="checkbox" ${state.showOsk===false?'':'checked'} onchange="toggleOsk()"> Tastatur auf dem Bildschirm zeigen (bei angeschlossener Hardware-Tastatur kann sie ausgeschaltet werden)</label>
+        <div style="display:flex;gap:8px;margin-top:6px;">
+          <button class="btn btn-ghost" style="flex:1;font-size:0.85rem;" onclick="endSessionNow()">⏹️ Stunde jetzt beenden</button>
+          <button class="btn btn-ghost" style="flex:1;font-size:0.85rem;" onclick="restartSession()">▶️ Neue Stunde starten</button>
+        </div>
+        <p style="font-size:0.75rem;color:#6B7F8C;line-height:1.4;margin-top:6px;">Auch ohne dieses Menü: die untere linke Bildschirmecke 3 Sekunden gedrückt halten beendet die Stunde (auf dem Abschlussbild startet sie eine neue).</p>
+      </div>
       <table class="teacher-panel">
         <tr><th>Bereich</th><th>Stufe</th><th>Sterne</th><th>Fehler</th></tr>
         ${rows}
@@ -4631,6 +5720,11 @@ function renderTeacherOverlay(){
 }
 
 try{
+  try{
+    const q = new URLSearchParams(location.search).get('stunde');
+    if(q==='30' || q==='45'){ state.sessionMin = parseInt(q,10); saveProgress(); }
+  }catch(e){}
+  loadSession();
   render();
 }catch(err){
   const app = document.getElementById('app');
