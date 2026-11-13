@@ -353,6 +353,35 @@
   .mal-col .sw-weg{background:#fff;}
   .mal-col.sel{border-color:var(--harbor-mid);background:#E4F2F4;box-shadow:0 0 0 3px #1B6E7F55;}
   .mal-note{margin-top:8px;text-align:center;font-weight:700;color:var(--coral-dark);}
+
+    /* Werkzeugkiste: Strategiekarten */
+    .strat-head{display:flex;align-items:center;gap:10px;margin:2px 0 10px;padding:8px 10px;border-radius:14px;background:#EAF3FB;border:2px solid #BFD9F0;}
+    .strat-title{flex:1;font-size:0.85rem;color:#4B6473;line-height:1.25;text-align:left;}
+    .strat-title b{font-family:'Baloo 2';font-size:1.1rem;color:#14507F;}
+    .strat-merk{border:2px solid #3F8BD6;background:#fff;color:#14507F;border-radius:12px;padding:8px 12px;font-family:'Baloo 2';font-weight:700;font-size:0.95rem;min-height:44px;}
+    .strat-merkbox{background:#FFF8E1;border:2px solid #F4B93E;border-radius:14px;padding:10px 12px;margin:0 0 10px;font-size:1.02rem;line-height:1.45;text-align:left;}
+    .strat-svg{display:block;flex:none;}
+    .strat-opts{grid-template-columns:repeat(2,1fr);}
+    .strat-opt{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:10px 6px;}
+    .strat-opt-name{font-family:'Baloo 2';font-weight:700;font-size:0.95rem;color:var(--harbor-dark);line-height:1.1;}
+    .strat-show{font-family:'Andika','Baloo 2';font-weight:800;font-size:2.4rem;text-align:center;margin:8px 0;letter-spacing:2px;}
+    .mk-row{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:14px 0 4px;}
+    .mk-u{min-width:52px;min-height:60px;padding:6px 10px;border-radius:12px;border:2px solid var(--line);background:var(--sand);font-family:'Andika';font-weight:800;font-size:2rem;display:inline-flex;align-items:center;justify-content:center;}
+    .mk-u.mk-word{font-size:1.3rem;min-height:52px;}
+    button.mk-u.on{background:#FFD76A;border-color:#F4B93E;}
+    .mk-u.ok{background:#d9f3dc;border-color:#4FA86B;}
+    .mk-u.bad{background:#F1A38B;border-color:#B24C2F;}
+    .mk-u.miss{background:#fff;border:2px dashed #F4B93E;}
+    .mk-legend{font-size:0.8rem;color:#4B6473;text-align:center;margin-top:8px;}
+    .mk-legend .mk-u{min-width:26px;min-height:26px;font-size:0.9rem;padding:0 6px;border-radius:8px;}
+    .kiste{margin:14px 0 4px;padding:10px;border-radius:16px;background:#EAF3FB;border:2px solid #BFD9F0;}
+    .kiste-h{font-family:'Baloo 2';font-weight:800;color:#14507F;margin-bottom:6px;}
+    .kiste-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+    .kiste-card{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 4px;border-radius:12px;background:#fff;border:2px solid #D3DEE6;}
+    .kiste-card.got{border-color:#4FA86B;background:#F1FBF3;}
+    .kiste-card.now{border-color:#F4B93E;}
+    .kiste-name{font-family:'Baloo 2';font-weight:700;font-size:0.78rem;line-height:1.1;color:var(--harbor-dark);text-align:center;}
+    .kiste-state{font-size:0.9rem;}
 </style>
 </head>
 <body>
@@ -409,7 +438,7 @@ const domains = [
   {id:'lesen', name:'Lesefahrrinne', sub:'Genau & flüssig lesen', icon:'⛵', color:'#E2672E'},
   {id:'lesekai', name:'Lesekai', sub:'Wörter & Sätze lesen, ankreuzen, malen', icon:'📖', color:'#B5527A'},
   {id:'schreib1', name:'Schreibwerft', sub:'Wörter lauttreu schreiben', icon:'⚓', color:'#0F3145'},
-  {id:'schreib2', name:'Leuchtturm', sub:'Richtig schreiben mit Regeln', icon:'🗼', color:'#F4B93E'},
+  {id:'schreib2', name:'Werkzeugkiste', sub:'Rechtschreib-Strategien (Niko/FRESCH)', icon:'🧰', color:'#F4B93E'},
   {id:'grundwortschatz', name:'Speicherstadt', sub:'Hamburger Grundwortschatz üben', icon:'🧱', color:'#A34A3D'},
   {id:'satzbau', name:'Satzwerft', sub:'Ganze Sätze aus Bildern bauen & schreiben', icon:'🧩', color:'#2E6E8E'},
   {id:'diktat', name:'Flaschenpost', sub:'Sätze diktieren & auf Papier schreiben', icon:'📝', color:'#6E4A8E'},
@@ -450,7 +479,8 @@ const DEPS = {
   // Konsonantenhäufungen (Stern, Schlange, Pfanne) erst nach Buchstabenbrücke Stufe 3
   schreib1:        {1:[['silbendock',3],['buchstabe',3]], 3:[['buchstabe',4],['silbendock',4]], 4:[['buchstabe',4]]},
   // Rechtschreibregeln bauen auf sicherem lautgetreuem Schreiben und Wörterlesen auf
-  schreib2:        {1:[['schreib1',3],['lesen',2]], 3:[['schreib1',4]]},
+  // Strategien erst, wenn lautgetreues Schreiben wirklich sicher ist (Schreibwerft bis Stufe 4 UND Pokal, siehe depsMissing)
+  schreib2:        {1:[['schreib1',4],['silbendock',4],['lesen',3]], 3:[['schreib1',4]]},
   grundwortschatz: {1:[['schreib1',3],['lesen',2]], 3:[['schreib1',4]], 4:[['lesen',3]]},
   satzbau:         {1:[['schreib1',3],['lesen',2]], 3:[['schreib1',4]]},
   diktat:          {1:[['schreib2',2],['grundwortschatz',2],['satzbau',2]], 3:[['schreib2',3],['grundwortschatz',3]]},
@@ -461,9 +491,16 @@ function depsMissing(id, level){
   Object.keys(tab).map(Number).filter(L=>L<=level).forEach(L=>{
     tab[L].forEach(([sid,lv])=>{ need[sid] = Math.max(need[sid]||0, lv); });
   });
-  return Object.keys(need)
+  const res = Object.keys(need)
     .filter(sid => (state.levels[sid]||1) < need[sid])
     .map(sid => ({d: domains.find(x=>x.id===sid), need: need[sid]}));
+  // Werkzeugkiste: zusätzlich muss die Schreibwerft gemeistert sein (Pokal), nicht nur durchlaufen
+  if(id==='schreib2' && !res.some(r=>r.d.id==='schreib1')){
+    const s1 = domains.find(x=>x.id==='schreib1');
+    const st = domainStatus(s1).status;
+    if(st!=='mastered' && st!=='review') res.push({d:s1, need:4});
+  }
+  return res;
 }
 // Schon begonnen = es wurde wirklich geübt (nicht nur ein Diagnose-Startwert).
 // Begonnene Stationen werden nie wieder gesperrt.
@@ -650,10 +687,10 @@ const iCanStatements = {
     4:'Ich kann Wörter mit Konsonantenhäufungen am Anfang UND am Ende aufschreiben.',
   },
   schreib2: {
-    1:'Ich kann mit dem Schwingen-Trick herausfinden, ob ein Buchstabe verdoppelt wird.',
-    2:'Ich kann mit dem Verlängern-Trick den richtigen Buchstaben am Wortende finden.',
-    3:'Ich kann mit dem Ableiten-Trick schwierige Wortbausteine richtig schreiben.',
-    4:'Ich kann auch lange zusammengesetzte Wörter und einige Merkwörter richtig schreiben.',
+    1:'Ich kann mit den Strategiekarten Silben schwingen und Kurzer Selbstlaut Wörter richtig schreiben (Könige, doppelte Mitlaute).',
+    2:'Ich kann mit Verlängern und Ableiten den Buchstaben am Wortende sowie ä und äu finden.',
+    3:'Ich kann Nomen und Satzanfänge großschreiben und Verben kleinschreiben.',
+    4:'Ich kann Merkwörter richtig schreiben und selbst die passende Strategiekarte wählen.',
   },
   grundwortschatz: {
     1:'Ich kann wichtige Wörter aus dem Grundwortschatz richtig schreiben.',
@@ -725,10 +762,10 @@ const levelGoals = {
     4:'Profi-Stufe: Konsonantenhäufungen am Anfang UND am Ende desselben Wortes.',
   },
   schreib2: {
-    1:'Trick Nummer 1: Schwinge das Wort in Silben. Klingt der Vokal davor kurz und knackig, wird der Buchstabe danach oft verdoppelt (Ba-ll, nicht Ba-l). Dieser Trick heißt „Schwingen".',
-    2:'Trick Nummer 2 heißt „Verlängern": Mach aus dem Wort ein längeres (Hund → Hunde). Jetzt hörst du genau, welcher Buchstabe am Ende wirklich steht.',
-    3:'Trick Nummer 3 heißt „Ableiten": Überlege, von welchem Wort dein Wort kommt (Fahrrad kommt von fahren). Das verrät dir die richtige Schreibweise.',
-    4:'Profi-Stufe: noch längere zusammengesetzte Wörter, kombinierte Regeln und ein paar echte Merkwörter.',
+    1:'Du lernst jetzt Strategiekarten kennen. Sie helfen dir, Wörter richtig zu schreiben. Die ersten zwei sind „Silben schwingen“ und „Kurzer Selbstlaut“.',
+    2:'Neue Strategiekarten: „Verlängern“ hilft dir am Wortende, „Ableiten“ bei ä und äu.',
+    3:'Neue Strategiekarte: „Groß oder klein?“. Du entscheidest, welche Wörter großgeschrieben werden: Nomen und das erste Wort im Satz.',
+    4:'Letzte Strategiekarte: „Merkwörter“. Dann wählst du selbst: Welche Karte hilft bei diesem Wort?',
   },
   grundwortschatz: {
     1:'Hier übst du wichtige Wörter aus dem Hamburger Grundwortschatz – Wörter, die du oft brauchst. Manche enden auf ein leises, unbetontes „e", das man trotzdem immer mitschreibt.',
@@ -820,6 +857,10 @@ const ERROR_CATEGORIES = {
   wortfamilie: 'Wortfamilie/Wortbausteine (Ableiten-Trick)',
   zwielaut: 'Zwielaut-Merkwörter (ei/ai, au/äu)',
   offene_silbe: 'Offene Silbe',
+  koenig: 'Silbenkern/König fehlt (Silben schwingen)',
+  gross_klein: 'Groß- und Kleinschreibung (Nomen, Satzanfang)',
+  merkwort: 'Merkwörter (Doppelvokal, Dehnungs-h, V, ß, Qu)',
+  strategiewahl: 'Passende Strategie wählen (Welche Karte hilft?)',
 };
 
 function ch(prompt, options, answerIdx, tip, speakText, errorCategory){
@@ -886,12 +927,231 @@ function flash(word, options, answerIdx, tip){
 // HTML-Datei, kein Unterordner - genau wie die .m4a-Lautdateien) -
 // eingebunden für Wörter, deren Emoji-Darstellung nicht eindeutig genug war
 // (z. B. Arm, Gabel, Lampe, Rasen, Segel, Strumpf, Traum, Überraschungsei).
+// GitHub unterscheidet Groß-/Kleinschreibung bei Dateinamen: Fehlt "Traum.png",
+// wird automatisch "traum.png" (und ohne Umlaut-Schreibweise "Ueberraschungsei") versucht.
+function picImgFallback(img){
+  const n = parseInt(img.dataset.try||'0',10);
+  const src = img.getAttribute('src')||'';
+  const file = src.split('/').pop();
+  const tries = [file.toLowerCase(), file.charAt(0).toUpperCase()+file.slice(1).toLowerCase()];
+  if(n>=tries.length) return;
+  img.dataset.try = String(n+1);
+  if(tries[n]!==file) img.setAttribute('src', tries[n]); else picImgFallback(img);
+}
 function renderPicVal(val){
   if(typeof val==='string' && val.indexOf('img:')===0){
     const src = val.slice(4);
-    return `<img src="${src}" alt="" class="pic-img" draggable="false" ondragstart="return false;">`;
+    return `<img src="${src}" alt="" class="pic-img" draggable="false" ondragstart="return false;" onerror="picImgFallback(this)">`;
   }
   return val;
+}
+
+
+/* ============================================================
+   WERKZEUGKISTE: Rechtschreibstrategien nach FRESCH (Freiburger Rechtschreibschule),
+   wie sie im Lehrwerk Niko mit Piktogrammen eingeführt werden:
+   Silben schwingen, Kurzer Selbstlaut, Verlängern, Ableiten, Groß oder klein?, Merkwörter.
+   Die sechs Symbole sind eigene Nachzeichnungen (blauer Kreis, weißes Zeichen),
+   keine Originalgrafiken. Merksätze: sinngemäß nach der Niko-Beschreibung des
+   Rechtschreibkonzepts, kindgerecht gekürzt.
+   Jede Strategie wird erst eingeführt (Karte), dann erkannt, angewendet und zuletzt
+   frei gewählt ("Welche Karte hilft?"). Eine Karte gilt als gesammelt, wenn das Kind
+   mindestens 6 Aufgaben dieser Strategie richtig gelöst hat (bei mindestens 65 % richtig).
+   ============================================================ */
+const FRESCH_ORDER = ['schwingen','kurz','verlaengern','ableiten','gross','merken'];
+const FRESCH_LEVEL = {1:['schwingen','kurz'], 2:['verlaengern','ableiten'], 3:['gross'], 4:['merken']};
+const FRESCH = {
+  schwingen:{name:'Silben schwingen',
+    merk:'Ich spreche das Wort deutlich und schwinge die Silben. Jede Silbe hat einen König. Der König ist ein Selbstlaut, ein Umlaut oder ein Zwielaut.',
+    ex:'Ha-se: zwei Silben, zwei Könige: a und e.'},
+  kurz:{name:'Kurzer Selbstlaut',
+    merk:'Nach einem kurzen Selbstlaut folgen mindestens zwei Mitlaute. Höre ich nur einen Mitlaut, dann schreibe ich ihn doppelt.',
+    ex:'Son-ne: Das o ist kurz, darum nn. Lam-pe: m und p sind schon zwei Mitlaute.'},
+  verlaengern:{name:'Verlängern',
+    merk:'Wenn ich am Wortende nicht genau höre, ob b oder p, d oder t, g oder k, dann verlängere ich das Wort.',
+    ex:'Hund: Ich sage die Hunde. Jetzt höre ich das d.'},
+  ableiten:{name:'Ableiten',
+    merk:'Ein Wort wird mit ä oder äu geschrieben, wenn es ein verwandtes Wort mit a oder au gibt. Gibt es keins, schreibe ich e oder eu.',
+    ex:'die Bäume: Baum. Aber Eule und heute haben kein verwandtes Wort mit au.'},
+  gross:{name:'Groß oder klein?',
+    merk:'Nomen schreibe ich groß. Das erste Wort im Satz schreibe ich auch groß. Ein Nomen erkenne ich daran, dass ich der, die oder das davor sagen kann.',
+    ex:'Der Hund bellt. Hund ist ein Nomen, Der steht am Satzanfang.'},
+  merken:{name:'Merkwörter',
+    merk:'Manche Wörter muss ich mir merken, weil keine Strategie hilft. Zum Beispiel bei Doppelvokalen, Dehnungs-h, V, ß, Qu und bei Fremdwörtern.',
+    ex:'Boot, Zahn, Vater, Straße, Quelle.'},
+  kiste:{name:'Welche Karte hilft?',
+    merk:'Ich überlege: Welche Strategiekarte hilft mir bei diesem Wort?',
+    ex:''},
+};
+
+// Symbole (eigene Nachzeichnung): blauer Kreis mit weißem Zeichen, viewBox 100 x 100
+function stratSvg(key, sz, gray){
+  const W = 'fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"';
+  const sym = {
+    schwingen: `<path ${W} d="M20 36 Q31 62 42 36"/><path ${W} d="M54 36 Q68 66 82 36"/><path ${W} d="M18 66 Q50 88 84 62"/>`,
+    kurz: `<path ${W} d="M27 60 L27 36 L39 48 L50 32 L61 48 L73 36 L73 60 Z"/><path ${W} d="M27 68 H73"/><circle cx="50" cy="82" r="4.5" fill="#fff"/>`,
+    verlaengern: `<path ${W} d="M22 34 L24 54 Q28 70 46 62 L74 54"/><path ${W} d="M62 40 L76 54 L62 68"/>`,
+    ableiten: `<path ${W} d="M54 20 L38 46 L62 50 L44 76"/><path ${W} d="M44 76 L42 58 M44 76 L60 70"/>`,
+    gross: `<text x="42" y="64" text-anchor="middle" font-family="Andika, Baloo 2, sans-serif" font-weight="800" font-size="40" fill="#fff">Aa</text><text x="78" y="38" text-anchor="middle" font-family="Andika, Baloo 2, sans-serif" font-weight="800" font-size="30" fill="#fff">?</text>`,
+    merken: `<path ${W} d="M24 68 L33 32 L50 54 L66 30 L77 64"/>`,
+    kiste: `<text x="50" y="68" text-anchor="middle" font-family="Andika, Baloo 2, sans-serif" font-weight="800" font-size="56" fill="#fff">?</text>`,
+  }[key] || '';
+  const fill = gray ? '#B9C4CC' : '#3F8BD6';
+  return `<svg class="strat-svg" viewBox="0 0 100 100" width="${sz}" height="${sz}" role="img" aria-label="${(FRESCH[key]||{}).name||''}"><path d="M50 6 C76 4 96 26 94 52 C92 78 70 96 46 94 C22 92 6 72 8 48 C10 24 28 8 50 6 Z" fill="${fill}"/>${sym}</svg>`;
+}
+
+// Zustand je Strategie: {ok, n, seen, card}
+function fr(k){
+  state.fresch = state.fresch || {};
+  return state.fresch[k] = state.fresch[k] || {ok:0, n:0, seen:false, card:false};
+}
+function frKings(list){ return list.length>1 ? list.slice(0,-1).join(', ')+' und '+list[list.length-1] : list[0]; }
+
+// Konstruktoren der Strategie-Aufgaben
+function T(strat, seq, item, cat, noDisc){
+  item.strat = strat; if(seq) item.seq = seq; if(cat) item.errorCategory = cat;
+  return item;
+}
+// Könige (bzw. Wörter) antippen: units = Buchstabeneinheiten, correct = Indizes der richtigen Einheiten
+function mk(strat, seq, prompt, units, correct, tip, word, cat){
+  return {type:'mark', strat, seq, prompt, units, correct, tip, speak:prompt+' '+word, word, errorCategory:cat};
+}
+// Könige im Wort: units aus Buchstaben (au, ei, ie, sch, ch zählen als eine Einheit), Silben nur für den Tipp
+function mkKing(word, units, kings, syl){
+  const names = kings.map(i=>units[i]);
+  return mk('schwingen', 1, 'Tippe alle Könige im Wort an: '+word, units, kings,
+    syl+': Jede Silbe hat einen König. '+(names.length>1 ? 'Hier sind es ' : 'Hier ist es ')+frKings(names)+'.', word, 'koenig');
+}
+// Welche Karte hilft? Symbole als Antwortmöglichkeiten (Schlüssel aus FRESCH)
+function swc(show, situation, keys, tip){
+  return {type:'choice', strat:'kiste', symOpts:true, prompt:'Welche Karte hilft hier?', show, options:keys, answer:0, tip,
+    speak:'Welche Karte hilft hier? '+situation, errorCategory:'strategiewahl'};
+}
+
+// ---------- Darstellung ----------
+function stratHead(item){
+  if(!item || !item.strat || !FRESCH[item.strat] || state.screen!=='practice') return '';
+  const k = item.strat, f = FRESCH[k], p = state.practice;
+  const open = p && p.merkOpen && k!=='kiste';
+  return `<div class="strat-head">
+      ${stratSvg(k, 46)}
+      <div class="strat-title">${k==='kiste' ? 'Werkzeugkiste' : 'Strategiekarte'}<br><b>${f.name}</b></div>
+      ${k==='kiste' ? '' : `<button class="strat-merk" onclick="stratMerk()">💡 Merksatz</button>`}
+    </div>
+    ${open ? `<div class="strat-merkbox">${f.merk}${f.ex ? '<br><i>'+f.ex+'</i>' : ''}<button class="speak-btn" style="margin-left:8px;" onclick="speak(FRESCH['${k}'].merk)">🔊</button></div>` : ''}`;
+}
+window.stratMerk = function(){
+  const p = state.practice, it = p && p.current;
+  if(!it || !it.strat) return;
+  p.merkOpen = !p.merkOpen;
+  if(p.merkOpen) speak(FRESCH[it.strat].merk);
+  render(true);
+};
+
+function renderMark(item, isStatic){
+  const p = state.practice, sel = p.markSel || [];
+  const need = {}; item.correct.forEach(i=>need[i]=true);
+  const btns = item.units.map((u,i)=>{
+    let cls = 'mk-u' + (item.unitKind==='word' ? ' mk-word' : '');
+    if(isStatic){
+      if(sel[i] && need[i]) cls += ' ok';
+      else if(sel[i] && !need[i]) cls += ' bad';
+      else if(!sel[i] && need[i]) cls += ' miss';
+      return `<span class="${cls}">${u}</span>`;
+    }
+    if(sel[i]) cls += ' on';
+    return `<button class="${cls}" onclick="markToggle(${i})">${u}</button>`;
+  }).join('');
+  return `
+    <div class="prompt-text">${item.prompt}</div>
+    <button class="speak-btn" onclick="speakCurrent()">🔊</button>
+    <div class="mk-row">${btns}</div>
+    ${isStatic ? `<p class="mk-legend"><span class="mk-u ok">✓</span> richtig <span class="mk-u miss">!</span> hat gefehlt <span class="mk-u bad">✗</span> zu viel</p>`
+               : `<button class="btn btn-primary btn-block" style="margin-top:12px;" onclick="markSubmit()">✅ Fertig</button>`}`;
+}
+window.markToggle = function(i){
+  const p = state.practice; if(!p || p.answered || !p.markSel) return;
+  p.markSel[i] = !p.markSel[i];
+  render(true);
+};
+window.markSubmit = function(){
+  const p = state.practice, it = p.current; if(!it || p.answered) return;
+  const need = {}; it.correct.forEach(i=>need[i]=true);
+  const sel = p.markSel || [];
+  let ok = true;
+  it.units.forEach((u,i)=>{ if(!!sel[i] !== !!need[i]) ok = false; });
+  window.practiceAnswer(ok ? 0 : 1);
+};
+
+function renderSymChoice(item, handlerName, isStatic, given){
+  const buttons = item.options.map((k,i)=>{
+    let cls = 'pic-opt-btn strat-opt';
+    if(isStatic){ if(i===item.answer) cls += ' correct'; else if(i===given) cls += ' wrong'; }
+    const inner = `${stratSvg(k, 64)}<span class="strat-opt-name">${FRESCH[k].name}</span>`;
+    return isStatic ? `<button class="${cls}" disabled>${inner}</button>` : `<button class="${cls}" onclick="${handlerName}(${i})">${inner}</button>`;
+  }).join('');
+  return `
+    <div class="prompt-text">${item.prompt}</div>
+    <div class="strat-show">${item.show}</div>
+    <button class="speak-btn" onclick="speakCurrent()">🔊</button>
+    <div class="pic-options strat-opts">${buttons}</div>`;
+}
+
+// Einführung einer Strategiekarte (erscheint einmal, bevor die erste Aufgabe dieser Strategie kommt)
+function screenStratIntro(){
+  const p = state.practice, k = p.stratIntro, f = FRESCH[k];
+  const d = anyDomain(p.domainId);
+  return `
+  ${topbar(d.name, d.sub, true)}
+  <main>
+    <div class="prompt-card" style="text-align:center;">
+      <div class="domain-tag" style="background:${d.color}22;">🧰 Neue Strategiekarte</div>
+      <div style="margin:10px 0 4px;display:flex;justify-content:center;">${stratSvg(k, 120)}</div>
+      <div style="font-family:'Baloo 2';font-weight:800;font-size:1.6rem;color:var(--harbor-dark);">${f.name}</div>
+      <p style="font-size:1.15rem;line-height:1.5;margin:12px 4px;font-family:'Baloo 2';font-weight:600;">${f.merk}</p>
+      <p style="font-size:1.05rem;color:#4B6473;margin:6px 4px;"><i>${f.ex}</i></p>
+      <button class="speak-btn" onclick="stratIntroSpeak()">🔊</button>
+      <button class="btn btn-primary btn-block" style="margin-top:14px;" onclick="stratIntroOk()">Verstanden! ▶️</button>
+    </div>
+  </main>`;
+}
+window.stratIntroSpeak = function(){
+  const k = state.practice.stratIntro; if(!k) return;
+  speak(FRESCH[k].name + '. ' + FRESCH[k].merk + ' ' + FRESCH[k].ex);
+};
+window.stratIntroOk = function(){
+  const p = state.practice, k = p.stratIntro;
+  if(k){ fr(k).seen = true; p.stratIntro = null; saveProgress(); }
+  render();
+};
+
+// Die Werkzeugkiste auf der Zielseite: sechs Karten, gesammelte farbig, noch nicht erreichte grau
+function kisteHtml(){
+  const lvl = state.levels.schreib2 || 1;
+  const avail = {}; for(let l=1;l<=lvl;l++) (FRESCH_LEVEL[l]||[]).forEach(k=>avail[k]=true);
+  const cards = FRESCH_ORDER.map(k=>{
+    const f = fr(k), got = f.card, open = !!avail[k];
+    return `<div class="kiste-card ${got?'got':''} ${open&&!got?'now':''}">
+      ${stratSvg(k, 52, !open)}
+      <div class="kiste-name">${FRESCH[k].name}</div>
+      <div class="kiste-state">${got ? '✅' : (open ? '🔧' : '🔒')}</div>
+    </div>`;
+  }).join('');
+  return `<div class="kiste"><div class="kiste-h">🧰 Deine Werkzeugkiste</div><div class="kiste-row">${cards}</div></div>`;
+}
+
+// Förderplan: Stand je Strategiekarte
+function fpFreschHtml(){
+  const f = state.fresch || {};
+  if(!FRESCH_ORDER.some(k=>f[k] && f[k].n)) return '';
+  const rows = FRESCH_ORDER.map(k=>{
+    const x = f[k] || {ok:0,n:0};
+    const st = x.card ? 'Karte gesammelt' : (x.n ? 'in Übung' : 'noch nicht geübt');
+    return `<tr><td><strong>${escapeHtml(FRESCH[k].name)}</strong></td><td>${x.n ? x.ok+' von '+x.n+' richtig' : '–'}</td><td>${st}</td></tr>`;
+  }).join('');
+  return `<p style="margin-top:10px;"><strong>Rechtschreibstrategien (Werkzeugkiste, nach FRESCH/Niko):</strong></p>
+    <table class="fp-table"><tr><th>Strategie</th><th>Aufgaben dieser Strategie</th><th>Stand</th></tr>${rows}</table>
+    <p class="fp-sub">Eine Strategiekarte gilt als gesammelt, wenn mindestens 6 Aufgaben dieser Strategie richtig gelöst wurden (bei mindestens 65 % richtig).</p>`;
 }
 
 // ============================================================
@@ -1574,55 +1834,261 @@ const content = {
       papier("Fens|ter", "🪟", "Fens-ter: erst nd/ns hören, dann die zweite Silbe."),
     ],
   },
-  schreib2: {
+  // WERKZEUGKISTE (Rechtschreib-Strategien nach FRESCH/Niko), ersetzt den früheren Leuchtturm.
+  // Stufe 1: Silben schwingen + Kurzer Selbstlaut · Stufe 2: Verlängern + Ableiten ·
+  // Stufe 3: Groß oder klein? · Stufe 4: Merkwörter + "Welche Karte hilft?"
+  schreib2: (function(){
+    const Q = 'Welches Wort ist richtig geschrieben?';
+    // Hilfsfunktionen für gleichartige Aufgaben
+    const sp = (word, kings) => 'Hör das Wort: ' + word + '. ' + kings;
+    const sw = (strat, seq, word, opts, tip, cat) => T(strat, seq, ch(Q, opts, 0, tip, word, cat), cat);
+    const inK = (strat, seq, prompt, word, emoji, tip, cat, cs) => { const o = T(strat, seq, inp(prompt, word, tip, word, emoji), cat); if(cs) o.cs = true; return o; };
+    const kl = (word, kind, tip) => T('kurz', 2, ch(word+': Ist der Selbstlaut kurz oder lang?', ['kurz','lang'], kind==='kurz'?0:1, tip, word+': Ist der Selbstlaut kurz oder lang?', 'doppelkonsonant'), 'doppelkonsonant');
+    const split = (word, right, wrong, tip) => T('schwingen', 1, ch('Wie schwingst du das Wort richtig?', [right, wrong], 0, tip, word, 'koenig'), 'koenig');
+    const verl = (word, stem, right, wrong, vl) => T('verlaengern', 1, ch(stem+': Verlängere das Wort. Welcher Buchstabe fehlt am Ende?', [right, wrong], 0,
+      word+' – '+vl+': Jetzt hörst du den Buchstaben '+right+'.', word+'. Verlängere das Wort. Welcher Buchstabe fehlt am Ende?', 'dehnung_auslaut'), 'dehnung_auslaut');
+    const abl = (right, wrong, root) => T('ableiten', 2, ch(Q, [right, wrong], 0, right+': Es gibt ein verwandtes Wort mit '+(/äu/.test(right)?'au':'a')+': '+root+'.', right, 'wortfamilie'), 'wortfamilie');
+    const ablNo = (right, wrong) => T('ableiten', 2, ch(Q, [right, wrong], 0, right+': Es gibt kein verwandtes Wort mit a oder au. Darum schreibe ich e oder eu.', right, 'wortfamilie'), 'wortfamilie');
+    const nom = (a,b,c) => T('gross', 1, ch('Welches Wort ist ein Nomen? Das schreibst du groß.', [a,b,c], 0, a+' ist ein Nomen: Ich kann „der, die oder das“ davor sagen. Nomen schreibe ich groß.', 'Welches Wort ist ein Nomen?', 'gross_klein'), 'gross_klein');
+    const sat = (right, wrong, tip) => T('gross', 2, ch('Welcher Satz ist richtig geschrieben?', [right, wrong], 0, tip, right, 'gross_klein'), 'gross_klein');
+    const sentMark = (sentence, caps, tip) => {
+      const units = sentence.split(' ');
+      const o = mk('gross', 1, 'Tippe alle Wörter an, die großgeschrieben werden.', units, caps, tip, sentence, 'gross_klein');
+      o.unitKind = 'word'; return o;
+    };
+    const mw = (right, wrong, tip) => T('merken', 1, ch('Wie schreibt man das Wort richtig?', [right, wrong], 0, tip, right, 'merkwort'), 'merkwort');
+    const mix = (right, wrong, card, root) => { const o = ch(Q, [right, wrong], 0, 'Hier hilft die Karte „'+FRESCH[card].name+'“: '+root, right, null); o.strat='kiste'; o.errorCategory='strategiewahl'; return o; };
+
+    return {
     1:[
-      ch('Welches Wort ist richtig geschrieben?', ['Ball','Bal'], 0, 'Nach kurzem Vokal verdoppelt man oft den Konsonanten: Ba-ll.', 'Ball', 'doppelkonsonant'),
-      ch('Welches Wort ist richtig geschrieben?', ['Teller','Teler'], 0, 'Tel-ler: doppeltes „l" nach kurzem „e".', 'Teller', 'doppelkonsonant'),
-      ch('Welches Wort ist richtig geschrieben?', ['Sonne','Sone'], 0, 'Son-ne: kurzer Vokal, doppelter Konsonant.', 'Sonne', 'doppelkonsonant'),
-      ch('Welches Wort ist richtig geschrieben?', ['Mutter','Muter'], 0, 'Mut-ter: höre den kurzen Vokal, dann weißt du: doppeltes „t".', 'Mutter', 'doppelkonsonant'),
-      ch('Welches Wort ist richtig geschrieben?', ['Robbe','Robe'], 0, 'Rob-be: kurzer Vokal, doppeltes „b". „Robe" (ein b) ist ein ganz anderes Wort mit langem o!', 'Robbe', 'doppelkonsonant'),
-      ch('Welches Wort ist richtig geschrieben?', ['Kissen','Kisen'], 0, 'Kis-sen: kurzer Vokal, doppeltes „s".', 'Kissen', 'doppelkonsonant'),
-      ch('Welches Wort ist richtig geschrieben?', ['Hammer','Hamer'], 0, 'Ham-mer: kurzer Vokal, doppeltes „m".', 'Hammer', 'doppelkonsonant'),
-      ch('Welches Wort ist richtig geschrieben?', ['Bett','Bet'], 0, 'Be-tt: kurzer Vokal, doppeltes „t".', 'Bett', 'doppelkonsonant'),
-      ch('Welches Wort ist richtig geschrieben?', ['Zettel','Zetel'], 0, 'Zet-tel: kurzer Vokal, doppeltes „t".', 'Zettel', 'doppelkonsonant'),
-      papier("Ball", "⚽", "Kurzer Vokal: danach kommt der Buchstabe doppelt."),
-      papier("Son|ne", "☀️", "Son-ne: nach dem kurzen o kommt „nn“."),
+      // ---- Silben schwingen: Könige finden, Silben schwingen, Wörter mit allen Königen schreiben ----
+      mkKing('Lampe', ['L','a','m','p','e'], [1,4], 'Lam-pe'),
+      mkKing('Hase', ['H','a','s','e'], [1,3], 'Ha-se'),
+      mkKing('Maus', ['M','au','s'], [1], 'Maus'),
+      mkKing('Eis', ['ei','s'], [0], 'Eis'),
+      mkKing('Blume', ['B','l','u','m','e'], [2,4], 'Blu-me'),
+      mkKing('Tomate', ['T','o','m','a','t','e'], [1,3,5], 'To-ma-te'),
+      mkKing('Mädchen', ['M','ä','d','ch','e','n'], [1,4], 'Mäd-chen'),
+      mkKing('Schule', ['sch','u','l','e'], [1,3], 'Schu-le'),
+      mkKing('Fenster', ['F','e','n','s','t','e','r'], [1,5], 'Fens-ter'),
+      mkKing('Esel', ['E','s','e','l'], [0,2], 'E-sel'),
+      mkKing('Fliege', ['F','l','ie','g','e'], [2,4], 'Flie-ge'),
+      mkKing('Kinder', ['K','i','n','d','e','r'], [1,4], 'Kin-der'),
+      mkKing('Baum', ['B','au','m'], [1], 'Baum'),
+      mkKing('Banane', ['B','a','n','a','n','e'], [1,3,5], 'Ba-na-ne'),
+      split('Hase', 'Ha|se', 'Has|e', 'Ha-se: zwei Silben, zwei Könige (a und e).'),
+      split('Lampe', 'Lam|pe', 'La|mpe', 'Lam-pe: zwei Silben, zwei Könige (a und e).'),
+      split('Nebel', 'Ne|bel', 'Neb|el', 'Ne-bel: zwei Silben, zwei Könige (e und e).'),
+      split('Tafel', 'Ta|fel', 'Taf|el', 'Ta-fel: zwei Silben, zwei Könige (a und e).'),
+      split('Blume', 'Blu|me', 'Blum|e', 'Blu-me: zwei Silben, zwei Könige (u und e).'),
+      split('Banane', 'Ba|na|ne', 'Ban|a|ne', 'Ba-na-ne: drei Silben, drei Könige (a, a, e).'),
+      split('Fenster', 'Fens|ter', 'Fen|ster', 'Fens-ter: zwei Silben, zwei Könige (e und e).'),
+      split('Kinder', 'Kin|der', 'Ki|nder', 'Kin-der: zwei Silben, zwei Könige (i und e).'),
+      inK('schwingen', 1, 'Schwinge das Wort und schreibe es. Jede Silbe braucht einen König!', 'Hase', '🐰', 'Ha-se: zwei Silben, zwei Könige (a und e). Vergiss das e am Ende nicht!', 'koenig'),
+      inK('schwingen', 1, 'Schwinge das Wort und schreibe es. Jede Silbe braucht einen König!', 'Nebel', '🌫️', 'Ne-bel: zwei Silben, zwei Könige (e und e). Schreibe beide e!', 'koenig'),
+      inK('schwingen', 1, 'Schwinge das Wort und schreibe es. Jede Silbe braucht einen König!', 'Banane', '🍌', 'Ba-na-ne: drei Silben, drei Könige (a, a, e).', 'koenig'),
+      inK('schwingen', 1, 'Schwinge das Wort und schreibe es. Jede Silbe braucht einen König!', 'Löwe', '🦁', 'Lö-we: zwei Silben, zwei Könige (ö und e).', 'koenig'),
+      inK('schwingen', 1, 'Schwinge das Wort und schreibe es. Jede Silbe braucht einen König!', 'Tomate', '🍅', 'To-ma-te: drei Silben, drei Könige (o, a, e).', 'koenig'),
+      inK('schwingen', 1, 'Schwinge das Wort und schreibe es. Jede Silbe braucht einen König!', 'Kamel', '🐪', 'Ka-mel: zwei Silben, zwei Könige (a und e).', 'koenig'),
+      inK('schwingen', 1, 'Schwinge das Wort und schreibe es. Jede Silbe braucht einen König!', 'Rakete', '🚀', 'Ra-ke-te: drei Silben, drei Könige (a, e, e).', 'koenig'),
+      inK('schwingen', 1, 'Schwinge das Wort und schreibe es. Jede Silbe braucht einen König!', 'Eule', '🦉', 'Eu-le: zwei Silben, zwei Könige (eu und e).', 'koenig'),
+      // ---- Kurzer Selbstlaut: kurz oder lang hören, Doppelkonsonant, "zwei Mitlaute sind schon da" ----
+      kl('Ball', 'kurz', 'Ball: Der Selbstlaut klingt kurz. Danach folgen zwei Mitlaute (ll).'),
+      kl('Hose', 'lang', 'Ho-se: Der Selbstlaut steht am Ende der Silbe und klingt lang.'),
+      kl('Mutter', 'kurz', 'Mut-ter: Der Selbstlaut klingt kurz. Danach folgen zwei Mitlaute (tt).'),
+      kl('Nase', 'lang', 'Na-se: Der Selbstlaut steht am Ende der Silbe und klingt lang.'),
+      kl('Sonne', 'kurz', 'Son-ne: Der Selbstlaut klingt kurz. Danach folgen zwei Mitlaute (nn).'),
+      kl('Igel', 'lang', 'I-gel: Der Selbstlaut steht am Ende der Silbe und klingt lang.'),
+      kl('Kette', 'kurz', 'Ket-te: Der Selbstlaut klingt kurz. Danach folgen zwei Mitlaute (tt).'),
+      kl('Besen', 'lang', 'Be-sen: Der Selbstlaut steht am Ende der Silbe und klingt lang.'),
+      kl('Löffel', 'kurz', 'Löf-fel: Der Selbstlaut klingt kurz. Danach folgen zwei Mitlaute (ff).'),
+      kl('Tafel', 'lang', 'Ta-fel: Der Selbstlaut steht am Ende der Silbe und klingt lang.'),
+      sw('kurz', 2, 'Ball', [ 'Ball','Bal' ], 'Nach kurzem Selbstlaut folgen zwei Mitlaute: Ba-ll.', 'doppelkonsonant'),
+      sw('kurz', 2, 'Teller', ['Teller','Teler'], 'Tel-ler: doppeltes „l“ nach kurzem „e“.', 'doppelkonsonant'),
+      sw('kurz', 2, 'Sonne', ['Sonne','Sone'], 'Son-ne: kurzer Selbstlaut, danach zwei Mitlaute.', 'doppelkonsonant'),
+      sw('kurz', 2, 'Mutter', ['Mutter','Muter'], 'Mut-ter: höre den kurzen Selbstlaut, dann weißt du: doppeltes „t“.', 'doppelkonsonant'),
+      sw('kurz', 2, 'Robbe', ['Robbe','Robe'], 'Rob-be: kurzer Selbstlaut, doppeltes „b“.', 'doppelkonsonant'),
+      sw('kurz', 2, 'Kissen', ['Kissen','Kisen'], 'Kis-sen: kurzer Selbstlaut, doppeltes „s“.', 'doppelkonsonant'),
+      sw('kurz', 2, 'Hammer', ['Hammer','Hamer'], 'Ham-mer: kurzer Selbstlaut, doppeltes „m“.', 'doppelkonsonant'),
+      sw('kurz', 2, 'Bett', ['Bett','Bet'], 'Be-tt: kurzer Selbstlaut, doppeltes „t“.', 'doppelkonsonant'),
+      sw('kurz', 2, 'Zettel', ['Zettel','Zetel'], 'Zet-tel: kurzer Selbstlaut, doppeltes „t“.', 'doppelkonsonant'),
+      sw('kurz', 2, 'Lampe', ['Lampe','Lammpe'], 'Lam-pe: m und p sind schon zwei Mitlaute. Nichts wird verdoppelt.', 'doppelkonsonant'),
+      sw('kurz', 2, 'Wolke', ['Wolke','Wollke'], 'Wol-ke: l und k sind schon zwei Mitlaute. Nichts wird verdoppelt.', 'doppelkonsonant'),
+      sw('kurz', 2, 'Insel', ['Insel','Innsel'], 'In-sel: n und s sind schon zwei Mitlaute. Nichts wird verdoppelt.', 'doppelkonsonant'),
+      sw('kurz', 2, 'Pinsel', ['Pinsel','Pinnsel'], 'Pin-sel: n und s sind schon zwei Mitlaute. Nichts wird verdoppelt.', 'doppelkonsonant'),
+      inK('kurz', 2, 'Schreibe das Wort. Der Selbstlaut klingt kurz.', 'Ball', '⚽', 'Ba-ll: nach dem kurzen Selbstlaut kommt „ll“.', 'doppelkonsonant'),
+      inK('kurz', 2, 'Schreibe das Wort. Der Selbstlaut klingt kurz.', 'Sonne', '☀️', 'Son-ne: nach dem kurzen o kommt „nn“.', 'doppelkonsonant'),
+      inK('kurz', 2, 'Schreibe das Wort. Der Selbstlaut klingt kurz.', 'Hammer', '🔨', 'Ham-mer: nach dem kurzen a kommt „mm“.', 'doppelkonsonant'),
+      inK('kurz', 2, 'Schreibe das Wort. Der Selbstlaut klingt kurz.', 'Tasse', '☕', 'Tas-se: nach dem kurzen a kommt „ss“.', 'doppelkonsonant'),
+      inK('kurz', 2, 'Schreibe das Wort. Der Selbstlaut klingt kurz.', 'Schiff', '🚢', 'Schi-ff: nach dem kurzen i kommt „ff“.', 'doppelkonsonant'),
+      inK('kurz', 2, 'Schreibe das Wort. Der Selbstlaut klingt kurz.', 'Löffel', '🥄', 'Löf-fel: nach dem kurzen ö kommt „ff“.', 'doppelkonsonant'),
+      inK('kurz', 2, 'Schreibe das Wort. Denk an die Mitlaute nach dem Selbstlaut!', 'Pilz', '🍄', 'Pilz: l und z sind schon zwei Mitlaute. Nichts wird verdoppelt.', 'doppelkonsonant'),
+      inK('kurz', 2, 'Schreibe das Wort. Denk an die Mitlaute nach dem Selbstlaut!', 'Hand', '✋', 'Hand: n und d sind schon zwei Mitlaute. Nichts wird verdoppelt.', 'doppelkonsonant'),
+      T('kurz', 2, papier("Ball", "⚽", "Kurzer Selbstlaut: danach kommt der Mitlaut doppelt."), 'doppelkonsonant'),
+      T('kurz', 2, papier("Son|ne", "☀️", "Son-ne: nach dem kurzen o kommt „nn“."), 'doppelkonsonant'),
     ],
     2:[
-      ch('Welches Wort ist richtig geschrieben?', ['Wohnung','Wonung'], 0, 'Verlängere: wohnen – das „h" hört man nicht, aber es macht das „o" davor lang.', 'Wohnung', 'dehnung_auslaut'),
-      ch('Welches Wort ist richtig geschrieben?', ['Hund','Hunt'], 0, 'Verlängere das Wort: die Hunde. Jetzt hörst du das „d"!', 'Hund', 'dehnung_auslaut'),
-      ch('Welches Wort ist richtig geschrieben?', ['Zahn','Zan'], 0, 'Verlängere: zahnen/Zähne – das „h" macht den Vokal lang.', 'Zahn', 'dehnung_auslaut'),
-      ch('Welches Wort ist richtig geschrieben?', ['Rad','Rat'], 0, 'Ableiten: das Fahr-rad, die Räder – darum schreibt man „d".', 'Rad', 'dehnung_auslaut'),
-      ch('Welches Wort ist richtig geschrieben?', ['Kuh','Ku'], 0, 'Dehnungs-h: nach dem langen „u" hört man kein „h", man schreibt es trotzdem.', 'Kuh', 'dehnung_auslaut'),
-      ch('Welches Wort ist richtig geschrieben?', ['Weg','Wek'], 0, 'Verlängere: die Wege – du hörst auch dort ein „g".', 'Weg', 'dehnung_auslaut'),
-      ch('Welches Wort ist richtig geschrieben?', ['Schuh','Schu'], 0, 'Dehnungs-h nach langem „u": Schuh.', 'Schuh', 'dehnung_auslaut'),
-      ch('Welches Wort ist richtig geschrieben?', ['Stuhl','Stul'], 0, 'Dehnungs-h nach langem „u": Stuhl.', 'Stuhl', 'dehnung_auslaut'),
-      ch('Welches Wort ist richtig geschrieben?', ['Hemd','Hemt'], 0, 'Verlängere: die Hemden – du hörst das „d".', 'Hemd', 'dehnung_auslaut'),
-      papier("Hund", "🐶", "Verlängern: Hunde – da hörst du das d."),
-      papier("Mond", "🌙", "Verlängern: Monde – da hörst du das d."),
+      // ---- Verlängern: b/p, d/t, g/k am Wortende ----
+      verl('Hund', 'Hun_', 'd', 't', 'die Hunde'),
+      verl('Kind', 'Kin_', 'd', 't', 'die Kinder'),
+      verl('Mond', 'Mon_', 'd', 't', 'die Monde'),
+      verl('Hemd', 'Hem_', 'd', 't', 'die Hemden'),
+      verl('Bild', 'Bil_', 'd', 't', 'die Bilder'),
+      verl('Brot', 'Bro_', 't', 'd', 'die Brote'),
+      verl('Dieb', 'Die_', 'b', 'p', 'die Diebe'),
+      verl('Sieb', 'Sie_', 'b', 'p', 'die Siebe'),
+      verl('Berg', 'Ber_', 'g', 'k', 'die Berge'),
+      verl('Tag', 'Ta_', 'g', 'k', 'die Tage'),
+      verl('Weg', 'We_', 'g', 'k', 'die Wege'),
+      verl('Zwerg', 'Zwer_', 'g', 'k', 'die Zwerge'),
+      verl('Geschenk', 'Geschen_', 'k', 'g', 'die Geschenke'),
+      inK('verlaengern', 1, 'Verlängere das Wort im Kopf und schreibe es.', 'Hund', '🐶', 'Hund – die Hunde: Jetzt hörst du das d.', 'dehnung_auslaut'),
+      inK('verlaengern', 1, 'Verlängere das Wort im Kopf und schreibe es.', 'Mond', '🌙', 'Mond – die Monde: Jetzt hörst du das d.', 'dehnung_auslaut'),
+      inK('verlaengern', 1, 'Verlängere das Wort im Kopf und schreibe es.', 'Brot', '🍞', 'Brot – die Brote: Jetzt hörst du das t.', 'dehnung_auslaut'),
+      inK('verlaengern', 1, 'Verlängere das Wort im Kopf und schreibe es.', 'Berg', '⛰️', 'Berg – die Berge: Jetzt hörst du das g.', 'dehnung_auslaut'),
+      inK('verlaengern', 1, 'Verlängere das Wort im Kopf und schreibe es.', 'Bild', '🖼️', 'Bild – die Bilder: Jetzt hörst du das d.', 'dehnung_auslaut'),
+      inK('verlaengern', 1, 'Verlängere das Wort im Kopf und schreibe es.', 'Korb', '🧺', 'Korb – die Körbe: Jetzt hörst du das b.', 'dehnung_auslaut'),
+      inK('verlaengern', 1, 'Verlängere das Wort im Kopf und schreibe es.', 'Kind', '🧒', 'Kind – die Kinder: Jetzt hörst du das d.', 'dehnung_auslaut'),
+      inK('verlaengern', 1, 'Verlängere das Wort im Kopf und schreibe es.', 'Wald', '🌲', 'Wald – die Wälder: Jetzt hörst du das d.', 'dehnung_auslaut'),
+      T('verlaengern', 1, papier("Hund", "🐶", "Verlängern: Hunde – da hörst du das d."), 'dehnung_auslaut'),
+      T('verlaengern', 1, papier("Mond", "🌙", "Verlängern: Monde – da hörst du das d."), 'dehnung_auslaut'),
+      // ---- Ableiten: ä/e und äu/eu ----
+      abl('Bäume', 'Beume', 'Baum'),
+      abl('Häuser', 'Heuser', 'Haus'),
+      abl('Mäuse', 'Meuse', 'Maus'),
+      abl('Äpfel', 'Epfel', 'Apfel'),
+      abl('Bänke', 'Benke', 'Bank'),
+      abl('Hände', 'Hende', 'Hand'),
+      abl('Länder', 'Lender', 'Land'),
+      abl('Städte', 'Stedte', 'Stadt'),
+      abl('Nächte', 'Nechte', 'Nacht'),
+      abl('Träume', 'Treume', 'Traum'),
+      abl('Zäune', 'Zeune', 'Zaun'),
+      abl('Bälle', 'Belle', 'Ball'),
+      abl('er läuft', 'er leuft', 'laufen'),
+      abl('sie fährt', 'sie fehrt', 'fahren'),
+      abl('er schläft', 'er schleft', 'schlafen'),
+      abl('sie fängt', 'sie fengt', 'fangen'),
+      abl('er trägt', 'er tregt', 'tragen'),
+      ablNo('Eule', 'Äule'),
+      ablNo('Feuer', 'Fäuer'),
+      ablNo('Fenster', 'Fänster'),
+      ablNo('Pferd', 'Pfärd'),
+      inK('ableiten', 2, 'Schreibe das Wort für mehrere. Leite von der Einzahl ab!', 'Bäume', '🌳🌳', 'ein Baum → viele Bäume: äu, weil es Baum mit au gibt.', 'wortfamilie'),
+      inK('ableiten', 2, 'Schreibe das Wort für mehrere. Leite von der Einzahl ab!', 'Häuser', '🏠🏠', 'ein Haus → viele Häuser: äu, weil es Haus mit au gibt.', 'wortfamilie'),
+      inK('ableiten', 2, 'Schreibe das Wort für mehrere. Leite von der Einzahl ab!', 'Mäuse', '🐭🐭', 'eine Maus → viele Mäuse: äu, weil es Maus mit au gibt.', 'wortfamilie'),
+      inK('ableiten', 2, 'Schreibe das Wort für mehrere. Leite von der Einzahl ab!', 'Äpfel', '🍎🍎', 'ein Apfel → viele Äpfel: Ä, weil es Apfel mit a gibt.', 'wortfamilie'),
+      inK('ableiten', 2, 'Schreibe das Wort für mehrere. Leite von der Einzahl ab!', 'Bälle', '⚽⚽', 'ein Ball → viele Bälle: ä, weil es Ball mit a gibt.', 'wortfamilie'),
+      T('ableiten', 2, papier("Bäu|me", "🌳🌳", "Ableiten: Baum – darum mit „äu“."), 'wortfamilie'),
+      T('ableiten', 2, papier("Häu|ser", "🏠🏠", "Ableiten: Haus – darum mit „äu“."), 'wortfamilie'),
     ],
     3:[
-      ch('Welches Wort ist richtig geschrieben?', ['Fahrrad','Farrad'], 0, 'Ableiten von „fahren": Fahr-rad, zwei r wie bei „fahren" + „Rad".', 'Fahrrad', 'wortfamilie'),
-      ch('Welches Wort ist richtig geschrieben?', ['Kindergarten','Kindergartn'], 0, 'Kinder-garten: zwei bekannte Wortbausteine zusammengesetzt.', 'Kindergarten', 'wortfamilie'),
-      ch('Welches Wort ist richtig geschrieben?', ['verkaufen','ferkaufen'], 0, 'Die Vorsilbe „ver-" wird immer mit „v" geschrieben.', 'verkaufen', 'wortfamilie'),
-      ch('Welches Wort ist richtig geschrieben?', ['Freundschaft','Freundschaftt'], 0, 'Die Nachsilbe „-schaft" wird nur mit einem „t" geschrieben.', 'Freundschaft', 'wortfamilie'),
-      ch('Welches Wort ist richtig geschrieben?', ['Handschuh','Hantschuh'], 0, 'Zusammengesetztes Wort: Hand + Schuh.', 'Handschuh', 'wortfamilie'),
-      ch('Welches Wort ist richtig geschrieben?', ['bezahlen','bezalen'], 0, 'Die Vorsilbe „be-" bleibt immer gleich geschrieben.', 'bezahlen', 'wortfamilie'),
-      ch('Welches Wort ist richtig geschrieben?', ['Regenschirm','Regenschirrm'], 0, 'Zusammengesetztes Wort: Regen + Schirm.', 'Regenschirm', 'wortfamilie'),
-      ch('Welches Wort ist richtig geschrieben?', ['verstehen','ferstehen'], 0, 'Die Vorsilbe „ver-" wird immer mit „v" geschrieben.', 'verstehen', 'wortfamilie'),
-      ch('Welches Wort ist richtig geschrieben?', ['Freundlichkeit','Freuntlichkeit'], 0, 'Von „Freund" abgeleitet – das „d" bleibt erhalten.', 'Freundlichkeit', 'wortfamilie'),
-      papier("Bäu|me", "🌳🌳", "Ableiten: Baum – darum mit „äu“."),
-      papier("Häu|ser", "🏠🏠", "Ableiten: Haus – darum mit „äu“."),
+      // ---- Groß oder klein? Nomen und Satzanfang ----
+      sentMark('der hund bellt laut', [0,1], 'Der steht am Satzanfang. Hund ist ein Nomen: der Hund.'),
+      sentMark('mia liest ein buch', [0,3], 'Mia ist ein Name und steht am Satzanfang. Buch ist ein Nomen: das Buch.'),
+      sentMark('die katze sitzt auf dem sofa', [0,1,5], 'Die steht am Satzanfang. Katze und Sofa sind Nomen: die Katze, das Sofa.'),
+      sentMark('wir spielen im garten fußball', [0,3,4], 'Wir steht am Satzanfang. Garten und Fußball sind Nomen: der Garten, der Fußball.'),
+      sentMark('der bäcker backt brot', [0,1,3], 'Der steht am Satzanfang. Bäcker und Brot sind Nomen: der Bäcker, das Brot.'),
+      sentMark('im sommer schwimmen wir im see', [0,1,5], 'Im steht am Satzanfang. Sommer und See sind Nomen: der Sommer, der See.'),
+      sentMark('ich esse einen apfel', [0,3], 'Ich steht am Satzanfang. Apfel ist ein Nomen: der Apfel.'),
+      sentMark('mein vater kocht suppe', [0,1,3], 'Mein steht am Satzanfang. Vater und Suppe sind Nomen: der Vater, die Suppe.'),
+      sentMark('die kinder lachen laut', [0,1], 'Die steht am Satzanfang. Kinder ist ein Nomen: die Kinder.'),
+      sentMark('am montag gehen wir ins kino', [0,1,5], 'Am steht am Satzanfang. Montag und Kino sind Nomen: der Montag, das Kino.'),
+      sentMark('die sonne scheint hell', [0,1], 'Die steht am Satzanfang. Sonne ist ein Nomen: die Sonne.'),
+      sentMark('ben malt ein buntes bild', [0,4], 'Ben ist ein Name und steht am Satzanfang. Bild ist ein Nomen: das Bild. „bunt“ ist kein Nomen.'),
+      nom('hund', 'bellt', 'laut'),
+      nom('tisch', 'steht', 'rund'),
+      nom('blume', 'blüht', 'schön'),
+      nom('vater', 'kocht', 'heute'),
+      nom('schule', 'beginnt', 'früh'),
+      nom('katze', 'schläft', 'leise'),
+      nom('auto', 'fährt', 'schnell'),
+      nom('kuchen', 'backen', 'lecker'),
+      sat('Der Hund bellt laut.', 'Der hund bellt laut.', 'Hund ist ein Nomen: der Hund. Nomen schreibe ich groß.'),
+      sat('Mia liest ein Buch.', 'mia liest ein buch.', 'Das erste Wort im Satz und das Nomen Buch schreibe ich groß.'),
+      sat('Die Katze schläft.', 'Die Katze Schläft.', 'Schläft ist ein Verb. Verben schreibe ich klein.'),
+      sat('Wir gehen in die Schule.', 'wir gehen in die Schule.', 'Das erste Wort im Satz schreibe ich groß.'),
+      sat('Das Auto fährt schnell.', 'Das Auto Fährt Schnell.', 'Fährt ist ein Verb und schnell ist kein Nomen. Beide schreibe ich klein.'),
+      sat('Ich esse einen Apfel.', 'Ich esse einen apfel.', 'Apfel ist ein Nomen: der Apfel. Nomen schreibe ich groß.'),
+      sat('Die Sonne scheint.', 'Die sonne scheint.', 'Sonne ist ein Nomen: die Sonne. Nomen schreibe ich groß.'),
+      sat('Am Montag gehen wir ins Kino.', 'am Montag gehen wir ins Kino.', 'Das erste Wort im Satz schreibe ich groß.'),
+      inK('gross', 1, 'Schreibe das Wort. Es ist ein Nomen.', 'Haus', '🏠', 'Das Haus: ein Nomen, es beginnt mit einem großen Buchstaben.', 'gross_klein', true),
+      inK('gross', 1, 'Schreibe das Wort. Es ist ein Nomen.', 'Baum', '🌳', 'Der Baum: ein Nomen, es beginnt mit einem großen Buchstaben.', 'gross_klein', true),
+      inK('gross', 1, 'Schreibe das Wort. Es ist ein Nomen.', 'Katze', '🐱', 'Die Katze: ein Nomen, es beginnt mit einem großen Buchstaben.', 'gross_klein', true),
+      inK('gross', 1, 'Schreibe das Wort. Es ist ein Nomen.', 'Blume', '🌷', 'Die Blume: ein Nomen, es beginnt mit einem großen Buchstaben.', 'gross_klein', true),
+      inK('gross', 1, 'Schreibe das Wort. Es ist ein Nomen.', 'Auto', '🚗', 'Das Auto: ein Nomen, es beginnt mit einem großen Buchstaben.', 'gross_klein', true),
+      inK('gross', 1, 'Schreibe das Wort. Es ist ein Nomen.', 'Sonne', '☀️', 'Die Sonne: ein Nomen, es beginnt mit einem großen Buchstaben.', 'gross_klein', true),
+      inK('gross', 2, 'Schreibe das Wort. Es ist ein Verb. Es wird kleingeschrieben.', 'laufen', '🏃', 'laufen ist ein Verb (ein Tunwort): klein geschrieben.', 'gross_klein', true),
+      inK('gross', 2, 'Schreibe das Wort. Es ist ein Verb. Es wird kleingeschrieben.', 'malen', '🎨', 'malen ist ein Verb (ein Tunwort): klein geschrieben.', 'gross_klein', true),
+      inK('gross', 2, 'Schreibe das Wort. Es ist ein Verb. Es wird kleingeschrieben.', 'singen', '🎤', 'singen ist ein Verb (ein Tunwort): klein geschrieben.', 'gross_klein', true),
+      T('gross', 1, papier("Blume", "🌷", "Nomen schreibe ich mit einem großen Anfangsbuchstaben."), 'gross_klein'),
+      T('gross', 1, papier("Haus", "🏠", "Nomen schreibe ich mit einem großen Anfangsbuchstaben."), 'gross_klein'),
     ],
-    4:[ // Profi-Stufe: längere zusammengesetzte Wörter, kombinierte Regeln, echte Merkwörter
-      ch('Welches Wort ist richtig geschrieben?', ['Fahrradkette','Farradkette'], 0, 'Zusammengesetzt: fahren + Rad + Kette.', 'Fahrradkette', 'wortfamilie'),
-      ch('Welches Wort ist richtig geschrieben?', ['Vogelhäuschen','Fogelhäuschen'], 0, 'Von „Haus" abgeleitet: Häus-chen. Vogel klingt wie „F", wird aber mit V geschrieben.', 'Vogelhäuschen', 'wortfamilie'),
-      ch('Welches Wort ist richtig geschrieben?', ['Schneemann','Schneeman'], 0, 'Zusammengesetzt: Schnee + Mann, das doppelte „n" von Mann bleibt.', 'Schneemann', 'doppelkonsonant'),
-      ch('Welches Wort ist richtig geschrieben?', ['Vater','Fater'], 0, 'Merkwort: „Vater" wird immer mit V geschrieben, auch wenn man „F" hört.', 'Vater'),
-      ch('Welches Wort ist richtig geschrieben?', ['Unterschrift','Unterschrifft'], 0, 'Zusammengesetzt: unter + Schrift.', 'Unterschrift', 'wortfamilie'),
-      ch('Welches Wort ist richtig geschrieben?', ['vielleicht','fielleicht'], 0, 'Merkwort: „vielleicht" wird immer mit V geschrieben.', 'vielleicht'),
+    4:[ // Merkwörter, danach frei wählen: "Welche Karte hilft?"
+      mw('Boot', 'Bot', 'Boot: Doppelvokal – zwei o. Das muss ich mir merken.'),
+      mw('Haar', 'Har', 'Haar: Doppelvokal – zwei a. Das muss ich mir merken.'),
+      mw('Schnee', 'Schne', 'Schnee: Doppelvokal – zwei e. Das muss ich mir merken.'),
+      mw('Meer', 'Mer', 'Meer: Doppelvokal – zwei e. Das muss ich mir merken.'),
+      mw('Tee', 'Te', 'Tee: Doppelvokal – zwei e. Das muss ich mir merken.'),
+      mw('Zoo', 'Zo', 'Zoo: Doppelvokal – zwei o. Das muss ich mir merken.'),
+      mw('Zahn', 'Zan', 'Zahn: Dehnungs-h. Das muss ich mir merken.'),
+      mw('Uhr', 'Ur', 'Uhr: Dehnungs-h. Das muss ich mir merken.'),
+      mw('Bahn', 'Ban', 'Bahn: Dehnungs-h. Das muss ich mir merken.'),
+      mw('Stuhl', 'Stul', 'Stuhl: Dehnungs-h. Das muss ich mir merken.'),
+      mw('Schuh', 'Schu', 'Schuh: Dehnungs-h. Das muss ich mir merken.'),
+      mw('Kuh', 'Ku', 'Kuh: Dehnungs-h. Das muss ich mir merken.'),
+      mw('Wohnung', 'Wonung', 'Wohnung: Dehnungs-h wie bei wohnen. Das muss ich mir merken.'),
+      mw('fahren', 'faren', 'fahren: Dehnungs-h. Das muss ich mir merken.'),
+      mw('Vater', 'Fater', 'Vater: Ich höre ein F, schreibe aber V. Das muss ich mir merken.'),
+      mw('Vogel', 'Fogel', 'Vogel: Ich höre ein F, schreibe aber V. Das muss ich mir merken.'),
+      mw('vier', 'fier', 'vier: Ich höre ein F, schreibe aber V. Das muss ich mir merken.'),
+      mw('viel', 'fil', 'viel: Ich höre ein F, schreibe aber V. Das muss ich mir merken.'),
+      mw('Straße', 'Strase', 'Straße: Hier steht ein ß. Das muss ich mir merken.'),
+      mw('heiß', 'heis', 'heiß: Hier steht ein ß. Das muss ich mir merken.'),
+      mw('Fuß', 'Fus', 'Fuß: Hier steht ein ß. Das muss ich mir merken.'),
+      mw('groß', 'gros', 'groß: Hier steht ein ß. Das muss ich mir merken.'),
+      mw('Quelle', 'Kwelle', 'Quelle: Qu wird immer mit Q und u geschrieben. Das muss ich mir merken.'),
+      mw('Qualle', 'Kwalle', 'Qualle: Qu wird immer mit Q und u geschrieben. Das muss ich mir merken.'),
+      inK('merken', 1, 'Schreibe das Merkwort.', 'Boot', '🚤', 'Boot: zwei o. Das Wort muss ich mir merken.', 'merkwort'),
+      inK('merken', 1, 'Schreibe das Merkwort.', 'Meer', '🌊', 'Meer: zwei e. Das Wort muss ich mir merken.', 'merkwort'),
+      inK('merken', 1, 'Schreibe das Merkwort.', 'Schnee', '❄️', 'Schnee: zwei e. Das Wort muss ich mir merken.', 'merkwort'),
+      inK('merken', 1, 'Schreibe das Merkwort.', 'Uhr', '⏰', 'Uhr: Dehnungs-h. Das Wort muss ich mir merken.', 'merkwort'),
+      inK('merken', 1, 'Schreibe das Merkwort.', 'Zahn', '🦷', 'Zahn: Dehnungs-h. Das Wort muss ich mir merken.', 'merkwort'),
+      inK('merken', 1, 'Schreibe das Merkwort.', 'Vogel', '🐦', 'Vogel: V am Anfang. Das Wort muss ich mir merken.', 'merkwort'),
+      inK('merken', 1, 'Schreibe das Merkwort.', 'Fuß', '🦶', 'Fuß: ß am Ende. Das Wort muss ich mir merken.', 'merkwort'),
+      inK('merken', 1, 'Schreibe das Merkwort.', 'Tee', '🍵', 'Tee: zwei e. Das Wort muss ich mir merken.', 'merkwort'),
+      inK('merken', 1, 'Schreibe das Merkwort.', 'Schuh', '👟', 'Schuh: Dehnungs-h. Das Wort muss ich mir merken.', 'merkwort'),
+      inK('merken', 1, 'Schreibe das Merkwort.', 'Kuh', '🐮', 'Kuh: Dehnungs-h. Das Wort muss ich mir merken.', 'merkwort'),
+      T('merken', 1, papier("Boot", "🚤", "Merkwort: Boot hat zwei o. Abdecken, schreiben, vergleichen."), 'merkwort'),
+      T('merken', 1, papier("Zahn", "🦷", "Merkwort: Zahn hat ein Dehnungs-h. Abdecken, schreiben, vergleichen."), 'merkwort'),
+      T('merken', 1, papier("Vo|gel", "🐦", "Merkwort: Vogel schreibe ich mit V."), 'merkwort'),
+      T('merken', 1, papier("Stra|ße", "🛣️", "Merkwort: Straße schreibe ich mit ß."), 'merkwort'),
+      // ---- Welche Karte hilft? (freie Strategiewahl) ----
+      swc('Hun_', 'Am Ende höre ich d oder t. Das Wort heißt Hund.', ['verlaengern','ableiten','gross','merken'], 'Hund: Am Wortende hilft die Karte Verlängern: die Hunde.'),
+      swc('Ber_', 'Am Ende höre ich g oder k. Das Wort heißt Berg.', ['verlaengern','ableiten','gross','merken'], 'Berg: Am Wortende hilft die Karte Verlängern: die Berge.'),
+      swc('B_ume', 'Ich weiß nicht, ob es ä oder e heißt. Das Wort heißt Bäume.', ['ableiten','verlaengern','gross','kurz'], 'Bäume: Die Karte Ableiten hilft: Baum mit au, darum äu.'),
+      swc('H_user', 'Ich weiß nicht, ob es äu oder eu heißt. Das Wort heißt Häuser.', ['ableiten','verlaengern','gross','kurz'], 'Häuser: Die Karte Ableiten hilft: Haus mit au, darum äu.'),
+      swc('So_e', 'Ich weiß nicht, ob ein Mitlaut oder zwei kommen. Das Wort heißt Sonne.', ['kurz','verlaengern','ableiten','gross'], 'Sonne: Die Karte Kurzer Selbstlaut hilft: o ist kurz, darum nn.'),
+      swc('Te_er', 'Ich weiß nicht, ob ein Mitlaut oder zwei kommen. Das Wort heißt Teller.', ['kurz','verlaengern','ableiten','gross'], 'Teller: Die Karte Kurzer Selbstlaut hilft: e ist kurz, darum ll.'),
+      swc('Tafl', 'Im Wort fehlt ein Selbstlaut. Das Wort heißt Tafel.', ['schwingen','verlaengern','ableiten','gross'], 'Tafel: Die Karte Silben schwingen hilft: Ta-fel, jede Silbe hat einen König.'),
+      swc('Hse', 'Im Wort fehlt ein Selbstlaut. Das Wort heißt Hase.', ['schwingen','verlaengern','ableiten','gross'], 'Hase: Die Karte Silben schwingen hilft: Ha-se, jede Silbe hat einen König.'),
+      swc('hund', 'Ich weiß nicht, ob das Wort groß oder klein geschrieben wird. Das Wort heißt Hund.', ['gross','verlaengern','ableiten','kurz'], 'Hund: Die Karte Groß oder klein? hilft: Hund ist ein Nomen, darum groß.'),
+      swc('schule', 'Ich weiß nicht, ob das Wort groß oder klein geschrieben wird. Das Wort heißt Schule.', ['gross','verlaengern','ableiten','kurz'], 'Schule: Die Karte Groß oder klein? hilft: die Schule ist ein Nomen, darum groß.'),
+      swc('Bot / Boot', 'Ich muss mir merken, wie das Wort geschrieben wird. Das Wort heißt Boot.', ['merken','verlaengern','ableiten','gross'], 'Boot: Hier hilft keine Strategie. Die Karte Merkwörter: zwei o merken.'),
+      swc('Fater / Vater', 'Ich muss mir merken, wie das Wort geschrieben wird. Das Wort heißt Vater.', ['merken','verlaengern','ableiten','gross'], 'Vater: Hier hilft keine Strategie. Die Karte Merkwörter: V am Anfang merken.'),
+      mix('Hund', 'Hunt', 'verlaengern', 'die Hunde, darum d.'),
+      mix('Bäume', 'Beume', 'ableiten', 'Baum mit au, darum äu.'),
+      mix('Sonne', 'Sone', 'kurz', 'kurzer Selbstlaut, darum nn.'),
+      mix('Tafel', 'Tafl', 'schwingen', 'Ta-fel: jede Silbe hat einen König.'),
+      mix('Berg', 'Berk', 'verlaengern', 'die Berge, darum g.'),
+      mix('Häuser', 'Heuser', 'ableiten', 'Haus mit au, darum äu.'),
+      mix('Teller', 'Teler', 'kurz', 'kurzer Selbstlaut, darum ll.'),
+      mix('Mond', 'Mont', 'verlaengern', 'die Monde, darum d.'),
+      T('kiste', 1, ch('Welcher Satz ist richtig geschrieben?', ['Der Hund läuft schnell.', 'Der hund läuft schnell.'], 0, 'Hier hilft die Karte Groß oder klein?: Hund ist ein Nomen.', 'Der Hund läuft schnell.', 'strategiewahl'), 'strategiewahl'),
+      T('kiste', 1, ch('Welcher Satz ist richtig geschrieben?', ['Die Kinder spielen im Garten.', 'Die Kinder spielen im garten.'], 0, 'Hier hilft die Karte Groß oder klein?: Garten ist ein Nomen.', 'Die Kinder spielen im Garten.', 'strategiewahl'), 'strategiewahl'),
     ],
-  },
+    };
+  })(),
   // Echte Wörter aus dem Hamburger Basiswortschatz (Behörde für Schule und
   // Berufsbildung, 785 Wörter), organisiert nach den dort benannten
   // Rechtschreibphänomenen statt erfundener Wortlisten.
@@ -1868,8 +2334,9 @@ const diagSilbendock = {
 // Stufe 3 (bei Erfolg) bzw. Stufe 1 (bei Misserfolg) zur Einordnung.
 function diagItem(domainId, level, usedSet){
   const pool = (domainId==='silbendock' ? diagSilbendock[level] : content[domainId][level]) || [];
-  const candidates = usedSet ? pool.filter(i => !usedSet.has(i)) : pool;
-  const choices = candidates.length ? candidates : pool;
+  const okPool = pool.filter(i => i.type!=='mark');
+  const candidates = usedSet ? okPool.filter(i => !usedSet.has(i)) : okPool;
+  const choices = candidates.length ? candidates : (okPool.length ? okPool : pool);
   const original = choices[Math.floor(Math.random()*choices.length)];
   if(usedSet) usedSet.add(original);
   return original;
@@ -1884,7 +2351,7 @@ let state = {
   levels:{}, stars:{}, diagDone:false, history:[], errorCounts:{}, attemptLogs:{},
   mastery:{}, selfChecks:[], pendingSelfCheck:null, pendingReview:false,
   wordStore:[], onboardStep:0, errorProfile:{}, errorLog:[], fpSnapshots:[], sessionMin:30, showOsk:true, endurance:null, sessionLog:[], session:null, pauseReturn:'practice', pauseIdx:0, pauseStep:0, discoverSeen:{},
-  trophies:{}, knownAtStart:{}, stationsVersion:3, showMoreStations:false, showAllStations:false, showStarHelp:false,
+  trophies:{}, knownAtStart:{}, fresch:{}, stationsVersion:3, showMoreStations:false, showAllStations:false, showStarHelp:false,
   childLabel:'', className:'',
   needsBasicLetterDrill:false, drill:null,
   practice:{domainId:null, level:1, attemptLog:[], queue:[], current:null, itemsDone:0, answered:false, lastCorrect:null},
@@ -1926,7 +2393,7 @@ function saveProgress(){
       errorCounts: state.errorCounts, attemptLogs: state.attemptLogs,
       mastery: state.mastery, selfChecks: state.selfChecks,
       needsBasicLetterDrill: state.needsBasicLetterDrill,
-      diagReports: state.diagReports, wordStore: state.wordStore, errorProfile: state.errorProfile, errorLog: state.errorLog, fpSnapshots: state.fpSnapshots, sessionMin: state.sessionMin, showOsk: state.showOsk, endurance: state.endurance, sessionLog: state.sessionLog, histV3: true, discoverSeen: state.discoverSeen,
+      diagReports: state.diagReports, wordStore: state.wordStore, errorProfile: state.errorProfile, errorLog: state.errorLog, fpSnapshots: state.fpSnapshots, sessionMin: state.sessionMin, showOsk: state.showOsk, endurance: state.endurance, sessionLog: state.sessionLog, histV3: true, discoverSeen: state.discoverSeen, fresch: state.fresch,
       childLabel: state.childLabel, className: state.className,
       trophies: state.trophies, knownAtStart: state.knownAtStart, stationsVersion: 3,
     }));
@@ -1956,6 +2423,7 @@ function loadProgress(){
       state.endurance = d.endurance || null;
       state.sessionLog = d.sessionLog || [];
       state.discoverSeen = d.discoverSeen || {};
+      state.fresch = d.fresch || {};
       state.childLabel = d.childLabel || '';
       state.className = d.className || '';
       state.trophies = d.trophies || {};
@@ -1973,7 +2441,7 @@ window.exportData = function(){
     errorCounts: state.errorCounts, attemptLogs: state.attemptLogs,
     mastery: state.mastery, selfChecks: state.selfChecks,
     needsBasicLetterDrill: state.needsBasicLetterDrill,
-    diagReports: state.diagReports, wordStore: state.wordStore, errorProfile: state.errorProfile, errorLog: state.errorLog, fpSnapshots: state.fpSnapshots, sessionMin: state.sessionMin, showOsk: state.showOsk, endurance: state.endurance, sessionLog: state.sessionLog, histV3: true, discoverSeen: state.discoverSeen,
+    diagReports: state.diagReports, wordStore: state.wordStore, errorProfile: state.errorProfile, errorLog: state.errorLog, fpSnapshots: state.fpSnapshots, sessionMin: state.sessionMin, showOsk: state.showOsk, endurance: state.endurance, sessionLog: state.sessionLog, histV3: true, discoverSeen: state.discoverSeen, fresch: state.fresch,
     childLabel: state.childLabel, className: state.className,
     trophies: state.trophies, knownAtStart: state.knownAtStart, stationsVersion: 3,
     exportedAt: new Date().toISOString(),
@@ -2023,6 +2491,7 @@ window.importData = function(file){
       state.endurance = d.endurance || null;
       state.sessionLog = d.sessionLog || [];
       state.discoverSeen = d.discoverSeen || {};
+      state.fresch = d.fresch || {};
       state.childLabel = d.childLabel || '';
       state.className = d.className || '';
       state.trophies = d.trophies || {};
@@ -2097,8 +2566,9 @@ function errGapPos(gap){ if(!gap) return ''; if(gap.charAt(0)==='_') return 'Anl
 // Baut den Fehlereintrag zu einer Aufgabe. given = Antwort des Kindes (oder null, wenn unbekannt).
 function errorEntryFor(item, given, p){
   const t = item.type, o = {t};
-  const w = errPlain(String(item.speak || item.word || item.answer || ''));
+  const w = errPlain(String(item.word || item.speak || item.answer || ''));
   if(w) o.w = w.slice(0,40);
+  if(item.strat) o.st = item.strat;
   if(t==='pic' || t==='silbchoice' || t==='choice' || t==='flash'){
     const g = (given===null||given===undefined) ? null : errPlain(item.options[given]);
     const c = errPlain(item.options[item.answer]);
@@ -2113,8 +2583,13 @@ function errorEntryFor(item, given, p){
       if(/ersten/.test(item.prompt)) o.pos='Anlaut'; else if(/letzten/.test(item.prompt)) o.pos='Auslaut'; else if(/mittleren|Mitte/.test(item.prompt)) o.pos='Inlaut';
     }
     if(t==='choice' && item.prompt && !item.errorCategory) o.q = item.prompt.replace(/_+/g,'…').slice(0,60);
+  } else if(t==='mark'){
+    o.c = item.correct.map(i=>item.units[i]).join('+').slice(0,40);
+    o.g = ((p&&p.markSel)||[]).map((x,i)=>x?item.units[i]:null).filter(Boolean).join('+').slice(0,40);
+    if(item.errorCategory) o.cat = item.errorCategory;
   } else if(t==='input'){
     o.c = String(item.answer||''); o.g = String(given||'').slice(0,40);
+    if(item.errorCategory) o.cat = item.errorCategory;
   } else if(t==='papier'){
     o.c = item.word.replace(/\|/g,'');
     if(p && p.papierMarks) o.m = p.papierMarks.map((x,i)=>x?i:-1).filter(i=>i>=0);
@@ -2163,9 +2638,9 @@ const FP_TK = [
   {id:'lsch', bereich:'schreiben', n:'Lautorientiertes Schreiben (Verschriften)', doms:['silbendock','schreib1'],
    erkl:'Gesprochene Wörter in Laute und Silben zerlegen und Buchstabe für Buchstabe aufschreiben (alphabetische Strategie). Fehler sind hier lautlich nachvollziehbar, z. B. fehlende Vokale oder Auslassungen in Konsonantenhäufungen.',
    foerder:'Wörter in Silben sprechen, Silbenbögen einzeichnen, Laut für Laut mit der Anlauttabelle verschriften, Wörter mit dem Schreibblatt aufschreiben und Buchstabe für Buchstabe kontrollieren.'},
-  {id:'orth', bereich:'schreiben', n:'Orthografische und morphematische Strategien', doms:['schreib2'],
-   erkl:'Rechtschreibregeln anwenden: Schwingen (Silbengelenk, doppelter Konsonant), Verlängern (Auslautverhärtung) und Ableiten (Wortstamm, ä/äu).',
-   foerder:'Schwingen-, Verlängern- und Ableiten-Trick mit Strategiekarten; Wörter nach Rechtschreibmustern sortieren; Silbenhäuschen und Strukturtypen (SCHNABEL).'},
+  {id:'orth', bereich:'schreiben', n:'Orthografische und morphematische Strategien (FRESCH)', doms:['schreib2'],
+   erkl:'Rechtschreibstrategien anwenden, wie sie im Lehrwerk Niko mit Piktogrammen eingeführt werden: Silben schwingen (jede Silbe hat einen König), Kurzer Selbstlaut (doppelter Mitlaut), Verlängern (b/p, d/t, g/k), Ableiten (ä/e, äu/eu) und Groß oder klein?; dazu Merkwörter.',
+   foerder:'Strategiekarten der Reihe nach sichern: Zu jedem Wort fragen „Welche Karte hilft?“; Silben schwingen und Könige markieren, Verlängerungswort bilden, Wortstamm suchen, Nomen mit der Artikelprobe erkennen; Merkwörter täglich mit Abdecken–Schreiben–Vergleichen.'},
   {id:'rws', bereich:'schreiben', n:'Rechtschreibwortschatz (Merkwörter)', doms:['grundwortschatz'],
    erkl:'Häufige Wörter, die sich nicht aus Regeln ableiten lassen (Hamburger Grundwortschatz), sicher abrufen und richtig schreiben.',
    foerder:'Täglich 5 Minuten Abdecken–Schreiben–Vergleichen mit 3–5 Wörtern aus dem Hamburger Grundwortschatz.'},
@@ -2181,7 +2656,7 @@ const STATION_INFO = {
   lesen:{kurz:'Wörter und Sätze genau lesen', tut:'Ähnlich aussehende Wörter unterscheiden, Lückensätze lesen und den Sinn von Sätzen verstehen.', bsp:'„Der Hund ___ im Garten.“ – bellt / Bälle / bellen', stufen:'1 ähnliche Wörter unterscheiden · 2 kurzer Satz mit Lücke · 3 längerer Satz verstehen · 4 Sätze mit Nebensatz'},
   lesekai:{kurz:'Wörter und Sätze zu Bildern lesen', tut:'Wort–Bild- und Satz–Bild-Zuordnung, lange Wörter mit Silbenfarben, „Lies und male“. Prüft genaues Erlesen ohne Raten.', bsp:'Satz „Der Hund sitzt unter dem Tisch.“ – das passende Bild wählen', stufen:'1 Wort–Bild · 2 lange Wörter mit Silbenfarben · 3 Satz–Bild · 4 lesen und malen'},
   schreib1:{kurz:'Wörter lauttreu schreiben', tut:'Das Kind schreibt Wörter nach Gehör, die so geschrieben werden, wie sie klingen (am Gerät und auf Papier).', bsp:'Bild Lampe – „Lampe“ schreiben', stufen:'1 einfache lauttreue Wörter · 2 neue Buchstaben · 3 Konsonantenhäufungen · 4 Häufungen am Anfang und Ende'},
-  schreib2:{kurz:'Rechtschreib-Tricks anwenden', tut:'Wörter mit Rechtschreibstrategien richtig schreiben: Schwingen (doppelter Konsonant), Verlängern (Hund – Hunde), Ableiten (Fahrrad – fahren).', bsp:'Hun_ – d oder t? Verlängern: Hunde → Hund', stufen:'1 Schwingen · 2 Verlängern · 3 Ableiten · 4 zusammengesetzte Wörter, Merkwörter'},
+  schreib2:{kurz:'Rechtschreib-Strategien (Niko-Karten)', tut:'Sechs Strategiekarten wie im Niko-Sprachbuch: Silben schwingen (Könige markieren), Kurzer Selbstlaut (doppelter Mitlaut), Verlängern (Hund – Hunde), Ableiten (Bäume – Baum), Groß oder klein? (Nomen, Satzanfang) und Merkwörter. Am Ende wählt das Kind selbst: Welche Karte hilft?', bsp:'Hun_ – Welche Karte hilft? Verlängern: Hunde → Hund', stufen:'1 Silben schwingen + Kurzer Selbstlaut · 2 Verlängern + Ableiten · 3 Groß oder klein? · 4 Merkwörter + Strategie frei wählen'},
   grundwortschatz:{kurz:'Merkwörter üben', tut:'Häufige Wörter des Hamburger Grundwortschatzes richtig schreiben (Auswählen, Schreiben, Abdecken–Schreiben–Vergleichen auf Papier).', bsp:'Vater oder Fater? – richtig wählen und aufschreiben', stufen:'1 Wörter mit unbetontem e · 2 Doppellaute und doppelte Konsonanten · 3 Verlängern/Ableiten · 4 ß, das/dass, lange Wörter'},
   satzbau:{kurz:'Eigene Sätze schreiben', tut:'Ein Wort einprägen und aus dem Kopf schreiben, dann eigene Sätze aus Bildbausteinen bauen und Wort für Wort aufschreiben (Papier).', bsp:'Bausteine: Der Hund / rennt / im Park – Satz schreiben', stufen:'1 Wort einprägen und schreiben · 2 Satz mit drei Bausteinen · 3 mehr Bausteine · 4 Satz mit vier Bausteinen'},
   diktat:{kurz:'Sätze nach Diktat schreiben', tut:'Das Kind hört einen Satz, schreibt ihn auf Papier und vergleicht selbst mit der Lösung.', bsp:'Hörsatz: „Die Katze schläft.“', stufen:'1 kurze Sätze · 2 längere Sätze, Selbstkontrolle · 3 kniffligere Sätze · 4 sehr lange Sätze'},
@@ -2200,6 +2675,10 @@ const FP_CAT_INFO = {
   doppelkonsonant:{label:'Doppelkonsonant / ck, tz', desc:'Nach kurzem Vokal fehlt der doppelte Konsonant (Silbengelenk), z. B. Schif statt Schiff.', mass:'Schwingen-Trick: Wort schwingen, kurzen Vokal hören, Silbengelenk (zwei Konsonanten) markieren; Kontrastpaare (Hüte/Hütte).'},
   dehnung_auslaut:{label:'Auslautverhärtung / Dehnung', desc:'b/p, d/t, g/k am Wortende oder Dehnungs-h werden nach dem Hören geschrieben.', mass:'Verlängerungsprobe (Hund – Hunde), Dehnungs-h als Merkmal langer Vokale vor l, m, n, r.'},
   wortfamilie:{label:'Wortfamilie / Wortbausteine', desc:'Wortstamm wird in verwandten Wörtern nicht erkannt (z. B. Freund → Freundlichkeit).', mass:'Ableiten-Trick: Wortstamm farbig markieren, Wortfamilien sammeln (ä/äu aus a/au ableiten).'},
+  koenig:{label:'Silbenkern fehlt (Silben schwingen)', desc:'In einer Silbe fehlt der Selbstlaut, Umlaut oder Zwielaut („König“), z. B. Tafl statt Tafel.', mass:'Strategiekarte Silben schwingen: Wort deutlich sprechen, Silben schwingen und in jeder Silbe den König markieren.'},
+  gross_klein:{label:'Groß- und Kleinschreibung', desc:'Nomen oder Satzanfänge werden kleingeschrieben bzw. Verben und Adjektive großgeschrieben.', mass:'Strategiekarte Groß oder klein?: Artikelprobe (der, die, das davor sagen), Nomen im Satz markieren, Satzanfang prüfen.'},
+  merkwort:{label:'Merkwörter', desc:'Wörter mit Doppelvokal, Dehnungs-h, V, ß, Qu oder Fremdwörter, die sich nicht ableiten lassen, werden nicht richtig abgerufen.', mass:'Täglich Abdecken–Schreiben–Vergleichen mit 3–5 Merkwörtern (Merkkarte, Merkwörter-Symbol).'},
+  strategiewahl:{label:'Passende Strategie wählen', desc:'Das Kind weiß nicht sicher, welche Strategie bei diesem Rechtschreibproblem hilft.', mass:'Werkzeugkiste: Zu jedem Wort fragen „Welche Karte hilft?“ und die Strategie laut begründen.'},
   zwielaut:{label:'Zwielaute ei/ai, eu/äu, au', desc:'Zwielaute werden verwechselt oder nicht als Einheit erkannt.', mass:'Merkwörter sammeln, Wörter mit ei/eu/au nach Zwielaut sortieren, Abdecken–Schreiben–Vergleichen.'},
 };
 const FP_MASS = {
@@ -2211,7 +2690,7 @@ const FP_MASS = {
   blitzlesen:{aus:'Kurze Blitzlese-Phasen im Heft oder mit Wortkarten, bekannte Wörter immer wieder erlesen.'},
   lesekompetenz:{aus:'Lesestrategien: Frage zuerst lesen, Textstelle unterstreichen, Antwort begründen („Wo steht das?").'},
   schreib1:{aus:'Wörter lauttreu mit Papier-Schreibblatt schreiben, Selbstkontrolle Buchstabe für Buchstabe, Silbenbögen einzeichnen.'},
-  schreib2:{aus:'Schreibblatt mit Selbstkontrolle, Rechtschreibstrategien (Schwingen, Verlängern, Ableiten) mit Strategiekarten.'},
+  schreib2:{aus:'Niko-Strategiekarten (Silben schwingen, Kurzer Selbstlaut, Verlängern, Ableiten, Groß oder klein?, Merkwörter) im Heft anwenden; bei jedem Wort laut fragen: Welche Karte hilft?'},
   grundwortschatz:{aus:'Täglich 5 Minuten Abdecken–Schreiben–Vergleichen mit 3–5 Wörtern aus dem Hamburger Grundwortschatz.'},
   satzbau:{aus:'Satz zuerst sprechen, dann Wort für Wort schreiben; Wortgrenzen und Satzanfang/Satzende markieren.'},
   diktat:{aus:'Lernwörter vor dem Diktat sichern; nach dem Diktat Fehler markieren und berichtigen.'},
@@ -2700,6 +3179,7 @@ function buildFoerderplanHTML(){
   ${lautHtml}
   <h3>4.2 Schreiben: Rechtschreibmuster und Fehlerarten</h3>
   ${catHtml}
+  ${fpFreschHtml()}
   ${patHtml}
   <h3>4.3 Wörter, die wiederholt falsch geschrieben werden</h3>
   ${wordHtml}
@@ -2784,7 +3264,7 @@ window.confirmReset = function(){
   if(confirm('Fortschritt wirklich löschen und neu starten?')){
     state.levels={}; state.stars={}; state.diagDone=false; state.history=[];
     state.errorCounts={}; state.attemptLogs={}; state.mastery={}; state.selfChecks=[];
-    state.needsBasicLetterDrill=false; state.diagReports=[]; state.wordStore=[]; state.onboardStep=0; state.errorProfile={}; state.errorLog=[]; state.fpSnapshots=[]; state.endurance=null; state.sessionLog=[]; state.session=null; try{localStorage.removeItem(SESSION_KEY);}catch(e){} state.discoverSeen={}; state.trophies={}; state.knownAtStart={};
+    state.needsBasicLetterDrill=false; state.diagReports=[]; state.wordStore=[]; state.onboardStep=0; state.errorProfile={}; state.errorLog=[]; state.fpSnapshots=[]; state.endurance=null; state.sessionLog=[]; state.session=null; try{localStorage.removeItem(SESSION_KEY);}catch(e){} state.discoverSeen={}; state.fresch={}; state.trophies={}; state.knownAtStart={};
     try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
     state.showTeacher=false;
     state.screen='start';
@@ -3241,8 +3721,9 @@ window.malCheck = function(){
 
 function checkAnswer(item, given){
   if(item.type==='choice' || item.type==='pic' || item.type==='flash' || item.type==='silbchoice') return given===item.answer;
-  if(item.type==='dictate' || item.type==='papier' || item.type==='match' || item.type==='malen' || item.type==='kreuzseite') return given===0;
+  if(item.type==='dictate' || item.type==='papier' || item.type==='match' || item.type==='malen' || item.type==='kreuzseite' || item.type==='mark') return given===0;
   if(item.type==='satzbau') return given===0;
+  if(item.cs) return (given||'').toString().trim().replace(/ß/g,'ss')===item.answer.replace(/ß/g,'ss');   // Groß-/Kleinschreibung zählt
   const norm = s => (s||'').toString().trim().toLowerCase().replace(/ß/g,'ss');
   return norm(given)===norm(item.answer).replace(/ß/g,'ss');
 }
@@ -3421,6 +3902,12 @@ function screenDiagnose(){
 }
 
 function renderItemBody(item, handlerName){
+  const head = stratHead(item);
+  if(item.type==='mark') return head + renderMark(item, false);
+  if(item.symOpts) return head + renderSymChoice(item, handlerName, false, null);
+  return head + renderItemBody0(item, handlerName);
+}
+function renderItemBody0(item, handlerName){
   if(item.type==='match') return renderMatchBody(item, false);
   if(item.type==='kreuzseite') return renderKreuzseite(item, false);
   if(item.type==='papier') return renderPapier(item, false);
@@ -4097,7 +4584,7 @@ window.openDomain = function(domainId){
   state.pendingReview = !!(info && info.status==='review');
   const level = state.levels[domainId] || 1;
   const discoverKey = domainId + ':' + level;
-  const needsDiscover = ['schreib2','grundwortschatz'].includes(domainId) && !state.pendingReview && !state.discoverSeen[discoverKey];
+  const needsDiscover = ['grundwortschatz'].includes(domainId) && !state.pendingReview && !state.discoverSeen[discoverKey];
   if(needsDiscover){
     state.discoverIndex = 0;
     state.screen = 'discover';
@@ -4591,6 +5078,7 @@ function screenGoal(){
       <div style="margin:8px 0;">${mascotIcon(72)}</div>
       <p style="font-size:1.1rem;line-height:1.55;color:var(--harbor-dark);font-family:'Baloo 2';font-weight:600;">${goal}</p>
       <button class="speak-btn" onclick="speakGoal()">🔊</button>
+      ${d.id==='schreib2' ? kisteHtml() : ''}
       <button class="btn btn-primary btn-block" style="margin-top:14px;" onclick="startPracticeSession()">Los geht's! ▶️</button>
       ${d.id==='buchstabe' ? '<button class="btn btn-ghost btn-block" style="margin-top:10px;" onclick="showLumi(\'lumi\',\'goal\')">🎬 Erklärvideo ansehen</button>' : ''}
     </div>
@@ -4659,6 +5147,15 @@ function startFlashCountdown(){
 }
 
 function pickPracticeItem(){
+  pickPracticeItem0();
+  const p = state.practice, it = p && p.current;
+  if(p){
+    p.merkOpen = false; p.stratIntro = null;
+    if(it && it.type==='mark') p.markSel = it.units.map(()=>false);
+    if(it && it.strat && it.strat!=='kiste' && FRESCH[it.strat] && !fr(it.strat).seen && !p.isWordReview && !p.isReview && !p.easy) p.stratIntro = it.strat;
+  }
+}
+function pickPracticeItem0(){
   const p = state.practice;
   if(!p.queue || p.queue.length === 0){
     const pool = content[p.domainId][(p.easy && !p.isReview && !p.isWordReview) ? Math.max(1,p.level-1) : p.level];
@@ -4724,6 +5221,7 @@ function screenPractice(){
   const d = anyDomain(state.practice.domainId);
   const p = state.practice;
   if(p.guessAlert && !p.answered) return screenGuessAlert();
+  if(p.stratIntro && !p.answered) return screenStratIntro();
   if(paperNeededNow(p) && !p.paperAck) return screenPaper();
   const item = p.current;
 
@@ -4732,7 +5230,7 @@ function screenPractice(){
     if(item.type==='kreuzseite'){
       feedback = ksFeedback(p);
     } else if(p.lastCorrect){
-      feedback = `<div class="feedback-box feedback-good">✅ ${p.levelUpMsg ? (p.correctPhrase+' '+p.levelUpMsg) : p.correctPhrase}${p.isWordReview ? '' : ' <b class="plus-star">+1 ⭐</b>'}</div>`;
+      feedback = `<div class="feedback-box feedback-good">✅ ${p.levelUpMsg ? (p.correctPhrase+' '+p.levelUpMsg) : p.correctPhrase}${p.isWordReview ? '' : ' <b class="plus-star">+1 ⭐</b>'}${p.cardMsg ? '<br><b>'+p.cardMsg+'</b>' : ''}</div>`;
     } else if(item.type==='papier'){
       feedback = `<div class="feedback-box feedback-tip">💡 Gut, dass du genau verglichen hast! Schreibe das Wort jetzt noch einmal richtig auf dein Blatt. ${item.tip}${p.levelDownMsg?('<br><br>'+p.levelDownMsg):''}</div>`;
     } else if(item.type==='dictate'){
@@ -4997,7 +5495,7 @@ window.startWordReview = function(){
 window.startCategoryReview = function(category){
   const pool = [];
   ['schreib2','grundwortschatz'].forEach(domId=>{
-    [1,2,3].forEach(lvl=>{
+    [1,2,3,4].forEach(lvl=>{
       (content[domId][lvl]||[]).forEach(it=>{
         if(it.errorCategory === category) pool.push(it);
       });
@@ -5019,6 +5517,12 @@ window.startCategoryReview = function(category){
 };
 
 function renderItemBodyStatic(item, given){
+  const head = stratHead(item);
+  if(item.type==='mark') return head + renderMark(item, true);
+  if(item.symOpts) return head + renderSymChoice(item, '', true, given);
+  return head + renderItemBodyStatic0(item, given);
+}
+function renderItemBodyStatic0(item, given){
   if(item.type==='match') return renderMatchBody(item, true);
   if(item.type==='kreuzseite') return renderKreuzseite(item, true);
   if(item.type==='papier') return renderPapier(item, true);
@@ -5130,7 +5634,7 @@ window.practiceAnswer = function(given){
   p.lastCorrect = correct;
   p.lastGiven = given;
   p.itemsDone++;
-  p.levelUpMsg=null; p.levelDownMsg=null;
+  p.levelUpMsg=null; p.levelDownMsg=null; p.cardMsg=null;
   p.correctPhrase = randomCorrectPhrase();
   // Raten erkennen: mehrere sehr schnelle Antworten bei Auswahlaufgaben mit mehreren Fehlern.
   // Solche Antworten werden nicht als Fehler gewertet (kein Abstieg, kein Eintrag im Förderplan).
@@ -5146,6 +5650,11 @@ window.practiceAnswer = function(given){
   if(!guessed && !p.easy){
     p.attemptLog.push(correct);
     if(p.attemptLog.length > 12) p.attemptLog.shift();
+  }
+  // Strategiekarten (Werkzeugkiste): richtige Aufgaben je Strategie zählen
+  if(!guessed && !p.easy && !p.isWordReview && item.strat && FRESCH[item.strat] && item.strat!=='kiste'){
+    const f = fr(item.strat); f.n++; if(correct) f.ok++;
+    if(!f.card && f.ok>=6 && f.ok/f.n>=0.65){ f.card = true; f.cardDate = todayStr(); p.cardMsg = '🧰 Neue Strategiekarte gesammelt: '+FRESCH[item.strat].name+'!'; }
   }
 
   if(p.isWordReview){
@@ -5192,11 +5701,11 @@ window.practiceAnswer = function(given){
         p.attemptLog=[]; p.queue=[];
         levelChanged = true;
         p.levelUpMsg = '⬆️ Klasse gemacht – du gehst eine Stufe hoch! ' + (levelGoals[p.domainId]||{})[p.level];
-        // Neue Stufe kann neue Entdecken-Paare haben (Leuchtturm/Speicherstadt) -
+        // Neue Stufe kann neue Entdecken-Paare haben (Werkzeugkiste/Speicherstadt) -
         // die sollen direkt beim Aufstieg gezeigt werden, nicht erst beim
         // nächsten Öffnen der Station von der Hafenkarte aus.
         const discoverKey = p.domainId + ':' + p.level;
-        if(['schreib2','grundwortschatz'].includes(p.domainId) && !state.discoverSeen[discoverKey]){
+        if(['grundwortschatz'].includes(p.domainId) && !state.discoverSeen[discoverKey]){
           p.pendingDiscoverLevel = p.level;
         }
       }
@@ -5578,7 +6087,7 @@ function renderErrorProfileSection(){
     .filter(e => e.count > 0)
     .sort((a,b) => b.count - a.count);
   if(entries.length === 0){
-    return `<h3 style="font-size:1rem;margin-top:18px;">Fehlerprofil</h3><p style="font-size:0.85rem;color:#6B7F8C;margin-top:4px;">Noch keine kategorisierten Fehler erfasst (Leuchtturm/Speicherstadt).</p>` + renderReadProfileSection();
+    return `<h3 style="font-size:1rem;margin-top:18px;">Fehlerprofil</h3><p style="font-size:0.85rem;color:#6B7F8C;margin-top:4px;">Noch keine kategorisierten Fehler erfasst (Werkzeugkiste/Speicherstadt).</p>` + renderReadProfileSection();
   }
   const maxCount = Math.max(...entries.map(e=>e.count));
   const rows = entries.map(e => {
@@ -5590,7 +6099,7 @@ function renderErrorProfileSection(){
     </tr>`;
   }).join('');
   return `
-    <h3 style="font-size:1rem;margin-top:18px;">Fehlerprofil (Leuchtturm &amp; Speicherstadt)</h3>
+    <h3 style="font-size:1rem;margin-top:18px;">Fehlerprofil (Werkzeugkiste &amp; Speicherstadt)</h3>
     <p style="font-size:0.8rem;color:#6B7F8C;margin-top:2px;">Zeigt, bei welchen Rechtschreibmustern noch Unsicherheit besteht - nicht nur wie viele, sondern welche Art von Fehlern.</p>
     <table class="teacher-panel"><tr><th>Muster</th><th>Häufigkeit</th><th>Anzahl</th></tr>${rows}</table>` + renderReadProfileSection();
 }
