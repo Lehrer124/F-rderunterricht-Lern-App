@@ -5297,13 +5297,27 @@ window.startEndSequence = function(){
     }, 80);
     endSeq.timers.push(iv);
     moeweTanz(true);
-    au.addEventListener('ended', ()=>{
+    // Abschlusssatz nach dem Lied: mehrere Auslöser (ended-Ereignis, Abspielzeit, Zeitpuffer), damit er auch auf dem iPad sicher kommt
+    let byeDone = false;
+    const bye = ()=>{
+      if(byeDone) return; byeDone = true;
       moeweTanz(false);
       if(!alive()) return;
-      const bye = document.getElementById('endBye'); if(bye) bye.classList.add('show');
+      const el = document.getElementById('endBye'); if(el) el.classList.add('show');
       const txt = 'Bitte bring dein iPad jetzt zurück. Tschüss, bis zum nächsten Mal!';
-      endSeq.timers.push(setTimeout(()=>{ if(alive() && !ttsSpeak(txt, false)) speakBrowser(txt, 0.95); }, 600));
-    });
+      endSeq.timers.push(setTimeout(()=>{
+        if(!alive()) return;
+        let ok = false; try{ ok = ttsSpeak(txt, false); }catch(e){}
+        if(!ok){ try{ speakBrowser(txt, 0.95); }catch(e){} }
+      }, 700));
+    };
+    au.addEventListener('ended', bye);
+    const iv2 = setInterval(()=>{
+      if(byeDone || !alive()){ clearInterval(iv2); return; }
+      if(au.ended || (au.duration && au.currentTime >= au.duration-0.2)) bye();
+    }, 250);
+    endSeq.timers.push(iv2);
+    endSeq.timers.push(setTimeout(bye, 67000));   // Notausgang, falls das Lied-Ende nicht gemeldet wird
   };
   const speakEnd = ()=>{
     if(!alive()) return;
