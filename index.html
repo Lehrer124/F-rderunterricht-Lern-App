@@ -297,6 +297,18 @@
   .cnt2.ghost{cursor:default;filter:none;}
   .cnt2.ghost .cimg{filter:grayscale(1) brightness(1.15);opacity:.22;}
   .term-cap{margin:10px 0 0;text-align:center;color:#fff;font-weight:700;font-size:.95rem;text-shadow:0 1px 2px rgba(15,35,55,.55);}
+  .song-wrap{display:flex;align-items:flex-end;justify-content:center;gap:4px;margin:14px auto 0;max-width:660px;}
+  .song-wrap .song-box{margin:0;flex:1 1 auto;min-width:0;}
+  .moewe-slot{flex:0 0 clamp(52px,12vw,104px);display:flex;justify-content:center;align-items:flex-end;padding-bottom:6px;}
+  .moewe{width:100%;height:auto;transform-origin:50% 100%;user-select:none;-webkit-user-drag:none;}
+  .moewe-r{transform:scaleX(-1);}
+  @keyframes moeweTanzL{0%,100%{transform:translateY(0) rotate(-7deg);}25%{transform:translateY(-16px) rotate(0deg);}50%{transform:translateY(0) rotate(7deg);}75%{transform:translateY(-16px) rotate(0deg);}}
+  @keyframes moeweTanzR{0%,100%{transform:scaleX(-1) translateY(0) rotate(7deg);}25%{transform:scaleX(-1) translateY(-16px) rotate(0deg);}50%{transform:scaleX(-1) translateY(0) rotate(-7deg);}75%{transform:scaleX(-1) translateY(-16px) rotate(0deg);}}
+  .moewe.dance.moewe-l{animation:moeweTanzL .9s ease-in-out infinite;}
+  .moewe.dance.moewe-r{animation:moeweTanzR .9s ease-in-out infinite;animation-delay:.45s;}
+  @media (max-width:480px){ .moewe-slot{flex-basis:46px;} .song-wrap .song-line{font-size:1.05rem;line-height:1.55;} }
+  .end-bye{display:none;margin:14px 6px 0;font-size:1.25rem;font-weight:700;line-height:1.5;color:var(--harbor-dark);}
+  .end-bye.show{display:block;}
   .song-box{margin:14px auto 0;max-width:420px;background:#EAF5FB;border:2px solid #BFE0F0;border-radius:16px;padding:10px 12px;}
   .song-title{font-family:'Baloo 2',sans-serif;font-weight:800;color:var(--harbor-dark);margin-bottom:4px;}
   .song-line{font-family:'Andika',sans-serif;font-size:1.25rem;line-height:1.7;color:#7A93A3;}
@@ -5248,14 +5260,16 @@ const END_SONG = 'data:audio/mpeg;base64,SUQzBAAAAAABUlRYWFgAAAASAAADbWFqb3JfYnJ
 // Liedtext (eigener, kindgerechter Text über Lotse Lumi und den Buchstabenhafen), Einsatzzeiten in Sekunden;
 // Ton: eigenes Abschiedslied (Lotse Lumi); Zeilenzeiten geschätzt, Wörter gleichmäßig verteilt
 const END_LYRICS = [[["Im", 7.0], ["Hamburger", 7.18], ["Hafen,", 8.01], ["im", 8.55], ["Buchstaben-Land,", 8.74]], [["da", 10.5], ["wohnt", 10.67], ["unser", 11.11], ["Lotse,", 11.54], ["der", 12.06], ["jedem", 12.32], ["gut", 12.75], ["bekannt!", 13.01]], [["Es", 14.0], ["ist", 14.18], ["Lumi", 14.44], ["der", 14.8], ["Lotse,", 15.07], ["er", 15.6], ["winkt", 15.78], ["und", 16.22], ["er", 16.49], ["lacht,", 16.67]], [["der", 17.5], ["alle", 17.77], ["die", 18.14], ["Schiffe", 18.41], ["nach", 19.05], ["Hause", 19.42], ["gebracht!", 19.88]], [["He,", 22.0], ["jo,", 22.45], ["Hissa!", 22.91], ["Die", 23.82], ["Lernzeit", 24.27], ["ist", 25.48], ["vorbei!", 25.94]], [["He,", 28.7], ["jo,", 29.27], ["Hissa!", 29.84], ["Du", 30.98], ["warst", 31.36], ["so", 32.32], ["toll", 32.7], ["dabei!", 33.46]]];
+const MOEWE_IMG = 'data:image/png;base64,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';
 const END_LYRICS_END = 36.5;   // Sekunde, ab der alle Zeilen als gesungen gelten
 const END_LYRICS_OFFSET = 0;   // bei Bedarf: Sekunden, um die der Text später (+) oder früher (-) leuchtet
 let endSeq = {gen:0, timers:[], audios:[]};
 function endSeqStop(){
   endSeq.gen++; endSeq.timers.forEach(clearTimeout); endSeq.timers=[];
-  endSeq.audios.forEach(a=>{ try{ a.pause(); }catch(e){} }); endSeq.audios=[];
+  endSeq.audios.forEach(a=>{ try{ a.pause(); }catch(e){} }); endSeq.audios=[]; try{ moeweTanz(false); const bye=document.getElementById('endBye'); if(bye) bye.classList.remove('show'); }catch(e){}
   try{ ttsStop(); if('speechSynthesis' in window) window.speechSynthesis.cancel(); }catch(e){}
 }
+function moeweTanz(on){ document.querySelectorAll('.moewe').forEach(el=>el.classList.toggle('dance', !!on)); }
 function endSeqLight(i){
   document.querySelectorAll('.song-w').forEach((el,k)=>{ el.classList.toggle('on', k<=i && i>=0); el.classList.toggle('now', k===i); });
 }
@@ -5282,10 +5296,18 @@ window.startEndSequence = function(){
       if(au.ended) clearInterval(iv);
     }, 80);
     endSeq.timers.push(iv);
+    moeweTanz(true);
+    au.addEventListener('ended', ()=>{
+      moeweTanz(false);
+      if(!alive()) return;
+      const bye = document.getElementById('endBye'); if(bye) bye.classList.add('show');
+      const txt = 'Bitte bring dein iPad jetzt zurück. Tschüss, bis zum nächsten Mal!';
+      endSeq.timers.push(setTimeout(()=>{ if(alive() && !ttsSpeak(txt, false)) speakBrowser(txt, 0.95); }, 600));
+    });
   };
   const speakEnd = ()=>{
     if(!alive()) return;
-    const txt = 'Du hast heute toll gearbeitet! Dein Schiff ist im Hafen angekommen. Lege das iPad jetzt bitte leise zur Seite.';
+    const txt = 'Du hast heute toll gearbeitet! Dein Schiff ist im Hafen angekommen.';
     const done = ()=>{ if(alive()) endSeq.timers.push(setTimeout(playSong, 500)); };
     if(!ttsSpeak(txt, false, done)) speakBrowser(txt, 0.95, done);
   };
@@ -5303,8 +5325,8 @@ function screenSessionEnd(){
       <div style="margin-bottom:6px;">${mascotIcon(56)}</div>
       <div class="task-instr" style="font-size:1.4rem;">Du hast heute toll gearbeitet!</div>
       <p style="font-size:1.05rem;line-height:1.5;color:var(--harbor-dark);margin:10px 0;">${s.items ? `Du hast ${s.items} Aufgaben bearbeitet, ${s.ok||0} davon richtig. ` : ''}Dein Schiff ist im Hafen angekommen.</p>
-      <p style="font-size:1rem;color:#4B6473;">Lege das iPad jetzt bitte leise zur Seite.</p>
-      <div class="song-box"><div class="song-title">🎵 Singe mit!</div>${lyr}</div>
+      <div class="song-wrap"><div class="moewe-slot"><img class="moewe moewe-l" src="${MOEWE_IMG}" alt="" draggable="false"></div><div class="song-box"><div class="song-title">🎵 Singe mit!</div>${lyr}</div><div class="moewe-slot"><img class="moewe moewe-r" src="${MOEWE_IMG}" alt="" draggable="false"></div></div>
+      <p id="endBye" class="end-bye">Bitte bring dein iPad jetzt zurück.<br>Tschüss, bis zum nächsten Mal! 👋</p>
       <button class="btn btn-ghost" style="margin-top:10px;" onclick="startEndSequence()">🔊 Noch einmal hören</button>
     </div>
   </main>`;
