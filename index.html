@@ -567,6 +567,14 @@ function setSub(domainId, level, sub){
   state.substeps = state.substeps || {};
   state.substeps[domainId] = {level, sub};
 }
+// Zuletzt geübte Aufgaben: stehen bei der nächsten Einheit nicht am Anfang der Reihe
+function itemKey(it){ return it ? [it.type, it.speak||it.word||it.sentence||'', it.tip||'', JSON.stringify(it.options||'').slice(0,60)].join('|') : ''; }
+function noteRecent(domainId, it){
+  state.recentItems = state.recentItems || {};
+  const a = state.recentItems[domainId] = state.recentItems[domainId] || [];
+  const k = itemKey(it); const i = a.indexOf(k); if(i>=0) a.splice(i,1);
+  a.push(k); while(a.length>10) a.shift();
+}
 function noteDay(domainId, level){
   state.levelDays = state.levelDays || {};
   let e = state.levelDays[domainId];
@@ -1508,6 +1516,64 @@ function dictate(sentence, tip){
 // Deutschen hat zu viele Ausnahmen für eine zuverlässige Faustregel).
 // Wörter ohne Eintrag gelten als einsilbig (ein Bogen über das ganze Wort).
 const wordSyllables = {
+  blume:['Blu','me'],
+  fisch:['Fisch'],
+  sonne:['Son','ne'],
+  apfel:['Ap','fel'],
+  haus:['Haus'],
+  vogel:['Vo','gel'],
+  pferd:['Pferd'],
+  ente:['En','te'],
+  schwimmt:['schwimmt'],
+  läuft:['läuft'],
+  trinkt:['trinkt'],
+  fuchs:['Fuchs'],
+  brummt:['brummt'],
+  schleicht:['schleicht'],
+  baby:['Ba','by'],
+  weint:['weint'],
+  arzt:['Arzt'],
+  hilft:['hilft'],
+  kind:['Kind'],
+  freund:['Freund'],
+  freundin:['Freun','din'],
+  frisst:['frisst'],
+  löwe:['Lö','we'],
+  brüllt:['brüllt'],
+  sofa:['So','fa'],
+  korb:['Korb'],
+  sitzt:['sitzt'],
+  tisch:['Tisch'],
+  frosch:['Frosch'],
+  quakt:['quakt'],
+  springt:['springt'],
+  teich:['Teich'],
+  see:['See'],
+  wasser:['Was','ser'],
+  schüler:['Schü','ler'],
+  rechnet:['rech','net'],
+  klassenzimmer:['Klas','sen','zim','mer'],
+  tafel:['Ta','fel'],
+  über:['über'],
+  leise:['lei','se'],
+  schnell:['schnell'],
+  mutig:['mu','tig'],
+  wiese:['Wie','se'],
+  eifrig:['eif','rig'],
+  müde:['mü','de'],
+  ärztin:['Ärz','tin'],
+  bäcker:['Bä','cker'],
+  pilot:['Pi','lot'],
+  arbeitet:['ar','bei','tet'],
+  freundlich:['freund','lich'],
+  krankenhaus:['Kran','ken','haus'],
+  stadt:['Stadt'],
+  flughafen:['Flug','ha','fen'],
+  dem:['dem'],
+  der:['der'],
+  an:['an'],
+  auf:['auf'],
+  schule:['Schu','le'],
   der:['der'], die:['die'], das:['das'], im:['im'], in:['in'], zu:['zu'], am:['am'],
   junge:['Jun','ge'], mädchen:['Mäd','chen'], hund:['Hund'], katze:['Kat','ze'],
   oma:['O','ma'], opa:['O','pa'], papa:['Pa','pa'],
@@ -1690,6 +1756,21 @@ const content = {
       pic('🔁','🦵','Bein', ['🪨','🐟','🌳'], 0, 'Bein – Stein: reimt sich!'),
       pic('🎯','🌙','Mond', ['🐭','🌳','⚽'], 0, 'Mond – Maus: gleicher Anfangslaut „M".'),
       pic('👏','🍎','Apfel', [silbenbogen(1),silbenbogen(2),silbenbogen(3)], 1, 'Ap-fel: zwei Bögen.'),
+      Object.assign(pic('🔁','👖','Hose', ['🥫','🌳','🍎'], 0, 'Hose – Dose: reimt sich!'), {sub:1}),
+      Object.assign(pic('🔁','🐕','Hund', ['👄','🌳','🍎'], 0, 'Hund – Mund: reimt sich!'), {sub:1}),
+      Object.assign(pic('🔁','🍞','Brot', ['🚤','🌳','🍎'], 0, 'Brot – Boot: reimt sich!'), {sub:1}),
+      Object.assign(pic('🔁','🚪','Tür', ['🐻','🌳','🍎'], 0, 'Tür – Bär: reimt sich!'), {sub:2}),
+      Object.assign(pic('🔁','🐟','Fisch', ['🪑','🌳','🍎'], 0, 'Fisch – Tisch: reimt sich!'), {sub:2}),
+      Object.assign(pic('🎯','👃','Nase', ['🍜','🌳','🐟'], 0, 'Nase – Nudel: gleicher Anlaut „N".'), {sub:1}),
+      Object.assign(pic('🎯','🌹','Rose', ['🚀','🌳','🐟'], 0, 'Rose – Rakete: gleicher Anlaut „R".'), {sub:1}),
+      Object.assign(pic('🎯','🐋','Wal', ['☁️','🌳','🍎'], 0, 'Wal – Wolke: gleicher Anlaut „W".'), {sub:2}),
+      Object.assign(pic('🎯','🐟','Fisch', ['🪶','🌳','🍎'], 0, 'Fisch – Feder: gleicher Anlaut „F".'), {sub:2}),
+      Object.assign(pic('🎯','🍅','Tomate', ['🐅','🌳','🐟'], 0, 'Tomate – Tiger: gleicher Anlaut „T".'), {sub:2}),
+      Object.assign(pic('👏','🚗','Auto', [silbenbogen(1),silbenbogen(2),silbenbogen(3)], 1, 'Au-to: zwei Bögen.'), {sub:1}),
+      Object.assign(pic('👏','🐕','Hund', [silbenbogen(1),silbenbogen(2),silbenbogen(3)], 0, 'Hund: nur ein Schwung, ein Bogen.'), {sub:1}),
+      Object.assign(pic('👏','🍅','Tomate', [silbenbogen(2),silbenbogen(3),silbenbogen(4)], 1, 'To-ma-te: drei Bögen.'), {sub:2}),
+      Object.assign(pic('👏','🦒','Giraffe', [silbenbogen(2),silbenbogen(3),silbenbogen(4)], 1, 'Gi-raf-fe: drei Bögen.'), {sub:2}),
+      Object.assign(pic('👏','🦆','Ente', [silbenbogen(1),silbenbogen(2),silbenbogen(3)], 1, 'En-te: zwei Bögen.'), {sub:1}),
     ],
     2:[
       pic('🔁','☀️','Sonne', ['🛢️','🐟','⭐'], 0, 'Sonne – Tonne: reimt sich!'),
@@ -1701,6 +1782,21 @@ const content = {
       pic('🎯','🚢','Schiff', ['🏫','🐕','🌙'], 0, 'Schiff – Schule: gleicher Anlaut „Sch".'),
       pic('🔁','🥅','Tor', ['👂','🐟','🌳'], 0, 'Tor – Ohr: reimt sich!'),
       pic('👏','🐘','Elefant', [silbenbogen(2),silbenbogen(3),silbenbogen(4)], 1, 'E-le-fant: drei Bögen.'),
+      Object.assign(pic('🔁','🪱','Wurm', ['🗼','🌳','🍎'], 0, 'Wurm – Turm: reimt sich!'), {sub:1}),
+      Object.assign(pic('🔁','🦟','Mücke', ['🌉','🌳','🍎'], 0, 'Mücke – Brücke: reimt sich!'), {sub:1}),
+      Object.assign(pic('🔁','🦔','Igel', ['🪞','🌳','🍎'], 0, 'Igel – Spiegel: reimt sich!'), {sub:2}),
+      Object.assign(pic('🔁','✋','Hand', ['🏖️','🌳','🍎'], 0, 'Hand – Sand: reimt sich!'), {sub:1}),
+      Object.assign(pic('🔁','🕯️','Kerze', ['❤️','🌳','🍎'], 0, 'Kerze – Herze: reimt sich!'), {sub:2}),
+      Object.assign(pic('🎯','👟','Schuh', ['✂️','🌳','🐟'], 0, 'Schuh – Schere: gleicher Anlaut „Sch".'), {sub:1}),
+      Object.assign(pic('🎯','🕷️','Spinne', ['🪞','🌳','🐟'], 0, 'Spinne – Spiegel: gleicher Anlaut „Sp".'), {sub:2}),
+      Object.assign(pic('🎯','👗','Kleid', ['🎹','🌳','🐟'], 0, 'Kleid – Klavier: gleicher Anlaut „Kl".'), {sub:2}),
+      Object.assign(pic('🎯','🔒','Schloss', ['🔑','🌳','🍎'], 0, 'Schloss – Schlüssel: gleicher Anlaut „Schl".'), {sub:2}),
+      Object.assign(pic('🎯','🌭','Wurst', ['🐋','🌳','🍎'], 0, 'Wurst – Wal: gleicher Anlaut „W".'), {sub:1}),
+      Object.assign(pic('👏','🚲','Fahrrad', [silbenbogen(1),silbenbogen(2),silbenbogen(3)], 1, 'Fahr-rad: zwei Bögen.'), {sub:1}),
+      Object.assign(pic('👏','🎸','Gitarre', [silbenbogen(2),silbenbogen(3),silbenbogen(4)], 1, 'Gi-tar-re: drei Bögen.'), {sub:2}),
+      Object.assign(pic('👏','🍋','Zitrone', [silbenbogen(2),silbenbogen(3),silbenbogen(4)], 1, 'Zi-tro-ne: drei Bögen.'), {sub:2}),
+      Object.assign(pic('👏','🐅','Tiger', [silbenbogen(1),silbenbogen(2),silbenbogen(3)], 1, 'Ti-ger: zwei Bögen.'), {sub:1}),
+      Object.assign(pic('👏','🚁','Hubschrauber', [silbenbogen(2),silbenbogen(3),silbenbogen(4)], 1, 'Hub-schrau-ber: drei Bögen.'), {sub:2}),
     ],
     3:[
       pic('👏','🚆','Zug', [silbenbogen(1),silbenbogen(2),silbenbogen(3)], 0, 'Zug: nur ein Schwung, nur ein Bogen.'),
@@ -1711,6 +1807,20 @@ const content = {
       pic('🎯','🐫','Kamel', ['🐱','🐟','🌳'], 0, 'Kamel – Katze: gleicher Anlaut „K".'),
       pic('🔁','🏺','Vase', ['👃','⚽','🌳'], 0, 'Vase – Nase: reimt sich!'),
       pic('🎯','⭐','Stern', ['🪑','🌳','🐟'], 0, 'Stern – Stuhl: gleicher Anlaut „St".'),
+      Object.assign(pic('🔁','🐓','Hahn', ['🦷','🌳','🍎'], 0, 'Hahn – Zahn: reimt sich!'), {sub:1}),
+      Object.assign(pic('🔁','⛰️','Berg', ['🧙','🌳','🍎'], 0, 'Berg – Zwerg: reimt sich!'), {sub:2}),
+      Object.assign(pic('🔁','👜','Tasche', ['🍼','🌳','🍎'], 0, 'Tasche – Flasche: reimt sich!'), {sub:1}),
+      Object.assign(pic('🔁','🌲','Tanne', ['🫖','🌳','🍎'], 0, 'Tanne – Kanne: reimt sich!'), {sub:2}),
+      Object.assign(pic('🎯','🧙','Zwerg', ['🧅','🌳','🐟'], 0, 'Zwerg – Zwiebel: gleicher Anlaut „Zw".'), {sub:2}),
+      Object.assign(pic('🎯','🏹','Pfeil', ['🐴','🌳','🐟'], 0, 'Pfeil – Pferd: gleicher Anlaut „Pf".'), {sub:1}),
+      Object.assign(pic('🎯','🏖️','Strand', ['img:Strumpf.png','🌳','🍎'], 0, 'Strand – Strumpf: gleicher Anlaut „Str".'), {sub:2}),
+      Object.assign(pic('🎯','❄️','Schnee', ['🐌','🌳','🍎'], 0, 'Schnee – Schnecke: gleicher Anlaut „Schn".'), {sub:1}),
+      Object.assign(pic('🎯','🍇','Traube', ['🚜','🌳','🐟'], 0, 'Traube – Traktor: gleicher Anlaut „Tr".'), {sub:2}),
+      Object.assign(pic('👏','🍯','Marmelade', [silbenbogen(3),silbenbogen(4),silbenbogen(5)], 1, 'Mar-me-la-de: vier Bögen.'), {sub:2}),
+      Object.assign(pic('👏','🚒','Feuerwehr', [silbenbogen(2),silbenbogen(3),silbenbogen(4)], 1, 'Feu-er-wehr: drei Bögen.'), {sub:1}),
+      Object.assign(pic('👏','🦜','Papagei', [silbenbogen(2),silbenbogen(3),silbenbogen(4)], 1, 'Pa-pa-gei: drei Bögen.'), {sub:1}),
+      Object.assign(pic('👏','🍉','Wassermelone', [silbenbogen(3),silbenbogen(4),silbenbogen(5)], 1, 'Was-ser-me-lo-ne: fünf Bögen!'), {sub:2}),
+      Object.assign(pic('👏','🍝','Spaghetti', [silbenbogen(2),silbenbogen(3),silbenbogen(4)], 1, 'Spa-ghet-ti: drei Bögen.'), {sub:2}),
     ],
     4:[ // Profi-Stufe: mehrsilbige Wörter, Konsonantenhäufungen im Anlaut
       pic('👏','☂️','Regenschirm', [silbenbogen(2),silbenbogen(3),silbenbogen(4)], 1, 'Re-gen-schirm: drei Bögen.'),
@@ -1719,6 +1829,22 @@ const content = {
       pic('🎯','🐊','Krokodil', ['👑','🐟','🌳'], 0, 'Krokodil – Krone: gleicher Anlaut „Kr".'),
       pic('🎯','👓','Brille', ['🍞','🐟','🌙'], 0, 'Brille – Brot: gleicher Anlaut „Br".'),
       pic('🔁','🪟','Fenster', ['👻👻','🌳','🐟'], 0, 'Fenster – Gespenster: reimt sich!'),
+      Object.assign(pic('🔁','🖌️','Pinsel', ['🏝️','🌳','🍎'], 0, 'Pinsel – Insel: reimt sich!'), {sub:1}),
+      Object.assign(pic('🔁','🔨','Hammer', ['📎','🌳','🍎'], 0, 'Hammer – Klammer: reimt sich!'), {sub:2}),
+      Object.assign(pic('🎯','🍑','Pflaume', ['🌱','🌳','🐕'], 0, 'Pflaume – Pflanze: gleicher Anlaut „Pfl".'), {sub:1}),
+      Object.assign(pic('🎯','🐍','Schlange', ['🔒','🌳','🐟'], 0, 'Schlange – Schloss: gleicher Anlaut „Schl".'), {sub:1}),
+      Object.assign(pic('🎯','🥛','Glas', ['🔔','🌳','🍎'], 0, 'Glas – Glocke: gleicher Anlaut „Gl".'), {sub:1}),
+      Object.assign(pic('🎯','🪰','Fliege', ['🍼','🌳','🍎'], 0, 'Fliege – Flasche: gleicher Anlaut „Fl".'), {sub:2}),
+      Object.assign(pic('🎯','🐷','Schwein', ['🦢','🌳','🍎'], 0, 'Schwein – Schwan: gleicher Anlaut „Schw".'), {sub:2}),
+      Object.assign(pic('🎯','👑','Krone', ['🏗️','🌳','🍎'], 0, 'Krone – Kran: gleicher Anlaut „Kr".'), {sub:2}),
+      Object.assign(pic('👏','💻','Computer', [silbenbogen(2),silbenbogen(3),silbenbogen(4)], 1, 'Com-pu-ter: drei Bögen.'), {sub:1}),
+      Object.assign(pic('👏','🖊️','Kugelschreiber', [silbenbogen(3),silbenbogen(4),silbenbogen(5)], 1, 'Ku-gel-schrei-ber: vier Bögen.'), {sub:2}),
+      Object.assign(pic('👏','🚂','Lokomotive', [silbenbogen(4),silbenbogen(5),silbenbogen(6)], 1, 'Lo-ko-mo-ti-ve: fünf Bögen.'), {sub:2}),
+      Object.assign(pic('👏','🍊','Orange', [silbenbogen(2),silbenbogen(3),silbenbogen(4)], 1, 'O-ran-ge: drei Bögen.'), {sub:1}),
+      Object.assign(pic('👏','🧹','Staubsauger', [silbenbogen(2),silbenbogen(3),silbenbogen(4)], 1, 'Staub-sau-ger: drei Bögen.'), {sub:1}),
+      Object.assign(pic('👏','✈️','Flugzeug', [silbenbogen(1),silbenbogen(2),silbenbogen(3)], 1, 'Flug-zeug: zwei Bögen.'), {sub:1}),
+      Object.assign(pic('👏','🎒','Rucksack', [silbenbogen(1),silbenbogen(2),silbenbogen(3)], 1, 'Ruck-sack: zwei Bögen.'), {sub:1}),
+      Object.assign(pic('👏','🎺','Trompete', [silbenbogen(2),silbenbogen(3),silbenbogen(4)], 1, 'Trom-pe-te: drei Bögen.'), {sub:2}),
     ],
   },
   buchstabe: {
@@ -1835,6 +1961,21 @@ const content = {
       inp('Schreibe nur den ersten Laut, den du hörst.', 't', 'T wie Tiger.', 'Tiger', '🐯'),
       inp('Schreibe nur den ersten Laut, den du hörst.', 'g', 'G wie Giraffe.', 'Giraffe', '🦒'),
       inp('Schreibe nur den ersten Laut, den du hörst.', 'd', 'D wie Delfin.', 'Delfin', '🐬'),
+      Object.assign(inp('Schreibe nur den ersten Laut, den du hörst.', 'n', 'N wie Nase.', 'Nase', '👃'), {sub:1}),
+      Object.assign(inp('Schreibe nur den ersten Laut, den du hörst.', 'h', 'H wie Hund.', 'Hund', '🐕'), {sub:1}),
+      Object.assign(inp('Schreibe nur den ersten Laut, den du hörst.', 'k', 'K wie Katze.', 'Katze', '🐱'), {sub:1}),
+      Object.assign(inp('Schreibe nur den ersten Laut, den du hörst.', 'r', 'R wie Rose.', 'Rose', '🌹'), {sub:1}),
+      Object.assign(inp('Schreibe nur den ersten Laut, den du hörst.', 'z', 'Z wie Zebra.', 'Zebra', '🦓'), {sub:1}),
+      Object.assign(inp('Schreibe nur den ersten Laut, den du hörst.', 'p', 'P wie Pilz.', 'Pilz', '🍄'), {sub:1}),
+      Object.assign(inp('Schreibe nur den ersten Laut, den du hörst.', 'd', 'D wie Dose.', 'Dose', '🥫'), {sub:1}),
+      Object.assign(inp('Schreibe nur den ersten Laut, den du hörst.', 's', 'S wie Sofa.', 'Sofa', '🛋️'), {sub:1}),
+      Object.assign(inp('Schreibe nur den ersten Laut, den du hörst.', 'm', 'M wie Mond.', 'Mond', '🌙'), {sub:1}),
+      Object.assign(inp('Schreibe nur den ersten Laut, den du hörst.', 'w', 'W wie Wolke.', 'Wolke', '☁️'), {sub:1}),
+      Object.assign(inp('Schreibe nur den ersten Laut, den du hörst.', 'e', 'E wie Ente.', 'Ente', '🦆'), {sub:2}),
+      Object.assign(inp('Schreibe nur den ersten Laut, den du hörst.', 'i', 'I wie Igel.', 'Igel', '🦔'), {sub:2}),
+      Object.assign(inp('Schreibe nur den ersten Laut, den du hörst.', 'a', 'A wie Affe.', 'Affe', '🐵'), {sub:2}),
+      Object.assign(inp('Schreibe nur den ersten Laut, den du hörst.', 'u', 'U wie Uhr.', 'Uhr', '🕐'), {sub:2}),
+      Object.assign(inp('Schreibe nur den ersten Laut, den du hörst.', 'o', 'O wie Ohr.', 'Ohr', '👂'), {sub:2}),
     ],
     2:[ // Endlaut verschriften (schwerer als Anlaut)
       inp('Schreibe nur den letzten Laut, den du hörst.', 'm', 'Bau-M: der letzte Laut ist „m".', 'Baum', '🌳'),
@@ -1846,6 +1987,21 @@ const content = {
       inp('Schreibe nur den letzten Laut, den du hörst.', 's', 'Bu-s: der letzte Laut ist „s".', 'Bus', '🚌'),
       inp('Schreibe nur den letzten Laut, den du hörst.', 'f', 'Wolf endet auf „f".', 'Wolf', '🐺'),
       inp('Schreibe nur den letzten Laut, den du hörst.', 'm', 'Arm endet auf „m".', 'Arm', 'img:Arm.png'),
+      Object.assign(inp('Schreibe nur den letzten Laut, den du hörst.', 's', 'Hau-s: der letzte Laut ist „s".', 'Haus', '🏠'), {sub:1}),
+      Object.assign(inp('Schreibe nur den letzten Laut, den du hörst.', 's', 'Gla-s: der letzte Laut ist „s".', 'Glas', '🥛'), {sub:1}),
+      Object.assign(inp('Schreibe nur den letzten Laut, den du hörst.', 'n', 'Zah-n: das „h" hört man nicht, der letzte Laut ist „n".', 'Zahn', '🦷'), {sub:1}),
+      Object.assign(inp('Schreibe nur den letzten Laut, den du hörst.', 'm', 'Tur-m: der letzte Laut ist „m".', 'Turm', '🗼'), {sub:1}),
+      Object.assign(inp('Schreibe nur den letzten Laut, den du hörst.', 'r', 'Uh-r: das „h" hört man nicht, der letzte Laut ist „r".', 'Uhr', '🕐'), {sub:1}),
+      Object.assign(inp('Schreibe nur den letzten Laut, den du hörst.', 'r', 'Tü-r: der letzte Laut ist „r".', 'Tür', '🚪'), {sub:1}),
+      Object.assign(inp('Schreibe nur den letzten Laut, den du hörst.', 'l', 'Stuh-l: das „h" hört man nicht, der letzte Laut ist „l".', 'Stuhl', '🪑'), {sub:1}),
+      Object.assign(inp('Schreibe nur den letzten Laut, den du hörst.', 'f', 'Brie-f: der letzte Laut ist „f".', 'Brief', '✉️'), {sub:1}),
+      Object.assign(inp('Schreibe nur den letzten Laut, den du hörst.', 'n', 'Schwa-n: der letzte Laut ist „n".', 'Schwan', '🦢'), {sub:2}),
+      Object.assign(inp('Schreibe nur den letzten Laut, den du hörst.', 'n', 'Bese-n: der letzte Laut ist „n".', 'Besen', '🧹'), {sub:2}),
+      Object.assign(inp('Schreibe nur den letzten Laut, den du hörst.', 'm', 'Schir-m: der letzte Laut ist „m".', 'Schirm', '☂️'), {sub:2}),
+      Object.assign(inp('Schreibe nur den letzten Laut, den du hörst.', 'l', 'Ige-l: der letzte Laut ist „l".', 'Igel', '🦔'), {sub:2}),
+      Object.assign(inp('Schreibe nur den letzten Laut, den du hörst.', 'l', 'Apfe-l: der letzte Laut ist „l".', 'Apfel', '🍎'), {sub:2}),
+      Object.assign(inp('Schreibe nur den letzten Laut, den du hörst.', 'ch', 'Bu-ch: „ch" ist ein Laut aus zwei Buchstaben.', 'Buch', '📖'), {sub:2}),
+      Object.assign(inp('Schreibe nur den letzten Laut, den du hörst.', 't', 'Bro-t: der letzte Laut ist „t".', 'Brot', '🍞'), {sub:2}),
     ],
     3:[ // Offene Silben verschriften (Konsonant + Vokal)
       inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'ba', 'Ba-na-ne: Trick – jede Silbe braucht mindestens einen Vokal (a,e,i,o,u), hier das „a".', 'Banane', '🍌'),
@@ -1859,6 +2015,23 @@ const content = {
       inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'ro', 'Ro-se: ein Konsonant, ein Vokal – „ro".', 'Rose', '🌹'),
       papier("Na|se", "👃", "Sprich leise mit: Na-se. Zwei Silben, in jeder steckt ein Vokal."),
       papier("Ho|se", "👖", "Ho-se: zwei Silben, in jeder steckt ein Vokal."),
+      Object.assign(inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'ha', 'Ha…: ein Konsonant, ein Vokal – „ha".', 'Hase', '🐰'), {sub:1}),
+      Object.assign(inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'ra', 'Ra…: ein Konsonant, ein Vokal – „ra".', 'Rabe', '🐦‍⬛'), {sub:1}),
+      Object.assign(inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'so', 'So…: ein Konsonant, ein Vokal – „so".', 'Sofa', '🛋️'), {sub:1}),
+      Object.assign(inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'ki', 'Ki…: ein Konsonant, ein Vokal – „ki".', 'Kino', '🎬'), {sub:1}),
+      Object.assign(inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'di', 'Di…: ein Konsonant, ein Vokal – „di".', 'Dino', '🦖'), {sub:1}),
+      Object.assign(inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'la', 'La…: ein Konsonant, ein Vokal – „la".', 'Lama', '🦙'), {sub:1}),
+      Object.assign(inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'nu', 'Nu…: ein Konsonant, ein Vokal – „nu".', 'Nudel', '🍜'), {sub:1}),
+      Object.assign(inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'ze', 'Ze…: ein Konsonant, ein Vokal – „ze".', 'Zebra', '🦓'), {sub:1}),
+      Object.assign(inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'ti', 'Ti…: ein Konsonant, ein Vokal – „ti".', 'Tiger', '🐅'), {sub:2}),
+      Object.assign(inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'pi', 'Pi…: ein Konsonant, ein Vokal – „pi".', 'Pilot', '👨‍✈️'), {sub:2}),
+      Object.assign(inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'bi', 'Bi…: ein Konsonant, ein Vokal – „bi".', 'Biber', '🦫'), {sub:2}),
+      Object.assign(inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'sa', 'Sa…: ein Konsonant, ein Vokal – „sa".', 'Salat', '🥗'), {sub:2}),
+      Object.assign(inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'ka', 'Ka…: ein Konsonant, ein Vokal – „ka".', 'Kamel', '🐫'), {sub:2}),
+      Object.assign(inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'me', 'Me…: ein Konsonant, ein Vokal – „me".', 'Melone', '🍈'), {sub:2}),
+      Object.assign(inp('Schreibe nur die erste Silbe des Wortes, das du hörst.', 'gi', 'Gi…: ein Konsonant, ein Vokal – „gi".', 'Giraffe', '🦒'), {sub:2}),
+      Object.assign(papier("Nu|del", "🍜", "Nu-del: zwei Silben, in jeder steckt ein Vokal."), {sub:1}),
+      Object.assign(papier("Ti|ger", "🐅", "Ti-ger: zwei Silben, in jeder steckt ein Vokal."), {sub:2}),
     ],
     4:[ // Profi-Stufe: die ersten ZWEI Silben schreiben (schwerer als nur eine)
       inp('Schreibe die ersten zwei Silben des Wortes, das du hörst.', 'bana', 'Ba-na-ne: die ersten beiden Silben zusammen.', 'Banane', '🍌'),
@@ -1869,6 +2042,22 @@ const content = {
       inp('Schreibe die ersten zwei Silben des Wortes, das du hörst.', 'rake', 'Ra-ke-te: die ersten beiden Silben zusammen.', 'Rakete', '🚀'),
       papier("Ra|ke|te", "🚀", "Ra-ke-te: drei Silben, in jeder steckt ein Vokal."),
       papier("Wol|ke", "☁️", "Wol-ke: zwei Silben, in jeder steckt ein Vokal."),
+      Object.assign(inp('Schreibe die ersten zwei Silben des Wortes, das du hörst.', 'melo', 'Me-lo-ne: die ersten beiden Silben zusammen.', 'Melone', '🍈'), {sub:1}),
+      Object.assign(inp('Schreibe die ersten zwei Silben des Wortes, das du hörst.', 'zitro', 'Zi-tro-ne: die ersten beiden Silben zusammen.', 'Zitrone', '🍋'), {sub:1}),
+      Object.assign(inp('Schreibe die ersten zwei Silben des Wortes, das du hörst.', 'sala', 'Sa-la-mi: die ersten beiden Silben zusammen.', 'Salami', '🍕'), {sub:1}),
+      Object.assign(inp('Schreibe die ersten zwei Silben des Wortes, das du hörst.', 'anan', 'A-na-nas: die ersten beiden Silben zusammen.', 'Ananas', '🍍'), {sub:1}),
+      Object.assign(inp('Schreibe die ersten zwei Silben des Wortes, das du hörst.', 'kroko', 'Kro-ko-dil: die ersten beiden Silben zusammen.', 'Krokodil', '🐊'), {sub:1}),
+      Object.assign(inp('Schreibe die ersten zwei Silben des Wortes, das du hörst.', 'moto', 'Mo-tor-rad: die ersten beiden Silben zusammen.', 'Motorrad', '🏍️'), {sub:1}),
+      Object.assign(inp('Schreibe die ersten zwei Silben des Wortes, das du hörst.', 'limo', 'Li-mo-na-de: die ersten beiden Silben zusammen.', 'Limonade', '🥤'), {sub:2}),
+      Object.assign(inp('Schreibe die ersten zwei Silben des Wortes, das du hörst.', 'schoko', 'Scho-ko-la-de: die ersten beiden Silben zusammen.', 'Schokolade', '🍫'), {sub:2}),
+      Object.assign(inp('Schreibe die ersten zwei Silben des Wortes, das du hörst.', 'papa', 'Pa-pa-gei: die ersten beiden Silben zusammen.', 'Papagei', '🦜'), {sub:2}),
+      Object.assign(inp('Schreibe die ersten zwei Silben des Wortes, das du hörst.', 'pingu', 'Pin-gu-in: die ersten beiden Silben zusammen.', 'Pinguin', '🐧'), {sub:2}),
+      Object.assign(inp('Schreibe die ersten zwei Silben des Wortes, das du hörst.', 'mikro', 'Mi-kro-fon: die ersten beiden Silben zusammen.', 'Mikrofon', '🎤'), {sub:2}),
+      Object.assign(inp('Schreibe die ersten zwei Silben des Wortes, das du hörst.', 'dino', 'Di-no-sau-ri-er: die ersten beiden Silben zusammen.', 'Dinosaurier', '🦕'), {sub:2}),
+      Object.assign(papier("Ba|na|ne", "🍌", "Ba-na-ne: drei Silben, in jeder steckt ein Vokal."), {sub:1}),
+      Object.assign(papier("To|ma|te", "🍅", "To-ma-te: drei Silben, in jeder steckt ein Vokal."), {sub:1}),
+      Object.assign(papier("Me|lo|ne", "🍈", "Me-lo-ne: drei Silben, in jeder steckt ein Vokal."), {sub:2}),
+      Object.assign(papier("Zi|tro|ne", "🍋", "Zi-tro-ne: drei Silben, in jeder steckt ein Vokal."), {sub:2}),
     ],
   },
   // Lesefahrrinne: Der Textumfang wächst mit der Stufe – Wort (1), Satz mit einem Wort (2),
@@ -1885,6 +2074,21 @@ const content = {
       ch('Höre genau: Welches Wort war das?', ['Sonne','Tonne','Wonne'], 0, 'Nur der erste Buchstabe unterscheidet die Wörter.', 'Sonne'),
       ch('Höre genau: Welches Wort war das?', ['Nase','Hase','Vase'], 0, 'Nur der erste Buchstabe unterscheidet die Wörter.', 'Nase'),
       ch('Höre genau: Welches Wort war das?', ['Nagel','Hagel','Kabel'], 0, 'Achte genau auf den Wortanfang.', 'Nagel'),
+      Object.assign(ch('Höre genau: Welches Wort war das?', ['Hand','Sand','Wand'], 0, 'Nur der erste Buchstabe unterscheidet die Wörter.', 'Hand'), {sub:1}),
+      Object.assign(ch('Höre genau: Welches Wort war das?', ['Mund','Hund','Bund'], 0, 'Nur der erste Buchstabe unterscheidet die Wörter.', 'Mund'), {sub:1}),
+      Object.assign(ch('Höre genau: Welches Wort war das?', ['Tisch','Fisch','Wisch'], 0, 'Nur der erste Buchstabe unterscheidet die Wörter.', 'Tisch'), {sub:1}),
+      Object.assign(ch('Höre genau: Welches Wort war das?', ['Bein','Stein','Wein'], 0, 'Nur der erste Buchstabe unterscheidet die Wörter.', 'Bein'), {sub:1}),
+      Object.assign(ch('Höre genau: Welches Wort war das?', ['Hut','Mut','Gut'], 0, 'Nur der erste Buchstabe unterscheidet die Wörter.', 'Hut'), {sub:1}),
+      Object.assign(ch('Höre genau: Welches Wort war das?', ['Rock','Bock','Sock'], 0, 'Nur der erste Buchstabe unterscheidet die Wörter.', 'Rock'), {sub:1}),
+      Object.assign(ch('Höre genau: Welches Wort war das?', ['Besen','Wesen','Lesen'], 0, 'Nur der erste Buchstabe unterscheidet die Wörter.', 'Besen'), {sub:1}),
+      Object.assign(ch('Höre genau: Welches Wort war das?', ['Boot','Brot','Tot'], 0, 'Nur der erste Buchstabe unterscheidet die Wörter.', 'Boot'), {sub:1}),
+      Object.assign(ch('Höre genau: Welches Wort war das?', ['Kabel','Nabel','Gabel'], 0, 'Nur der erste Buchstabe unterscheidet die Wörter.', 'Kabel'), {sub:2}),
+      Object.assign(ch('Höre genau: Welches Wort war das?', ['Sack','Pack','Hack'], 0, 'Nur der erste Buchstabe unterscheidet die Wörter.', 'Sack'), {sub:2}),
+      Object.assign(ch('Höre genau: Welches Wort war das?', ['Nuss','Kuss','Bus'], 0, 'Nur der erste Buchstabe unterscheidet die Wörter.', 'Nuss'), {sub:2}),
+      Object.assign(ch('Höre genau: Welches Wort war das?', ['Wolle','Rolle','Tolle'], 0, 'Nur der erste Buchstabe unterscheidet die Wörter.', 'Wolle'), {sub:2}),
+      Object.assign(ch('Höre genau: Welches Wort war das?', ['Zahn','Bahn','Hahn'], 0, 'Nur der erste Buchstabe unterscheidet die Wörter.', 'Zahn'), {sub:2}),
+      Object.assign(ch('Höre genau: Welches Wort war das?', ['Biene','Miene','Schiene'], 0, 'Nur der erste Buchstabe unterscheidet die Wörter.', 'Biene'), {sub:2}),
+      Object.assign(ch('Höre genau: Welches Wort war das?', ['Rinde','Linde','Binde'], 0, 'Nur der erste Buchstabe unterscheidet die Wörter.', 'Rinde'), {sub:2}),
     ],
     2:[
       chSent('Der Hund ___ laut.', ['bellt','schwimmt','singt'], 0, 'Überlege: Was tut ein Hund normalerweise?'),
@@ -1905,6 +2109,12 @@ const content = {
       chSent('Bevor die Familie in den Urlaub fährt, packt Mama die ___.', ['Koffer','Teller','Bücher'], 0, 'Was braucht man für eine Reise?'),
       chSent('Weil der Hund bellt, wacht das ganze Haus ___.', ['auf','ab','zu'], 0, 'Was passiert, wenn laut gebellt wird?'),
       chSent('Damit die Pflanze wächst, braucht sie Wasser und ___.', ['Licht','Sand','Papier'], 0, 'Was brauchen Pflanzen zum Wachsen?'),
+      Object.assign(chSent('Nach dem Duschen trocknet sich Tom mit dem ___ ab.', ['Handtuch','Schuh','Hund'], 0, 'Was benutzt man zum Abtrocknen?'), {sub:1}),
+      Object.assign(chSent('Im Zoo sieht Lena einen großen ___.', ['Elefanten','Schreibtisch','Löffel'], 0, 'Was kann man im Zoo sehen?'), {sub:1}),
+      Object.assign(chSent('Papa kocht in der Küche eine leckere ___.', ['Suppe','Mütze','Zahnbürste'], 0, 'Was kann man kochen?'), {sub:1}),
+      Object.assign(chSent('Zum Geburtstag bekommt Ali einen ___.', ['Kuchen','Besen','Stein'], 0, 'Was gibt es zum Geburtstag?'), {sub:2}),
+      Object.assign(chSent('Die Kinder spielen auf dem ___ Fußball.', ['Sportplatz','Teller','Dach'], 0, 'Wo spielt man Fußball?'), {sub:2}),
+      Object.assign(chSent('Im Herbst fallen die bunten ___ von den Bäumen.', ['Blätter','Steine','Fische'], 0, 'Was fällt im Herbst von den Bäumen?'), {sub:2}),
     ],
     3:[ // Satzende als Wortgruppe wählen; dazu die langen Sätze mit Nebensatz (ein Wort fehlt)
       chSent('Im Sommer gehen wir gern ___.', ['im See schwimmen','im See rodeln','im Wald rodeln'], 0, 'Lies den ganzen Satz und dann jede Möglichkeit bis zum Ende.', true),
@@ -1921,6 +2131,16 @@ const content = {
       chSent('Damit niemand nass wird, spannt Opa im Garten eine große ___ auf.', ['Regenplane','Kerze','Gitarre'], 0, 'Was schützt vor Regen im Garten?'),
       chSent('Weil die Straße glatt war, fuhr der Bus an diesem Morgen viel ___.', ['langsamer','schneller','lauter'], 0, 'Wie fährt man bei Glätte vorsichtig?'),
       chSent('Nachdem sie das Buch zu Ende gelesen hatte, stellte Emma es zurück ins ___.', ['Regal','Wasser','Feuer'], 0, 'Wohin stellt man ein Buch nach dem Lesen?'),
+      Object.assign(chSent('Zum Frühstück essen wir gern ___.', ['Brot mit Marmelade','Brot mit Mantel','Brot mit Marmor'], 0, 'Lies jede Möglichkeit bis zum Ende.', true), {sub:1}),
+      Object.assign(chSent('Am Wochenende fahren wir mit dem Fahrrad ___.', ['zum Badesee','zum Backofen','zum Blumentopf'], 0, 'Wohin kann man mit dem Fahrrad fahren?', true), {sub:1}),
+      Object.assign(chSent('Im Zirkus sehen wir einen lustigen ___.', ['Clown mit roter Nase','Clown mit roter Nadel','Clown mit roter Nuss'], 0, 'Lies jede Möglichkeit bis zum Ende.', true), {sub:1}),
+      Object.assign(chSent('Zum Malen brauche ich Pinsel und ___.', ['bunte Farben','bunte Ferien','bunte Fenster'], 0, 'Was braucht man zum Malen?', true), {sub:1}),
+      Object.assign(chSent('Im Garten wachsen Tomaten und ___.', ['knackige Gurken','knackige Gabeln','knackige Gardinen'], 0, 'Was wächst im Garten?', true), {sub:1}),
+      Object.assign(chSent('Die Feuerwehr kommt mit lautem ___.', ['Sirenengeheul und Blaulicht','Sirenengeheul und Blattlaus','Sirenengeheul und Bleistift'], 0, 'Lies jede Möglichkeit bis zum Ende.', true), {sub:2}),
+      Object.assign(chSent('Auf dem Bauernhof füttert Opa die ___.', ['Hühner und Enten','Hüte und Enten','Hühner und Ecken'], 0, 'Was füttert man auf dem Bauernhof?', true), {sub:2}),
+      Object.assign(chSent('Nach der Schule isst Jan ein ___.', ['Brot mit Käse','Brot mit Kerze','Brot mit Kissen'], 0, 'Was kann man essen?', true), {sub:2}),
+      Object.assign(chSent('Im Park spielen die Kinder mit einem ___.', ['bunten Ball','bunten Balken','bunten Bart'], 0, 'Womit spielen Kinder?', true), {sub:2}),
+      Object.assign(chSent('Beim Bäcker kaufen wir ein frisches ___.', ['Brötchen zum Frühstück','Brötchen zum Fahren','Bücher zum Frühstück'], 0, 'Lies jede Möglichkeit bis zum Ende.', true), {sub:2}),
     ],
     4:[ // ganzen Nebensatz auswählen
       chSent('Ben nimmt einen Schirm mit, ___.', ['weil es regnet','weil die Sonne scheint','weil er Hunger hat'], 0, 'Alle drei fangen mit „weil“ an – lies jede bis zum Ende.', true),
@@ -1934,6 +2154,19 @@ const content = {
       chSent('Lea hat heute Geburtstag. Sie lädt ihre Freunde ein, ___.', ['damit sie zusammen feiern können','damit sie zusammen schlafen können','damit sie zusammen schwimmen können'], 0, 'Lies auch den ersten Satz – er verrät, was los ist.', true),
       chSent('Der Winter war sehr kalt. Der Teich ist zugefroren, ___.', ['sodass die Kinder darauf Schlittschuh laufen können','sodass die Kinder darin schwimmen können','sodass die Kinder darauf Tomaten pflanzen können'], 0, 'Was kann man auf dem Eis machen?', true),
       chSent('Papa hat den Wecker nicht gehört. Er kommt zu spät zur Arbeit, ___.', ['weil er verschlafen hat','weil er früh aufgestanden ist','weil er Urlaub hat'], 0, 'Lies auch den ersten Satz – er verrät den Grund.', true),
+      Object.assign(chSent('Lisa zieht eine Jacke an, ___.', ['weil es draußen kalt ist','weil es draußen heiß ist','weil es draußen Hunger hat'], 0, 'Warum zieht man eine Jacke an?', true), {sub:1}),
+      Object.assign(chSent('Wir gehen schwimmen, ___.', ['weil das Wasser warm ist','weil das Wasser gefroren ist','weil das Wasser singt'], 0, 'Wann geht man gern schwimmen?', true), {sub:1}),
+      Object.assign(chSent('Der Junge weint, ___.', ['weil er hingefallen ist','weil er einen Witz erzählt','weil er Ferien hat'], 0, 'Warum weint jemand?', true), {sub:1}),
+      Object.assign(chSent('Mama kauft Eier, ___.', ['damit sie einen Kuchen backen kann','damit sie einen Kuchen anziehen kann','damit sie einen Kuchen bellen kann'], 0, 'Wofür braucht man Eier?', true), {sub:1}),
+      Object.assign(chSent('Der Hund wedelt mit dem Schwanz, ___.', ['weil er sich freut','weil er Bücher liest','weil er Schlittschuh läuft'], 0, 'Warum wedelt ein Hund?', true), {sub:1}),
+      Object.assign(chSent('Tom muss seinen Mantel anziehen, ___.', ['bevor er nach draußen geht','bevor er nach draußen schläft','bevor er nach draußen frisst'], 0, 'Wann zieht man den Mantel an?', true), {sub:1}),
+      Object.assign(chSent('Die Kinder freuen sich auf die Pause, ___.', ['weil sie dann draußen spielen dürfen','weil sie dann Hausaufgaben schreiben müssen','weil sie dann ins Bett gehen müssen'], 0, 'Worauf freut man sich in der Pause?', true), {sub:2}),
+      Object.assign(chSent('Papa schaltet das Licht an, ___.', ['weil es im Zimmer dunkel ist','weil es im Zimmer hell ist','weil es im Zimmer Dienstag ist'], 0, 'Wann schaltet man das Licht an?', true), {sub:2}),
+      Object.assign(chSent('Oma backt einen Kuchen, ___.', ['weil Besuch zum Kaffee kommt','weil Besuch zum Schlafen fliegt','weil Besuch zum Bellen kommt'], 0, 'Warum backt man einen Kuchen?', true), {sub:2}),
+      Object.assign(chSent('Die Blumen lassen die Köpfe hängen, ___.', ['weil sie lange kein Wasser bekommen haben','weil sie viel Wasser bekommen haben','weil sie viel Schokolade bekommen haben'], 0, 'Was brauchen Blumen?', true), {sub:2}),
+      Object.assign(chSent('Die Straße ist nass, ___.', ['weil es geregnet hat','weil die Sonne geschienen hat','weil der Schnee heiß war'], 0, 'Warum ist die Straße nass?', true), {sub:2}),
+      Object.assign(chSent('Ben packt seinen Ranzen, ___.', ['damit er nichts für die Schule vergisst','damit er alles für die Schule vergisst','damit er nichts für die Schule isst'], 0, 'Lies jede Möglichkeit bis zum Ende.', true), {sub:2}),
+      Object.assign(chSent('Anna lernt fleißig, ___.', ['damit sie eine gute Note schreibt','damit sie eine gute Note frisst','damit sie eine schlechte Note schreibt'], 0, 'Lies jede Möglichkeit bis zum Ende.', true), {sub:2}),
     ],
   },
   // Lesekai: Stufe 1 Kreuze an (2 Wörter), Stufe 2 Kreuze an mit Silbenfarben
@@ -2480,8 +2713,8 @@ const content = {
       ch('Welches Wort ist richtig geschrieben?', ['wir','vir'], 0, '„wir“ schreibe ich mit w wie Wind.', 'wir', 'funktionswort'),
       ch('Welches Wort ist richtig geschrieben?', ['oder','oda'], 0, '„oder“ endet mit „er“.', 'oder', 'funktionswort'),
       ch('Welches Wort ist richtig geschrieben?', ['auf','uf'], 0, '„auf“ beginnt mit dem Zwielaut „au“.', 'auf', 'funktionswort'),
-      ch('Mia ___ Tom spielen.', ['und','oder'], 0, 'Beide spielen zusammen. „und“ verbindet die Namen.', undefined, 'funktionswort'),
-      ch('Magst du Tee ___ Saft?', ['oder','und'], 0, 'Du suchst dir eins aus: Tee oder Saft. „oder“ heißt: das eine oder das andere.', undefined, 'funktionswort'),
+      ch('Beide spielen zusammen: Mia ___ Tom.', ['und','oder'], 0, '„Beide“ heißt: Mia und Tom machen es zusammen. „und“ verbindet die Namen.', undefined, 'funktionswort'),
+      ch('Du darfst nur eins nehmen: Tee ___ Saft?', ['oder','und'], 0, '„Nur eins“ heißt: du suchst dir eins aus. „oder“ heißt: das eine oder das andere.', undefined, 'funktionswort'),
       ch('Das Buch liegt ___ dem Tisch.', ['auf','und'], 0, 'Wo liegt das Buch? auf dem Tisch.', undefined, 'funktionswort'),
       ch('Welches Wort ist richtig geschrieben?', ['Wir','Vir'], 0, '„Wir“ schreibe ich mit W wie Wind.', 'Wir', 'funktionswort'),
       ch('Welches Wort ist richtig geschrieben?', ['Ich','Ihc'], 0, '„Ich“: erst I, dann ch.', 'Ich', 'funktionswort'),
@@ -2501,6 +2734,25 @@ const content = {
       ch('Welches Wort ist richtig geschrieben?', ['Mücke','Müke'], 0, '„ck" nach kurzem Vokal: Mü-cke.', 'Mücke', 'doppelkonsonant'),
       papier("Haus", "🏠", "Haus: der Zwielaut „au“."),
       papier("Baum", "🌳", "Baum: der Zwielaut „au“."),
+      Object.assign(ch('Welches Wort ist richtig geschrieben?', ['Eis','Ais'], 0, 'Zwielaut „ei": Eis.', 'Eis', 'zwielaut'), {sub:1}),
+      Object.assign(ch('Welches Wort ist richtig geschrieben?', ['Mäuse','Meuse'], 0, 'Zwielaut „äu": Maus – Mäuse.', 'Mäuse', 'zwielaut'), {sub:1}),
+      Object.assign(ch('Welches Wort ist richtig geschrieben?', ['Feuer','Foier'], 0, 'Zwielaut „eu": Feuer.', 'Feuer', 'zwielaut'), {sub:1}),
+      Object.assign(ch('Welches Wort ist richtig geschrieben?', ['Raupe','Roupe'], 0, 'Zwielaut „au": Rau-pe.', 'Raupe', 'zwielaut'), {sub:1}),
+      Object.assign(ch('Welches Wort ist richtig geschrieben?', ['Sonne','Sone'], 0, 'Doppelkonsonant nach kurzem Vokal: Son-ne.', 'Sonne', 'doppelkonsonant'), {sub:2}),
+      Object.assign(ch('Welches Wort ist richtig geschrieben?', ['Mutter','Muter'], 0, 'Doppelkonsonant nach kurzem Vokal: Mut-ter.', 'Mutter', 'doppelkonsonant'), {sub:2}),
+      Object.assign(ch('Welches Wort ist richtig geschrieben?', ['Tasse','Tase'], 0, 'Doppelkonsonant nach kurzem Vokal: Tas-se.', 'Tasse', 'doppelkonsonant'), {sub:2}),
+      Object.assign(ch('Welches Wort ist richtig geschrieben?', ['Katze','Kaze'], 0, '„tz" nach kurzem Vokal: Kat-ze.', 'Katze', 'doppelkonsonant'), {sub:2}),
+      Object.assign(ch('Welches Wort ist richtig geschrieben?', ['Mütze','Müze'], 0, '„tz" nach kurzem Vokal: Müt-ze.', 'Mütze', 'doppelkonsonant'), {sub:2}),
+      Object.assign(ch('Welches Wort ist richtig geschrieben?', ['Brücke','Brüke'], 0, '„ck" nach kurzem Vokal: Brü-cke.', 'Brücke', 'doppelkonsonant'), {sub:2}),
+      Object.assign(ch('Welches Wort ist richtig geschrieben?', ['Jacke','Jake'], 0, '„ck" nach kurzem Vokal: Ja-cke.', 'Jacke', 'doppelkonsonant'), {sub:2}),
+      Object.assign(ch('Welches Wort ist richtig geschrieben?', ['Decke','Deke'], 0, '„ck" nach kurzem Vokal: De-cke.', 'Decke', 'doppelkonsonant'), {sub:2}),
+      Object.assign(ch('Welches Wort ist richtig geschrieben?', ['Wasser','Waser'], 0, 'Doppelkonsonant nach kurzem Vokal: Was-ser.', 'Wasser', 'doppelkonsonant'), {sub:2}),
+      Object.assign(inp('Schreibe das Wort, das du hörst.', 'Eis', 'Zwielaut „ei": Eis.', 'Eis', '🍦'), {sub:1}),
+      Object.assign(inp('Schreibe das Wort, das du hörst.', 'Sonne', 'Doppelkonsonant nach kurzem Vokal: Son-ne.', 'Sonne', '☀️'), {sub:2}),
+      Object.assign(inp('Schreibe das Wort, das du hörst.', 'Katze', '„tz" nach kurzem Vokal: Kat-ze.', 'Katze', '🐱'), {sub:2}),
+      Object.assign(inp('Schreibe das Wort, das du hörst.', 'Jacke', '„ck" nach kurzem Vokal: Ja-cke.', 'Jacke', '🧥'), {sub:2}),
+      Object.assign(papier("Son|ne", "☀️", "Son-ne: kurzer Vokal, darum nn."), {sub:2}),
+      Object.assign(papier("Brü|cke", "🌉", "Brü-cke: kurzer Vokal, darum ck."), {sub:2}),
     ],
     3:[ // Stammprinzip: Dehnungs-h, ie, Auslautverhärtung, zusammengesetzte Wörter
       ch('Welches Wort ist richtig geschrieben?', ['Bahn','Ban'], 0, 'Dehnungs-h macht den Vokal davor lang: Bahn.', 'Bahn', 'dehnung_auslaut'),
@@ -2518,6 +2770,23 @@ const content = {
       ch('Habt ___ Hunger?', ['ihr','ir'], 0, '„ihr“ hat ein Dehnungs-h. Das muss ich mir merken.', undefined, 'funktionswort'),
       ch('Da ist Ben. Ich sehe ___ .', ['ihn','in'], 0, 'Ich sehe ihn: Es geht um Ben, eine Person. „in“ sagt, wo etwas ist.', undefined, 'funktionswort'),
       ch('Ben ist ___ der Schule.', ['in','ihn'], 0, 'Wo ist Ben? in der Schule. „in“ sagt, wo etwas ist.', undefined, 'funktionswort'),
+      Object.assign(ch('Welches Wort ist richtig geschrieben?', ['Zug','Zuk'], 0, 'Verlängere: die Züge. Jetzt hörst du das „g" – Auslautverhärtung.', 'Zug', 'dehnung_auslaut'), {sub:1}),
+      Object.assign(ch('Welches Wort ist richtig geschrieben?', ['Berg','Berk'], 0, 'Verlängere: die Berge. Jetzt hörst du das „g".', 'Berg', 'dehnung_auslaut'), {sub:1}),
+      Object.assign(ch('Welches Wort ist richtig geschrieben?', ['Korb','Korp'], 0, 'Verlängere: die Körbe. Jetzt hörst du das „b".', 'Korb', 'dehnung_auslaut'), {sub:1}),
+      Object.assign(ch('Welches Wort ist richtig geschrieben?', ['Kind','Kint'], 0, 'Verlängere: die Kinder. Jetzt hörst du das „d".', 'Kind', 'dehnung_auslaut'), {sub:1}),
+      Object.assign(ch('Welches Wort ist richtig geschrieben?', ['Wald','Walt'], 0, 'Verlängere: die Wälder. Jetzt hörst du das „d".', 'Wald', 'dehnung_auslaut'), {sub:1}),
+      Object.assign(ch('Welches Wort ist richtig geschrieben?', ['Mond','Mont'], 0, 'Verlängere: die Monde. Jetzt hörst du das „d".', 'Mond', 'dehnung_auslaut'), {sub:1}),
+      Object.assign(ch('Welches Wort ist richtig geschrieben?', ['Hände','Hende'], 0, 'Ableiten: Hand mit a, darum Hände mit ä.', 'Hände', 'wortfamilie'), {sub:2}),
+      Object.assign(ch('Welches Wort ist richtig geschrieben?', ['Bäcker','Becker'], 0, 'Ableiten: backen mit a, darum Bäcker mit ä.', 'Bäcker', 'wortfamilie'), {sub:2}),
+      Object.assign(ch('Welches Wort ist richtig geschrieben?', ['Bälle','Belle'], 0, 'Ableiten: Ball mit a, darum Bälle mit ä.', 'Bälle', 'wortfamilie'), {sub:2}),
+      Object.assign(ch('Welches Wort ist richtig geschrieben?', ['Tier','Tir'], 0, '„ie" ist die Regelschreibung für das lange „i": Tier.', 'Tier', 'dehnung_auslaut'), {sub:2}),
+      Object.assign(ch('Welches Wort ist richtig geschrieben?', ['Spiel','Spil'], 0, '„ie" ist die Regelschreibung für das lange „i": Spiel.', 'Spiel', 'dehnung_auslaut'), {sub:2}),
+      Object.assign(ch('Welches Wort ist richtig geschrieben?', ['Zahl','Zal'], 0, 'Dehnungs-h macht den Vokal davor lang: Zahl.', 'Zahl', 'dehnung_auslaut'), {sub:2}),
+      Object.assign(inp('Schreibe das Wort, das du hörst.', 'Berg', 'Verlängere: die Berge. Jetzt hörst du das „g".', 'Berg', '⛰️'), {sub:1}),
+      Object.assign(inp('Schreibe das Wort, das du hörst.', 'Kind', 'Verlängere: die Kinder. Jetzt hörst du das „d".', 'Kind', '🧒'), {sub:1}),
+      Object.assign(inp('Schreibe das Wort, das du hörst.', 'Tier', '„ie" ist die Regelschreibung für das lange „i": Tier.', 'Tier', '🐾'), {sub:2}),
+      Object.assign(papier("Berg", "⛰️", "Verlängere: die Berge. Abdecken, schreiben, vergleichen."), {sub:1}),
+      Object.assign(papier("Spiel", "🎲", "Spiel: „ie“ für das lange „i“. Abdecken, schreiben, vergleichen."), {sub:2}),
     ],
     4:[ // Profi-Stufe: längere Wörter, ß-Regel, das/dass-Unterscheidung
       // Die ersten drei Wortpaare erscheinen beim Stufenstart als „Entdecken“: Sie führen die ß/ss-Regel ein.
@@ -2623,24 +2892,56 @@ const content = {
       dictate('Die Sonne scheint.', 'Achte auf den Punkt am Satzende!'),
       dictate('Mama kocht Suppe.', 'Der Satz beginnt groß – wie jeder Satz.'),
       dictate('Der Ball ist rund.', 'Vier Wörter, ein Punkt am Ende.'),
+      dictate('Die Katze schläft.', 'Achte auf den Punkt am Satzende!'),
+      dictate('Das Auto fährt.', 'Achte auf den Punkt am Satzende!'),
+      dictate('Opa liest ein Buch.', 'Achte auf den Punkt am Satzende!'),
+      dictate('Der Mond scheint.', 'Achte auf den Punkt am Satzende!'),
+      dictate('Oma backt Brot.', 'Achte auf den Punkt am Satzende!'),
+      dictate('Die Blume ist rot.', 'Achte auf den Punkt am Satzende!'),
+      dictate('Der Vogel singt.', 'Achte auf den Punkt am Satzende!'),
+      dictate('Ich mag Eis.', 'Achte auf den Punkt am Satzende!'),
     ],
     2:[
       dictate('Der kleine Hund läuft schnell.', 'Achte auf Großschreibung am Satzanfang und den Punkt am Ende.'),
       dictate('Am Montag gehen wir schwimmen.', 'Achte auf Großschreibung am Satzanfang und den Punkt am Ende.'),
       dictate('Die Kinder spielen im Garten.', 'Achte auf Großschreibung am Satzanfang und den Punkt am Ende.'),
       dictate('Papa liest ein spannendes Buch.', 'Achte auf Großschreibung am Satzanfang und den Punkt am Ende.'),
+      dictate('Die Kinder lachen laut.', 'Achte auf Großschreibung am Satzanfang und den Punkt am Ende.'),
+      dictate('Wir essen gern Pizza.', 'Achte auf Großschreibung am Satzanfang und den Punkt am Ende.'),
+      dictate('Der Bus kommt gleich.', 'Achte auf Großschreibung am Satzanfang und den Punkt am Ende.'),
+      dictate('Im Garten blühen die Blumen.', 'Achte auf Großschreibung am Satzanfang und den Punkt am Ende.'),
+      dictate('Mein Bruder spielt Fußball.', 'Achte auf Großschreibung am Satzanfang und den Punkt am Ende.'),
+      dictate('Die Katze trinkt Milch.', 'Achte auf Großschreibung am Satzanfang und den Punkt am Ende.'),
+      dictate('Am Abend lese ich ein Buch.', 'Achte auf Großschreibung am Satzanfang und den Punkt am Ende.'),
+      dictate('Das Wetter ist heute schön.', 'Achte auf Großschreibung am Satzanfang und den Punkt am Ende.'),
     ],
     3:[
       dictate('Nach der Schule spielt Lena mit ihrer Freundin.', 'Ein langer Satz: höre dir jeden Wortteil genau an.'),
       dictate('Der Regen hört am Nachmittag endlich auf.', 'Ein langer Satz: höre dir jeden Wortteil genau an.'),
       dictate('Wir fahren am Wochenende zu Oma und Opa.', 'Ein langer Satz: höre dir jeden Wortteil genau an.'),
       dictate('Der Bäcker backt jeden Morgen frisches Brot.', 'Ein langer Satz: höre dir jeden Wortteil genau an.'),
+      dictate('Im Sommer baden wir im See.', 'Ein langer Satz: höre dir jeden Wortteil genau an.'),
+      dictate('Die Lehrerin erklärt die Aufgabe.', 'Ein langer Satz: höre dir jeden Wortteil genau an.'),
+      dictate('Nach dem Essen putze ich meine Zähne.', 'Ein langer Satz: höre dir jeden Wortteil genau an.'),
+      dictate('Der Zug fährt pünktlich um acht Uhr ab.', 'Ein langer Satz: höre dir jeden Wortteil genau an.'),
+      dictate('Am Samstag besuchen wir den Zoo.', 'Ein langer Satz: höre dir jeden Wortteil genau an.'),
+      dictate('Meine Freundin hat einen kleinen Hund.', 'Ein langer Satz: höre dir jeden Wortteil genau an.'),
+      dictate('Im Herbst fallen die bunten Blätter.', 'Ein langer Satz: höre dir jeden Wortteil genau an.'),
+      dictate('Die Kinder bauen eine Sandburg am Strand.', 'Ein langer Satz: höre dir jeden Wortteil genau an.'),
     ],
     4:[ // Profi-Stufe: noch längere Sätze, teils mit Nebensatz
       dictate('Am Wochenende fahren wir mit dem Zug zu meiner Oma nach Hamburg.', 'Ein sehr langer Satz: höre dir jeden Wortteil genau an.'),
       dictate('Meine kleine Schwester hat gestern ihren ersten Kindergartentag gehabt.', 'Ein sehr langer Satz: höre dir jeden Wortteil genau an.'),
       dictate('Nach dem Abendessen räumen alle gemeinsam die Küche auf.', 'Ein sehr langer Satz: höre dir jeden Wortteil genau an.'),
       dictate('Weil es draußen so kalt war, zog Ben eine dicke Jacke an.', 'Ein Satz mit zwei Teilen – höre genau hin.'),
+      dictate('Obwohl es regnete, gingen die Kinder in den Park.', 'Ein sehr langer Satz: höre dir jeden Wortteil genau an.'),
+      dictate('Mein Vater repariert am Wochenende das alte Fahrrad.', 'Ein sehr langer Satz: höre dir jeden Wortteil genau an.'),
+      dictate('Wenn die Sonne scheint, spielen wir draußen.', 'Ein sehr langer Satz: höre dir jeden Wortteil genau an.'),
+      dictate('Am Abend sitzen wir gemütlich zusammen und lesen.', 'Ein sehr langer Satz: höre dir jeden Wortteil genau an.'),
+      dictate('Der Zirkus kommt im nächsten Monat in unsere Stadt.', 'Ein sehr langer Satz: höre dir jeden Wortteil genau an.'),
+      dictate('Weil Lena krank war, blieb sie zwei Tage zu Hause.', 'Ein sehr langer Satz: höre dir jeden Wortteil genau an.'),
+      dictate('Die Feuerwehr löschte schnell das brennende Haus.', 'Ein sehr langer Satz: höre dir jeden Wortteil genau an.'),
+      dictate('Nach dem Unterricht gehen wir gemeinsam zum Spielplatz.', 'Ein sehr langer Satz: höre dir jeden Wortteil genau an.'),
     ],
   },
   // Satzwerft: Figuren, Tätigkeiten und Orte kommen in jeder Runde nur EINMAL vor (nichts wiederholt sich),
@@ -2652,6 +2953,13 @@ const content = {
       wordstudy('Garten', '🌳🌷🌻🌲', 'Präg dir Bild und Wort gut ein.'),
       wordstudy('Schule', '🏫', 'Präg dir Bild und Wort gut ein.'),
       wordstudy('Mädchen', '👧', 'Präg dir Bild und Wort gut ein.'),
+      wordstudy('Haus', '🏠', 'Präg dir Bild und Wort gut ein.'),
+      wordstudy('Blume', '🌸', 'Präg dir Bild und Wort gut ein.'),
+      wordstudy('Fisch', '🐟', 'Präg dir Bild und Wort gut ein.'),
+      wordstudy('Schiff', '🚢', 'Präg dir Bild und Wort gut ein.'),
+      wordstudy('Sonne', '☀️', 'Präg dir Bild und Wort gut ein.'),
+      wordstudy('Apfel', '🍎', 'Präg dir Bild und Wort gut ein.'),
+      wordstudy('Auto', '🚗', 'Präg dir Bild und Wort gut ein.'),
     ],
     2:[
       satzRound([
@@ -2661,6 +2969,30 @@ const content = {
       satzRound([
         {label:'Wer?', options:[{emoji:'🐱',word:'Die Katze'},{emoji:'👵',word:'Die Oma'},{emoji:'👴',word:'Der Opa'}]},
         {label:'Was tut er?', options:[{emoji:'🎵',word:'singt'},{emoji:'🍽️',word:'isst'},{emoji:'📖',word:'liest'}]},
+      ], 'Ein kurzer Satz: Wer? und Was tut er?'),
+      satzRound([
+        {label:'Wer?', options:[{emoji:'🐦',word:'Der Vogel'},{emoji:'🐴',word:'Das Pferd'},{emoji:'🦆',word:'Die Ente'}]},
+        {label:'Was tut er?', options:[{emoji:'🏊',word:'schwimmt'},{emoji:'🏃',word:'läuft'},{emoji:'🥤',word:'trinkt'}]}
+      ], 'Ein kurzer Satz: Wer? und Was tut er?'),
+      satzRound([
+        {label:'Wer?', options:[{emoji:'🐻',word:'Der Bär'},{emoji:'🐭',word:'Die Maus'},{emoji:'🦊',word:'Der Fuchs'}]},
+        {label:'Was tut er?', options:[{emoji:'😴',word:'schläft'},{emoji:'🤸',word:'hüpft'},{emoji:'🥷',word:'schleicht'}]}
+      ], 'Ein kurzer Satz: Wer? und Was tut er?'),
+      satzRound([
+        {label:'Wer?', options:[{emoji:'👩',word:'Die Mama'},{emoji:'👨',word:'Der Papa'},{emoji:'👶',word:'Das Baby'}]},
+        {label:'Was tut er?', options:[{emoji:'😄',word:'lacht'},{emoji:'😢',word:'weint'},{emoji:'😴',word:'schläft'}]}
+      ], 'Ein kurzer Satz: Wer? und Was tut er?'),
+      satzRound([
+        {label:'Wer?', options:[{emoji:'👩‍🏫',word:'Die Lehrerin'},{emoji:'👨‍🍳',word:'Der Koch'},{emoji:'👨‍⚕️',word:'Der Arzt'}]},
+        {label:'Was tut er?', options:[{emoji:'✍️',word:'schreibt'},{emoji:'🍲',word:'kocht'},{emoji:'🤝',word:'hilft'}]}
+      ], 'Ein kurzer Satz: Wer? und Was tut er?'),
+      satzRound([
+        {label:'Wer?', options:[{emoji:'🧒',word:'Das Kind'},{emoji:'🧑',word:'Der Freund'},{emoji:'👧',word:'Die Freundin'}]},
+        {label:'Was tut er?', options:[{emoji:'🎨',word:'malt'},{emoji:'⚽',word:'spielt'},{emoji:'📖',word:'liest'}]}
+      ], 'Ein kurzer Satz: Wer? und Was tut er?'),
+      satzRound([
+        {label:'Wer?', options:[{emoji:'🐰',word:'Der Hase'},{emoji:'🐑',word:'Das Schaf'},{emoji:'🦁',word:'Der Löwe'}]},
+        {label:'Was tut er?', options:[{emoji:'🏃',word:'rennt'},{emoji:'🌿',word:'frisst'},{emoji:'📣',word:'brüllt'}]}
       ], 'Ein kurzer Satz: Wer? und Was tut er?'),
     ],
     3:[
@@ -2673,6 +3005,26 @@ const content = {
         {label:'Wer?', options:[{emoji:'🐭',word:'Die Maus'},{emoji:'🐻',word:'Der Bär'},{emoji:'🐑',word:'Das Schaf'}]},
         {label:'Was tut er?', options:[{emoji:'🎨',word:'malt'},{emoji:'🚶',word:'spaziert'},{emoji:'👋',word:'winkt'}]},
         {label:'Wo?', options:[{emoji:'🛏️',word:'im Bett'},{emoji:'🏞️',word:'im Park'},{emoji:'🌲',word:'im Wald'}]},
+      ], 'Jetzt kommt noch ein Wo? dazu.'),
+      satzRound([
+        {label:'Wer?', options:[{emoji:'🐕',word:'Der Hund'},{emoji:'🐈',word:'Die Katze'},{emoji:'🐴',word:'Das Pferd'}]},
+        {label:'Was tut er?', options:[{emoji:'😴',word:'schläft'},{emoji:'⚽',word:'spielt'},{emoji:'🍽️',word:'frisst'}]},
+        {label:'Wo?', options:[{emoji:'🌳',word:'im Garten'},{emoji:'🛋️',word:'auf dem Sofa'},{emoji:'🧺',word:'im Korb'}]}
+      ], 'Jetzt kommt noch ein Wo? dazu.'),
+      satzRound([
+        {label:'Wer?', options:[{emoji:'👴',word:'Der Opa'},{emoji:'👵',word:'Die Oma'},{emoji:'👨',word:'Der Papa'}]},
+        {label:'Was tut er?', options:[{emoji:'📖',word:'liest'},{emoji:'🪑',word:'sitzt'},{emoji:'🍲',word:'kocht'}]},
+        {label:'Wo?', options:[{emoji:'🌳',word:'im Garten'},{emoji:'🍽️',word:'am Tisch'},{emoji:'🍳',word:'in der Küche'}]}
+      ], 'Jetzt kommt noch ein Wo? dazu.'),
+      satzRound([
+        {label:'Wer?', options:[{emoji:'🐟',word:'Der Fisch'},{emoji:'🦆',word:'Die Ente'},{emoji:'🐸',word:'Der Frosch'}]},
+        {label:'Was tut er?', options:[{emoji:'🏊',word:'schwimmt'},{emoji:'📣',word:'quakt'},{emoji:'🤸',word:'springt'}]},
+        {label:'Wo?', options:[{emoji:'🏞️',word:'im Teich'},{emoji:'🌊',word:'am See'},{emoji:'💧',word:'im Wasser'}]}
+      ], 'Jetzt kommt noch ein Wo? dazu.'),
+      satzRound([
+        {label:'Wer?', options:[{emoji:'👩‍🏫',word:'Die Lehrerin'},{emoji:'🧒',word:'Der Schüler'},{emoji:'👧',word:'Das Mädchen'}]},
+        {label:'Was tut er?', options:[{emoji:'✍️',word:'schreibt'},{emoji:'🔢',word:'rechnet'},{emoji:'🎨',word:'malt'}]},
+        {label:'Wo?', options:[{emoji:'🏫',word:'in der Schule'},{emoji:'🏫',word:'im Klassenzimmer'},{emoji:'📋',word:'an der Tafel'}]}
       ], 'Jetzt kommt noch ein Wo? dazu.'),
     ],
     4:[ // vier Bausteine, der längste Satz
@@ -2687,6 +3039,24 @@ const content = {
         {label:'Was tut er?', options:[{emoji:'✏️',word:'zeichnet'},{emoji:'✂️',word:'bastelt'},{emoji:'✍️',word:'schreibt'}]},
         {label:'Wie?', options:[{emoji:'😌',word:'ruhig'},{emoji:'🙂',word:'stolz'},{emoji:'😁',word:'glücklich'}]},
         {label:'Wo?', options:[{emoji:'🚗',word:'im Auto'},{emoji:'⚓',word:'am Hafen'},{emoji:'🚜',word:'auf dem Hof'}]},
+      ], 'Ein langer Satz mit vier Bausteinen.'),
+      satzRound([
+        {label:'Wer?', options:[{emoji:'🐈',word:'Die Katze'},{emoji:'🐕',word:'Der Hund'},{emoji:'🐴',word:'Das Pferd'}]},
+        {label:'Was tut er?', options:[{emoji:'🥷',word:'schleicht'},{emoji:'🤸',word:'springt'},{emoji:'🏃',word:'rennt'}]},
+        {label:'Wie?', options:[{emoji:'🤫',word:'leise'},{emoji:'💨',word:'schnell'},{emoji:'💪',word:'mutig'}]},
+        {label:'Wo?', options:[{emoji:'🌳',word:'im Garten'},{emoji:'🌿',word:'auf der Wiese'},{emoji:'🚜',word:'auf dem Hof'}]}
+      ], 'Ein langer Satz mit vier Bausteinen.'),
+      satzRound([
+        {label:'Wer?', options:[{emoji:'👦',word:'Der Junge'},{emoji:'👧',word:'Das Mädchen'},{emoji:'👴',word:'Der Opa'}]},
+        {label:'Was tut er?', options:[{emoji:'📖',word:'liest'},{emoji:'✍️',word:'schreibt'},{emoji:'✏️',word:'zeichnet'}]},
+        {label:'Wie?', options:[{emoji:'😌',word:'ruhig'},{emoji:'😊',word:'eifrig'},{emoji:'🥱',word:'müde'}]},
+        {label:'Wo?', options:[{emoji:'🛋️',word:'im Zimmer'},{emoji:'🏫',word:'in der Schule'},{emoji:'🍽️',word:'am Tisch'}]}
+      ], 'Ein langer Satz mit vier Bausteinen.'),
+      satzRound([
+        {label:'Wer?', options:[{emoji:'👩‍⚕️',word:'Die Ärztin'},{emoji:'🥖',word:'Der Bäcker'},{emoji:'👨‍✈️',word:'Der Pilot'}]},
+        {label:'Was tut er?', options:[{emoji:'🛠️',word:'arbeitet'},{emoji:'🍞',word:'backt'},{emoji:'🤝',word:'hilft'}]},
+        {label:'Wie?', options:[{emoji:'💨',word:'schnell'},{emoji:'🙂',word:'freundlich'},{emoji:'😁',word:'glücklich'}]},
+        {label:'Wo?', options:[{emoji:'🏥',word:'im Krankenhaus'},{emoji:'🏙️',word:'in der Stadt'},{emoji:'✈️',word:'am Flughafen'}]}
       ], 'Ein langer Satz mit vier Bausteinen.'),
     ],
   },
@@ -2818,7 +3188,7 @@ function diagResItems(r){
 let state = {
   screen:'start',
   diag:{domainIndex:0, stage:'mid', midCorrect:null, current:null, answeredThisStep:false},
-  levels:{}, stars:{}, diagDone:false, history:[], errorCounts:{}, attemptLogs:{}, levelDays:{}, substeps:{},
+  levels:{}, stars:{}, diagDone:false, history:[], errorCounts:{}, attemptLogs:{}, levelDays:{}, substeps:{}, recentItems:{},
   mastery:{}, selfChecks:[], pendingSelfCheck:null, pendingReview:false,
   wordStore:[], onboardStep:0, errorProfile:{}, errorLog:[], fpSnapshots:[], sessionMin:30, showOsk:true, endurance:null, sessionLog:[], session:null, pauseReturn:'practice', pauseIdx:0, pauseStep:0, discoverSeen:{},
   trophies:{}, knownAtStart:{}, fresch:{}, stationsVersion:3, showMoreStations:false, showAllStations:false, showStarHelp:false,
@@ -2860,7 +3230,7 @@ function saveProgress(){
   try{
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       levels: state.levels, stars: state.stars, diagDone: !!state.diagDone, history: state.history,
-      errorCounts: state.errorCounts, attemptLogs: state.attemptLogs, levelDays: state.levelDays, substeps: state.substeps,
+      errorCounts: state.errorCounts, attemptLogs: state.attemptLogs, levelDays: state.levelDays, substeps: state.substeps, recentItems: state.recentItems,
       mastery: state.mastery, selfChecks: state.selfChecks,
       needsBasicLetterDrill: state.needsBasicLetterDrill,
       diagReports: state.diagReports, wordStore: state.wordStore, errorProfile: state.errorProfile, errorLog: state.errorLog, fpSnapshots: state.fpSnapshots, sessionMin: state.sessionMin, showOsk: state.showOsk, endurance: state.endurance, sessionLog: state.sessionLog, histV3: true, discoverSeen: state.discoverSeen, fresch: state.fresch,
@@ -2882,6 +3252,7 @@ function loadProgress(){
       state.attemptLogs = d.attemptLogs || {};
       state.levelDays = d.levelDays || {};
       state.substeps = d.substeps || {};
+      state.recentItems = d.recentItems || {};
       state.mastery = d.mastery || {};
       state.selfChecks = d.selfChecks || [];
       state.needsBasicLetterDrill = !!d.needsBasicLetterDrill;
@@ -2910,7 +3281,7 @@ function loadProgress(){
 window.exportData = function(){
   const payload = {
     levels: state.levels, stars: state.stars, diagDone: !!state.diagDone, history: state.history,
-    errorCounts: state.errorCounts, attemptLogs: state.attemptLogs, levelDays: state.levelDays, substeps: state.substeps,
+    errorCounts: state.errorCounts, attemptLogs: state.attemptLogs, levelDays: state.levelDays, substeps: state.substeps, recentItems: state.recentItems,
     mastery: state.mastery, selfChecks: state.selfChecks,
     needsBasicLetterDrill: state.needsBasicLetterDrill,
     diagReports: state.diagReports, wordStore: state.wordStore, errorProfile: state.errorProfile, errorLog: state.errorLog, fpSnapshots: state.fpSnapshots, sessionMin: state.sessionMin, showOsk: state.showOsk, endurance: state.endurance, sessionLog: state.sessionLog, histV3: true, discoverSeen: state.discoverSeen, fresch: state.fresch,
@@ -2952,6 +3323,7 @@ window.importData = function(file){
       state.attemptLogs = d.attemptLogs || {};
       state.levelDays = d.levelDays || {};
       state.substeps = d.substeps || {};
+      state.recentItems = d.recentItems || {};
       state.mastery = d.mastery || {};
       state.selfChecks = d.selfChecks || [];
       state.needsBasicLetterDrill = !!d.needsBasicLetterDrill;
@@ -3755,7 +4127,7 @@ window.exportFoerderplan = function(){
 window.confirmReset = function(){
   if(confirm('Fortschritt wirklich löschen und neu starten?')){
     state.levels={}; state.stars={}; state.diagDone=false; state.history=[];
-    state.errorCounts={}; state.attemptLogs={}; state.levelDays={}; state.substeps={}; state.mastery={}; state.selfChecks=[];
+    state.errorCounts={}; state.attemptLogs={}; state.levelDays={}; state.substeps={}; state.recentItems={}; state.mastery={}; state.selfChecks=[];
     state.needsBasicLetterDrill=false; state.diagReports=[]; state.wordStore=[]; state.onboardStep=0; state.errorProfile={}; state.errorLog=[]; state.fpSnapshots=[]; state.endurance=null; state.sessionLog=[]; state.session=null; try{localStorage.removeItem(SESSION_KEY);}catch(e){} state.discoverSeen={}; state.fresch={}; state.trophies={}; state.knownAtStart={};
     try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
     state.showTeacher=false;
@@ -3807,6 +4179,8 @@ function playLetterSoundThenWord(key, word){
    ein Satz oder lädt eine Datei nicht, spricht der ganze Text wie bisher
    die Browser-Stimme - nichts bricht ab.
    ============================================================ */
+const TTS_VER = '20261119j';   // bei neuen Sprachdateien erhöhen: verhindert, dass der Browser alte und neue Dateien mischt
+const TTS_FILES = ['audio-1.bin','audio-2.bin','audio-3.bin'], TTS_SPLIT = 13000000, TTS_HDR = 32;   // jede Datei beginnt mit einem 32-Byte-Kopf   // Länge der ersten beiden Dateien (GitHub erlaubt Uploads bis 25 MB)
 const TTS = {idx:null, buf:null, q:[], busy:false, el:null, gen:0, urls:{}, rangeOk:true, miss:{}};
 function cyrb53(str){
   let h1=0xdeadbeef, h2=0x41c6ce57;
@@ -3831,15 +4205,17 @@ function ttsChunks(t){
 function ttsKey(chunk, slow){ return cyrb53(chunk)+(slow?'s':'n'); }
 function ttsInit(){
   try{
-    fetch('sprache.json').then(r=>r.ok?r.json():null).then(j=>{
+    fetch('sprache.json?v='+TTS_VER, {cache:'no-cache'}).then(r=>r.ok?r.json():null).then(j=>{
       if(!j) return; TTS.idx=j;
       // GitHub erlaubt Uploads nur bis 25 MB: die Clips liegen deshalb in zwei Dateien (sprache.bin = Anfang, sprache2.bin = Rest)
-      const getP = (f)=> fetch(f).then(r=>r.ok?r.arrayBuffer():null).catch(()=>null);
-      TTS.binP = Promise.all([getP('sprache.bin'), getP('sprache2.bin')]).then(([b1,b2])=>{
-        if(!b1) return null;
-        let b = b1;
-        if(b2){ const L1 = Math.min(b1.byteLength, 13000000); const u = new Uint8Array(L1 + b2.byteLength); u.set(new Uint8Array(b1,0,L1),0); u.set(new Uint8Array(b2),L1); b = u.buffer; }
-        TTS.buf = b; return b;
+      const getP = (f)=> fetch(f+'?v='+TTS_VER).then(r=>r.ok?r.arrayBuffer():null).catch(()=>null);
+      TTS.binP = Promise.all(TTS_FILES.map(getP)).then(parts=>{
+        if(!parts[0]) return null;
+        // Jede Datei ist genau TTS_SPLIT Byte lang (die letzte darf kürzer sein)
+        const lens = parts.map((x,i)=> x ? (i<parts.length-1 ? TTS_SPLIT : x.byteLength-TTS_HDR) : 0);
+        const u = new Uint8Array(lens.reduce((a,b)=>a+b,0)); let o = 0;
+        parts.forEach((x,i)=>{ if(x){ u.set(new Uint8Array(x,TTS_HDR,lens[i]), i*TTS_SPLIT); o = i*TTS_SPLIT+lens[i]; } });
+        TTS.buf = u.buffer; return u.buffer;
       });
     }).catch(()=>{});
   }catch(e){}
@@ -3853,16 +4229,19 @@ function ttsClip(key){
   if(TTS.urls[key]) return Promise.resolve(TTS.urls[key]);
   const e = TTS.idx && TTS.idx[key];
   if(!e) return Promise.reject(new Error('kein Clip'));
-  const done = (ab)=>{ const u = URL.createObjectURL(new Blob([ab],{type:'audio/mpeg'})); TTS.urls[key]=u; return u; };
-  if(TTS.buf) return Promise.resolve(done(TTS.buf.slice(e[0], e[0]+e[1])));
+  const done = (ab)=>{
+    const h = new Uint8Array(ab,0,3);
+    if(!((h[0]===0x49&&h[1]===0x44&&h[2]===0x33) || (h[0]===0xFF&&(h[1]&0xE0)===0xE0))) throw new Error('kein MP3');   // falscher Ausschnitt -> Browser-Stimme statt falschem Wort
+    const u = URL.createObjectURL(new Blob([ab],{type:'audio/mpeg'})); TTS.urls[key]=u; return u; };
+  if(TTS.buf){ try{ return Promise.resolve(done(TTS.buf.slice(e[0], e[0]+e[1]))); }catch(err){ return Promise.reject(err); } }
   // Noch nicht komplett geladen: nur den einen Clip per Range-Anfrage holen,
   // sonst (Server ohne Range) auf das vollständige Laden warten.
   const viaFull = ()=> (TTS.binP||Promise.resolve(null)).then(b=>{ if(!b) throw new Error('kein Laden'); return done(b.slice(e[0], e[0]+e[1])); });
   if(!TTS.rangeOk) return viaFull();
-  const SPLIT = 13000000;   // Länge von sprache.bin (Teil 1)
-  if(e[0] < SPLIT && e[0]+e[1] > SPLIT) return viaFull();   // Clip liegt über der Dateigrenze
-  const rf = e[0] < SPLIT ? 'sprache.bin' : 'sprache2.bin', ro = e[0] < SPLIT ? e[0] : e[0]-SPLIT;
-  return fetch(rf,{headers:{Range:'bytes='+ro+'-'+(ro+e[1]-1)}}).then(r=>{
+  const fi = Math.min(Math.floor(e[0]/TTS_SPLIT), TTS_FILES.length-1);
+  if(Math.min(Math.floor((e[0]+e[1]-1)/TTS_SPLIT), TTS_FILES.length-1) !== fi) return viaFull();   // Clip liegt über der Dateigrenze
+  const rf = TTS_FILES[fi], ro = e[0] - fi*TTS_SPLIT + TTS_HDR;
+  return fetch(rf+'?v='+TTS_VER,{headers:{Range:'bytes='+ro+'-'+(ro+e[1]-1)}}).then(r=>{
     if(r.status!==206){ TTS.rangeOk=false; throw new Error('kein Range'); }
     return r.arrayBuffer();
   }).then(done, ()=>viaFull());
@@ -4341,6 +4720,7 @@ function renderScreen(){
   if(state.screen==='letterdrill') return screenLetterDrill();
   if(state.screen==='drilldone') return screenDrillDone();
   if(state.screen==='diagreport') return screenDiagReport();
+  if(state.screen==='diagfeedback') return screenDiagFeedback();
   if(state.screen==='vertiefung') return screenVertiefung();
   if(state.screen==='discover') return screenDiscover();
   if(state.screen==='lumi') return screenLumi();
@@ -4665,7 +5045,7 @@ function renderItemBody0(item, handlerName){
       `<button class="opt-btn" onclick="${handlerName}(${i})">${fmtOpt(opt)}</button>`
     ).join('') + `</div>`;
   } else {
-    body += kbEntryHtml(handlerName, item.type==='input' && typeof item.answer==='string' && item.answer===item.answer.toLowerCase());
+    body += kbEntryHtml(handlerName, item.type==='input' && typeof item.answer==='string' && item.answer===item.answer.toLowerCase() && (/Laut|Silbe/.test(item.prompt||'') || !/^[A-ZÄÖÜ]/.test(item.speak||'')));
   }
   return body;
 }
@@ -4742,8 +5122,7 @@ window.diagAnswer = function(given){
     state.diagReports.push({date: todayStr(), results: st.domainResults, sv:3, v:2});
     state.diagReports = state.diagReports.slice(-10);
     saveProgress();
-    state.screen = 'diagreport';
-    render();
+    startDiagFeedback();
     return;
   }
   // Folgebereiche überspringen, deren Voraussetzungen noch fehlen (Kind steht noch am Anfang)
@@ -4765,8 +5144,7 @@ window.diagAnswer = function(given){
     state.diagReports.push({date: todayStr(), results: st.domainResults, sv:3, v:2});
     state.diagReports = state.diagReports.slice(-10);
     saveProgress();
-    state.screen = 'diagreport';
-    render();
+    startDiagFeedback();
     return;
   }
   st.currentLevel = 2; st.asked = [];
@@ -5277,9 +5655,9 @@ function kbEntryHtml(handlerName, lower){
   kbLowerStart = !!lower;
   kbShiftOn = !lower;   // Wortanfang: zuerst Großbuchstaben (die meisten Wörter sind Nomen), danach automatisch klein
   const rows = KB_ROWS.map(r=>'<div class="kb-row">' + r.map(k=>{
-    if(k==='⇧') return `<button type="button" class="kb-key kb-wide kb-on" id="kbShiftKey" onclick="kbShift()" aria-label="Großbuchstabe">⇧</button>`;
+    if(k==='⇧') return `<button type="button" class="kb-key kb-wide${kbShiftOn?' kb-on':''}" id="kbShiftKey" onclick="kbShift()" aria-label="Großbuchstabe">⇧</button>`;
     if(k==='⌫') return `<button type="button" class="kb-key kb-wide" onclick="kbBack()" aria-label="Löschen">⌫</button>`;
-    return `<button type="button" class="kb-key" data-k="${k}" onclick="kbPress('${k}')">${k==='ß' ? k : k.toUpperCase()}</button>`;
+    return `<button type="button" class="kb-key" data-k="${k}" onclick="kbPress('${k}')">${(k==='ß' || !kbShiftOn) ? k : k.toUpperCase()}</button>`;
   }).join('') + '</div>').join('');
   return `
     <input type="hidden" id="textAnswer" value="">
@@ -5539,6 +5917,29 @@ const MOEWE_IMG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKoAAAC5CAMAAAC
 const END_LYRICS_END = 36.5;   // Sekunde, ab der alle Zeilen als gesungen gelten
 const END_LYRICS_OFFSET = 0;   // bei Bedarf: Sekunden, um die der Text später (+) oder früher (-) leuchtet
 let endSeq = {gen:0, timers:[], audios:[]};
+// Abschiedslieder: Lotse Lumis Lied ist eingebaut. Weitere Lieder liegen als MP3 im Ordner „lieder“ und werden
+// in lieder/lieder.json beschrieben: [{"datei":"name.mp3","titel":"Titel","text":[[["Wort",1.2],...],...],"ende":30}]
+// („text“ und „ende“ sind optional; ohne Text zeigt die Seite nur den Liedtitel.)
+const END_SONG_BUILTIN = {id:'lumi', titel:'Lotse Lumis Abschiedslied', src:END_SONG, lyrics:END_LYRICS, ende:END_LYRICS_END};
+let endSongs = [END_SONG_BUILTIN];
+function loadEndSongs(){
+  try{
+    fetch('lieder/lieder.json?v='+TTS_VER).then(r=>r.ok?r.json():[]).then(list=>{
+      if(!Array.isArray(list)) return;
+      list.forEach(e=>{ if(e && typeof e.datei==='string' && /^[\w.\- äöüÄÖÜß]+\.(mp3|m4a|ogg|wav)$/i.test(e.datei)){
+        endSongs.push({id:e.datei, titel:e.titel||e.datei.replace(/\.[^.]+$/,''), src:'lieder/'+encodeURIComponent(e.datei), lyrics:Array.isArray(e.text)?e.text:null, ende:e.ende||0});
+      }});
+    }).catch(()=>{});
+  }catch(err){}
+}
+function pickEndSong(){
+  let last = ''; try{ last = localStorage.getItem('bh_lastsong')||''; }catch(e){}
+  const pool = endSongs.length>1 ? endSongs.filter(x=>x.id!==last) : endSongs;
+  const song = pool[Math.floor(Math.random()*pool.length)];
+  try{ localStorage.setItem('bh_lastsong', song.id); }catch(e){}
+  return song;
+}
+loadEndSongs();
 function endSeqStop(){
   endSeq.gen++; endSeq.timers.forEach(clearTimeout); endSeq.timers=[];
   endSeq.audios.forEach(a=>{ try{ a.pause(); }catch(e){} }); endSeq.audios=[]; try{ moeweTanz(false); const bye=document.getElementById('endBye'); if(bye) bye.classList.remove('show'); }catch(e){}
@@ -5552,12 +5953,13 @@ window.startEndSequence = function(){
   endSeqStop();
   const gen = endSeq.gen;
   const alive = ()=> gen===endSeq.gen && state.screen==='sessionend';
-  const flat = END_LYRICS.reduce((a,l)=>a.concat(l),[]);
+  const song = endSeq.song || END_SONG_BUILTIN;
+  const flat = (song.lyrics||[]).reduce((a,l)=>a.concat(l),[]);
   endSeqLight(-1);
   const playSong = ()=>{
     if(!alive()) return;
     try{
-      const au = new Audio(END_SONG); endSeq.audios.push(au);
+      const au = new Audio(song.src); endSeq.audios.push(au);
       au.play().catch(()=>{});
     }catch(e){}
     // Text folgt der echten Abspielzeit des Liedes (nicht einem Timer), damit beides synchron bleibt
@@ -5566,7 +5968,7 @@ window.startEndSequence = function(){
       if(!alive() || !au){ clearInterval(iv); return; }
       const ct = au.currentTime - END_LYRICS_OFFSET; let idx = -1;
       for(let k=0;k<flat.length;k++){ if(flat[k][1] <= ct) idx = k; }
-      if(ct >= END_LYRICS_END) idx = flat.length;
+      if(song.ende && ct >= song.ende) idx = flat.length;
       if(idx !== last){ last = idx; endSeqLight(idx); }
       if(au.ended) clearInterval(iv);
     }, 80);
@@ -5587,12 +5989,13 @@ window.startEndSequence = function(){
       }, 700));
     };
     au.addEventListener('ended', bye);
+    au.addEventListener('error', bye);
     const iv2 = setInterval(()=>{
       if(byeDone || !alive()){ clearInterval(iv2); return; }
       if(au.ended || (au.duration && au.currentTime >= au.duration-0.2)) bye();
     }, 250);
     endSeq.timers.push(iv2);
-    endSeq.timers.push(setTimeout(bye, 67000));   // Notausgang, falls das Lied-Ende nicht gemeldet wird
+    endSeq.timers.push(setTimeout(bye, 420000));   // Notausgang, falls das Lied-Ende nicht gemeldet wird
   };
   const speakEnd = ()=>{
     if(!alive()) return;
@@ -5604,8 +6007,10 @@ window.startEndSequence = function(){
 };
 function screenSessionEnd(){
   const s = state.session || {};
+  if(!endSeq.started) endSeq.song = pickEndSong();
   if(!endSeq.started){ endSeq.started = true; setTimeout(()=>{ if(state.screen==='sessionend') startEndSequence(); }, 400); }
-  const lyr = END_LYRICS.map(l=>`<div class="song-line">${l.map(([w],i)=>`${i&&w[0]!=='~'?' ':''}<span class="song-w">${w.replace('~','')}</span>`).join('')}</div>`).join('');
+  const song = endSeq.song || END_SONG_BUILTIN;
+  const lyr = !song.lyrics ? `<div class="song-line" style="color:var(--harbor-dark);">${song.titel}</div>` : song.lyrics.map(l=>`<div class="song-line">${l.map(([w],i)=>`${i&&w[0]!=='~'?' ':''}<span class="song-w">${w.replace('~','')}</span>`).join('')}</div>`).join('');
   return `
   <div class="topbar"><div class="topbar-row"><div></div><div style="text-align:center;flex:1;"><h1>Geschafft!</h1></div><div></div></div><div class="wave"></div></div>
   <main>
@@ -5614,7 +6019,7 @@ function screenSessionEnd(){
       <div style="margin-bottom:6px;">${mascotIcon(56)}</div>
       <div class="task-instr" style="font-size:1.4rem;">Du hast heute toll gearbeitet!</div>
       <p style="font-size:1.05rem;line-height:1.5;color:var(--harbor-dark);margin:10px 0;">${s.items ? `Du hast ${s.items} Aufgaben bearbeitet, ${s.ok||0} davon richtig. ` : ''}Dein Schiff ist im Hafen angekommen.</p>
-      <div class="song-wrap"><div class="moewe-slot"><img class="moewe moewe-l" src="${MOEWE_IMG}" alt="" draggable="false"></div><div class="song-box"><div class="song-title">🎵 Singe mit!</div>${lyr}</div><div class="moewe-slot"><img class="moewe moewe-r" src="${MOEWE_IMG}" alt="" draggable="false"></div></div>
+      <div class="song-wrap"><div class="moewe-slot"><img class="moewe moewe-l" src="${MOEWE_IMG}" alt="" draggable="false"></div><div class="song-box"><div class="song-title">🎵 ${song.lyrics ? 'Singe mit!' : 'Hör gut zu!'}</div>${lyr}</div><div class="moewe-slot"><img class="moewe moewe-r" src="${MOEWE_IMG}" alt="" draggable="false"></div></div>
       <p id="endBye" class="end-bye">Bitte bring dein iPad jetzt zurück.<br>Tschüss, bis zum nächsten Mal! 👋</p>
       <button class="btn btn-ghost" style="margin-top:10px;" onclick="startEndSequence()">🔊 Noch einmal hören</button>
     </div>
@@ -5884,12 +6289,21 @@ function pickPracticeItem0(){
       }
       shuffled = out;
     }
+    if(!p.isReview && !p.isWordReview && shuffled.length>12){
+      const rec = (state.recentItems && state.recentItems[p.domainId]) || [];
+      if(rec.length){
+        const fresh = shuffled.filter(i=>rec.indexOf(itemKey(i))<0), old = shuffled.filter(i=>rec.indexOf(itemKey(i))>=0);
+        old.sort((x,y)=>rec.indexOf(itemKey(x))-rec.indexOf(itemKey(y)));
+        shuffled = fresh.concat(old);
+      }
+    }
     if(p.current && shuffled[0]===p.current && shuffled.length>1){
       [shuffled[0], shuffled[1]] = [shuffled[1], shuffled[0]];
     }
     p.queue = shuffled;
   }
   p.current = shuffleOptions(p.queue.shift());
+  if(!p.isReview && !p.isWordReview) noteRecent(p.domainId, p.current);
   p.shownAt = Date.now();
   p.answered=false;
   p.message=null; window._autoKey='';
@@ -6773,6 +7187,92 @@ function screenLetterDrill(){
   </main>`;
 }
 
+
+// ===== Kindgerechte Rückmeldung nach der Diagnostik (Lotse Lumi) =====
+// Alle Sätze sind fest formuliert (nur diese liegen als Thorsten-Aufnahme vor).
+const DF_STRENGTH = {"phon": ["Du kannst Reime, Silben und Anfangslaute hören.", "Du hörst auch bei kniffligen Wörtern genau hin.", "Du hörst schwierige Reime und Anfangslaute heraus.", "Du hörst sogar bei langen Wörtern genau hin."], "buchstabe": ["Du weißt, mit welchem Buchstaben ein Wort anfängt.", "Du findest fehlende Buchstaben in einem Wort.", "Du findest zu einem Bild das richtige Wort.", "Du unterscheidest Buchstaben, die leicht zu verwechseln sind."], "silbendock": ["Du schreibst den ersten Laut eines Wortes auf.", "Du schreibst den letzten Laut eines Wortes auf.", "Du hörst eine Silbe heraus und schreibst sie auf.", "Du schreibst die ersten zwei Silben eines Wortes auf."], "lesen": ["Du liest ähnliche Wörter genau und unterscheidest sie.", "Du liest einen Satz und findest das Wort, das fehlt.", "Du liest längere Sätze und findest die passenden Wörter.", "Du liest einen Satz und findest den passenden Satzteil."], "schreib1": ["Du schreibst einfache Wörter so auf, wie du sie hörst.", "Du schreibst auch Wörter mit neuen Buchstaben richtig auf.", "Du schreibst Wörter mit vielen Mitlauten hintereinander.", "Du schreibst schwierige Wörter mit vielen Mitlauten auf."], "schreib2": ["Du kennst Tricks, um Wörter richtig zu schreiben.", "Du findest mit Verlängern und Ableiten den richtigen Buchstaben.", "Du schreibst Nomen groß und setzt das richtige Satzzeichen.", "Du kennst viele Merkwörter und weißt, welcher Trick hilft."], "grundwortschatz": ["Du schreibst viele einfache Merkwörter richtig.", "Du schreibst Wörter mit Doppellauten und doppelten Mitlauten richtig.", "Du schreibst Wörter richtig, die man verlängern oder ableiten muss.", "Du schreibst auch lange Wörter und schwierige Merkwörter richtig."]};
+const DF_NEXT = {"phon": ["Reime, Silben und Anfangslaute zu hören.", "auch bei kniffligen Wörtern genau hinzuhören.", "schwierige Reime und Anfangslaute herauszuhören.", "auch bei langen Wörtern genau hinzuhören."], "buchstabe": ["zu hören, mit welchem Buchstaben ein Wort anfängt.", "fehlende Buchstaben in einem Wort zu finden.", "zu einem Bild das richtige Wort zu finden.", "Buchstaben zu unterscheiden, die leicht zu verwechseln sind."], "silbendock": ["den ersten Laut eines Wortes aufzuschreiben.", "den letzten Laut eines Wortes aufzuschreiben.", "eine Silbe herauszuhören und aufzuschreiben.", "die ersten zwei Silben eines Wortes aufzuschreiben."], "lesen": ["ähnliche Wörter genau zu lesen.", "einen Satz zu lesen und das fehlende Wort zu finden.", "längere Sätze zu lesen und die passenden Wörter zu finden.", "einen Satz zu lesen und den passenden Satzteil zu finden."], "schreib1": ["einfache Wörter so aufzuschreiben, wie du sie hörst.", "auch Wörter mit neuen Buchstaben aufzuschreiben.", "Wörter mit vielen Mitlauten hintereinander zu schreiben.", "schwierige Wörter mit vielen Mitlauten aufzuschreiben."], "schreib2": ["Tricks anzuwenden, mit denen du Wörter richtig schreibst.", "mit Verlängern und Ableiten den richtigen Buchstaben zu finden.", "Nomen großzuschreiben und das richtige Satzzeichen zu setzen.", "Merkwörter zu üben und den passenden Trick dazu zu finden."], "grundwortschatz": ["viele einfache Merkwörter richtig zu schreiben.", "Wörter mit Doppellauten und doppelten Mitlauten richtig zu schreiben.", "Wörter richtig zu schreiben, die man verlängern oder ableiten muss.", "auch lange Wörter und schwierige Merkwörter richtig zu schreiben."]};
+const DF_AHA = {"phon": "Wenn du Laute und Silben genau hörst, kannst du ein Wort in seine Teile zerlegen. Das ist der erste Schritt zum Schreiben. Danach helfen dir Regeln und Wortmuster, das Wort auch richtig zu schreiben.", "buchstabe": "Jeder Laut hat einen Buchstaben. Wenn du beides zusammenbringst, kannst du jedes Wort lesen und schreiben.", "silbendock": "Jedes Wort besteht aus Silben, wie Bausteine. Wenn du die Silben hörst, werden auch lange Wörter ganz leicht.", "lesen": "Viele Wörter sehen fast gleich aus. Wer genau liest, versteht den Satz und verwechselt nichts mehr.", "schreib1": "Wenn du jeden Laut aufschreibst, hast du schon das Gerüst des Wortes. Danach kommen Regeln und Wortmuster dazu, damit das Wort auch richtig geschrieben ist.", "schreib2": "Manche Wörter hört man nicht richtig. Mit Tricks wie Verlängern weißt du, ob Hund mit d oder mit t geschrieben wird.", "grundwortschatz": "Manche Wörter muss man sich einfach merken. Wenn du sie kennst, schreibst du schneller und sicherer."};
+const DF_TEXT = {
+  hello:'Super, das hast du toll gemacht! Ich möchte dir gern eine Rückmeldung geben.',
+  can:'Das kannst du schon richtig gut:',
+  none:'Du hast alle Aufgaben mutig ausprobiert. Das ist ein toller Anfang!',
+  all:'Du kannst schon fast alles auf der höchsten Stufe!',
+  step:'Dein nächster Lernschritt:',
+  nextPre:'Als Nächstes lernst du,',
+  why:'Warum ist das wichtig?',
+  allNext:'Jetzt üben wir, damit du ganz sicher wirst und Pokale sammelst.',
+  go:'Los geht es mit der Station'
+};
+function diagFeedbackModel(){
+  const reports = state.diagReports || [];
+  const latest = reports[reports.length-1] || {results:{}};
+  const rows = diagDomains.map((d,i)=>{
+    const r = latest.results[d.id] || {};
+    const m = r.skipped ? 0 : (typeof r.mastered==='number' ? r.mastered : (r.level||0));
+    return {d, m:Math.max(0,Math.min(4,m)), i};
+  });
+  const strengths = rows.filter(x=>x.m>=1).sort((a,b)=>b.m-a.m || a.i-b.i).slice(0,3)
+    .map(x=>({d:x.d, text:DF_STRENGTH[x.d.id][x.m-1]}));
+  const open = rows.filter(x=>x.m<4).sort((a,b)=> (TIERS[a.d.id]-TIERS[b.d.id]) || (a.m-b.m) || (a.i-b.i));
+  const nx = open[0] || null;
+  return {strengths, next: nx ? {d:nx.d, text: DF_NEXT[nx.d.id][nx.m], aha: DF_AHA[nx.d.id]} : null};
+}
+function screenDiagFeedback(){
+  const m = diagFeedbackModel();
+  const page = state.dfPage || 0;
+  const bubble = (inner)=>`<div style="background:#fff;border:2px solid var(--line);border-radius:22px;padding:16px 16px 14px;margin-top:10px;text-align:left;">${inner}</div>`;
+  let body;
+  if(page===0){
+    const list = m.strengths.length
+      ? m.strengths.map(x=>`<div style="display:flex;gap:10px;align-items:flex-start;margin:10px 0;font-size:1.12rem;line-height:1.35;"><span style="font-size:1.5rem;">${x.d.icon}</span><span>✅ ${x.text}</span></div>`).join('')
+      : `<div style="font-size:1.12rem;line-height:1.4;margin:10px 0;">⭐ ${DF_TEXT.none}</div>`;
+    body = `
+      <div style="text-align:center;">${mascotIcon(120)}</div>
+      ${bubble(`<div style="font-family:'Baloo 2';font-weight:700;font-size:1.25rem;color:var(--harbor-dark);">${DF_TEXT.hello}</div>
+        <div style="font-family:'Baloo 2';font-weight:700;font-size:1.15rem;margin-top:8px;">${m.strengths.length ? DF_TEXT.can : ''}</div>${list}`)}
+      <button class="speak-btn" onclick="speakDiagFeedback()">🔊</button>
+      <button class="btn btn-primary btn-block" style="margin-top:14px;" onclick="diagFeedbackNext()">Weiter ▶️</button>`;
+  } else {
+    const nx = m.next;
+    const inner = nx
+      ? `<div style="font-family:'Baloo 2';font-weight:700;font-size:1.2rem;color:var(--harbor-dark);">${DF_TEXT.step}</div>
+         <div style="font-size:1.15rem;line-height:1.4;margin:8px 0;">🎯 ${DF_TEXT.nextPre} ${nx.text}</div>
+         <div style="background:#FFF6DA;border-radius:14px;padding:10px 12px;margin-top:10px;font-size:1.08rem;line-height:1.4;">💡 <b>${DF_TEXT.why}</b><br>${nx.aha}</div>
+         <div style="margin-top:10px;font-size:1.05rem;">${nx.d.icon} ${DF_TEXT.go} <b>${nx.d.name}</b>.</div>`
+      : `<div style="font-family:'Baloo 2';font-weight:700;font-size:1.2rem;">${DF_TEXT.all}</div><div style="font-size:1.1rem;margin-top:8px;">${DF_TEXT.allNext}</div>`;
+    body = `
+      <div style="text-align:center;">${mascotIcon(120)}</div>
+      ${bubble(inner)}
+      <button class="speak-btn" onclick="speakDiagFeedback()">🔊</button>
+      <button class="btn btn-primary btn-block" style="margin-top:14px;" onclick="closeDiagFeedback()">Los geht's! ▶️</button>`;
+  }
+  return `
+  ${topbar('Lotse Lumi', 'Das hast du geschafft', false)}
+  <main>${body}</main>`;
+}
+window.speakDiagFeedback = function(){
+  const m = diagFeedbackModel(); const page = state.dfPage || 0;
+  if(page===0){
+    speak(DF_TEXT.hello);
+    if(m.strengths.length){ speak(DF_TEXT.can); m.strengths.forEach(x=>speak(x.text)); }
+    else speak(DF_TEXT.none);
+  } else if(m.next){
+    speak(DF_TEXT.step); speak(DF_TEXT.nextPre+' '+m.next.text); speak(DF_TEXT.why); speak(m.next.aha); speak(DF_TEXT.go+' '+m.next.d.name+'.');
+  } else { speak(DF_TEXT.all); speak(DF_TEXT.allNext); }
+};
+window.diagFeedbackNext = function(){ ttsStop(); state.dfPage = 1; render(); setTimeout(speakDiagFeedback, 400); };
+window.closeDiagFeedback = function(){
+  ttsStop(); state.dfPage = 0;
+  state.screen = state.needsBasicLetterDrill ? 'drilloffer' : 'map';
+  render();
+  if(state.needsBasicLetterDrill) speak(DRILL_OFFER_TEXT);
+};
+function startDiagFeedback(){
+  state.dfPage = 0; state.screen = 'diagfeedback'; render();
+  setTimeout(()=>{ if(state.screen==='diagfeedback') speakDiagFeedback(); }, 700);
+}
+
 function screenDiagReport(){
   const reports = state.diagReports || [];
   const latest = reports[reports.length-1] || {date:todayStr(), results:{}};
@@ -6810,11 +7310,12 @@ function screenDiagReport(){
   <main>
     <p style="font-size:0.9rem;color:#4B6473;margin:10px 0;">${previous ? 'Vergleich zur letzten Diagnose vom '+previous.date+':' : 'Ergebnis des Lotsen-Checks – Grundlage für den Förderplan:'}</p>
     ${rows}
-    <button class="btn btn-primary btn-block" style="margin-top:18px;" onclick="closeDiagReport()">Weiter ▶️</button>
+    <button class="btn btn-primary btn-block" style="margin-top:18px;" onclick="closeDiagReport()">${state.diagReportFromTeacher ? '← Zurück zur Hafenkarte' : 'Weiter ▶️'}</button>
   </main>`;
 }
 
 window.closeDiagReport = function(){
+  if(state.diagReportFromTeacher){ state.diagReportFromTeacher = false; state.screen = 'map'; render(); return; }
   state.screen = state.needsBasicLetterDrill ? 'drilloffer' : 'map';
   render();
   if(state.needsBasicLetterDrill) speak(DRILL_OFFER_TEXT);
@@ -6822,6 +7323,7 @@ window.closeDiagReport = function(){
 
 window.viewDiagReport = function(){
   state.showTeacher = false;
+  state.diagReportFromTeacher = true;
   state.screen = 'diagreport';
   render();
 };
