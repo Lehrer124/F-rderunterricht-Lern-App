@@ -136,6 +136,9 @@
   }
   .options{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px;}
   .options.single{grid-template-columns:1fr;}
+  .options.row3{grid-template-columns:repeat(3,1fr);}
+  .options.row3 .opt-btn{font-size:3rem;line-height:1;min-height:92px;padding:6px;}
+  .options.row3s .opt-btn{font-size:2rem;}
   .opt-btn{
     background:var(--sand);
     border:2px solid var(--line);
@@ -395,6 +398,7 @@
   .m-col{display:flex;flex-direction:column;gap:10px;}
   .m-btn{min-height:68px;border:3px solid var(--line);border-radius:14px;background:var(--sand);font-family:'Andika',sans-serif;font-weight:700;font-size:1.5rem;color:var(--ink);cursor:pointer;padding:6px 10px;}
   .m-pic{font-size:2.6rem;line-height:1;}
+  .m-pic.m-syl{font-size:1.9rem;}
   .m-pic .pic-img{height:2.8rem;width:auto;}
   .m-sel{border-color:var(--harbor-mid);background:#E4F2F4;box-shadow:0 0 0 3px #1B6E7F55;}
   .m-done{border-color:#2E8B57;background:#E3F4EA;opacity:.85;}
@@ -456,7 +460,7 @@
     .mk-legend .mk-u{min-width:26px;min-height:26px;font-size:0.9rem;padding:0 6px;border-radius:8px;}
     .kiste{margin:14px 0 4px;padding:10px;border-radius:16px;background:#EAF3FB;border:2px solid #BFD9F0;}
     .kiste-h{font-family:'Baloo 2';font-weight:800;color:#14507F;margin-bottom:6px;}
-    .kiste-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+    .kiste-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
     .kiste-card{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 4px;border-radius:12px;background:#fff;border:2px solid #D3DEE6;}
     .kiste-card.got{border-color:#4FA86B;background:#F1FBF3;}
     .kiste-card.now{border-color:#F4B93E;}
@@ -762,8 +766,8 @@ const iCanStatements = {
     4:'Ich kann einen Satz lesen und den passenden Nebensatz dazu auswählen.',
   },
   lesekai: {
-    1:'Ich kann zu einem Bild das passende Wort lesen und ankreuzen.',
-    2:'Ich kann auch längere Wörter mit Silbenfarben lesen und Bilder mit Wörtern verbinden.',
+    1:'Ich kann zu einem Bild die passende erste Silbe und das passende Wort lesen und ankreuzen.',
+    2:'Ich kann auch längere Wörter mit Silbenfarben lesen, Silben zu Wörtern verbinden und Bilder mit Wörtern verbinden.',
     3:'Ich kann einen ganzen Satz lesen und das passende Bild dazu finden.',
     4:'Ich kann Sätze lesen und genau das malen, was dasteht.',
   },
@@ -775,15 +779,15 @@ const iCanStatements = {
   },
   schreib2: {
     1:'Ich kann mit den Strategiekarten Silben schwingen und Kurzer Selbstlaut Wörter richtig schreiben (Könige, doppelte Mitlaute).',
-    2:'Ich kann mit Verlängern und Ableiten den Buchstaben am Wortende sowie ä und äu finden.',
-    3:'Ich kann Nomen und Satzanfänge großschreiben und Verben kleinschreiben.',
-    4:'Ich kann Merkwörter richtig schreiben und selbst die passende Strategiekarte wählen.',
+    2:'Ich kann mit Verlängern und Ableiten den Buchstaben am Wortende sowie ä, äu, ö und ü finden.',
+    3:'Ich kann Nomen und Satzanfänge großschreiben, Verben kleinschreiben und das richtige Satzzeichen am Satzende setzen.',
+    4:'Ich kann Merkwörter richtig schreiben, Aufzählungen mit Komma schreiben und selbst die passende Strategiekarte wählen.',
   },
   grundwortschatz: {
-    1:'Ich kann wichtige Wörter aus dem Grundwortschatz richtig schreiben.',
+    1:'Ich kann wichtige Wörter und kleine Wörter (und, oder, ich, wir, auf) richtig schreiben.',
     2:'Ich kann Wörter mit Doppellauten oder doppelten Buchstaben richtig schreiben.',
-    3:'Ich kann auch kniffligere Grundwortschatz-Wörter mit meinen Tricks richtig schreiben.',
-    4:'Ich kann auch längere Wörter und die das/dass-Regel richtig anwenden.',
+    3:'Ich kann auch kniffligere Wörter mit meinen Tricks richtig schreiben, zum Beispiel ihr und ihn.',
+    4:'Ich kann ß und ss unterscheiden, längere Wörter schreiben und die das/dass-Regel anwenden.',
   },
   blitzlesen: {
     1:'Ich kann kurze, bekannte Wörter blitzschnell erkennen.',
@@ -837,8 +841,8 @@ const levelGoals = {
     4:'Jetzt fehlt ein ganzer Nebensatz (weil, damit, bevor …). Lies alles genau und wähle den passenden.',
   },
   lesekai: {
-    1:'Hier liest du Wörter ganz genau: Zu jedem Bild gehört ein Wort. Die Wörter sehen fast gleich aus – lies bis zum letzten Buchstaben!',
-    2:'Jetzt sind es mehr Wörter. Lange Wörter haben farbige Silben, die helfen beim Lesen. Du verbindest auch Bilder mit Wörtern.',
+    1:'Hier liest du ganz genau: Zu jedem Bild gehört eine Silbe oder ein Wort. Sie sehen fast gleich aus – lies bis zum letzten Buchstaben!',
+    2:'Jetzt sind es mehr Wörter. Lange Wörter haben farbige Silben, die helfen beim Lesen. Du verbindest auch Silben zu Wörtern und Bilder mit Wörtern.',
     3:'Du liest ganze Sätze und findest das Bild, das zum Satz passt. Lies jedes Wort genau.',
     4:'Lies und male: Lies die Sätze und male genau das, was dasteht – nicht mehr und nicht weniger.',
   },
@@ -850,15 +854,15 @@ const levelGoals = {
   },
   schreib2: {
     1:'Du lernst jetzt Strategiekarten kennen. Sie helfen dir, Wörter richtig zu schreiben. Die ersten zwei sind „Silben schwingen“ und „Kurzer Selbstlaut“.',
-    2:'Neue Strategiekarten: „Verlängern“ hilft dir am Wortende, „Ableiten“ bei ä und äu.',
-    3:'Neue Strategiekarte: „Groß oder klein?“. Du entscheidest, welche Wörter großgeschrieben werden: Nomen und das erste Wort im Satz.',
-    4:'Letzte Strategiekarte: „Merkwörter“. Dann wählst du selbst: Welche Karte hilft bei diesem Wort?',
+    2:'Neue Strategiekarten: „Verlängern“ hilft dir am Wortende, „Ableiten“ bei ä, äu, ö und ü.',
+    3:'Neue Strategiekarten: „Groß oder klein?“ (Nomen und das erste Wort im Satz) und „Satzzeichen“ (Punkt, Fragezeichen, Ausrufezeichen am Satzende).',
+    4:'Letzte Strategiekarte: „Merkwörter“. Dazu kommt das Komma bei Aufzählungen. Dann wählst du selbst: Welche Karte hilft bei diesem Wort?',
   },
   grundwortschatz: {
-    1:'Hier übst du wichtige Wörter aus dem Hamburger Grundwortschatz – Wörter, die du oft brauchst. Manche enden auf ein leises, unbetontes „e", das man trotzdem immer mitschreibt.',
+    1:'Hier übst du wichtige Wörter, die du oft brauchst. Manche enden auf ein leises, unbetontes „e", das man trotzdem immer mitschreibt. Dazu kommen kleine Wörter wie und, oder, ich und wir.',
     2:'Denk an den Schwingen-Trick: Klingt der Vokal kurz, wird der Buchstabe danach oft verdoppelt.',
-    3:'Jetzt hilft dir der Verlängern-Trick und der Ableiten-Trick bei kniffligeren Wörtern.',
-    4:'Profi-Stufe: längere Wörter, die ß-Regel und die das/dass-Unterscheidung.',
+    3:'Jetzt hilft dir der Verlängern-Trick und der Ableiten-Trick bei kniffligeren Wörtern. Auch ihr und ihn kommen dazu.',
+    4:'Profi-Stufe: Wörter mit ß oder ss (Ist der Selbstlaut kurz oder lang?), längere Wörter und die das/dass-Unterscheidung.',
   },
   blitzlesen: {
     1:'Hier übst du, Wörter blitzschnell zu erkennen – bevor die Zeit abläuft, musst du das passende Bild finden. Das trainiert automatisiertes Lesen.',
@@ -942,6 +946,9 @@ const ERROR_CATEGORIES = {
   gross_klein: 'Groß- und Kleinschreibung (Nomen, Satzanfang)',
   merkwort: 'Merkwörter (Doppelvokal, Dehnungs-h, V, ß, Qu)',
   strategiewahl: 'Passende Strategie wählen (Welche Karte hilft?)',
+  satzzeichen: 'Satzzeichen (Satzende, Komma bei Aufzählung)',
+  funktionswort: 'Kleine Wörter (und, oder, ich, wir, auf, ihr)',
+  ss_sz: 'ß oder ss (langer oder kurzer Selbstlaut)',
 };
 
 function ch(prompt, options, answerIdx, tip, speakText, errorCategory){
@@ -1046,8 +1053,8 @@ function renderPicVal(val){
    frei gewählt ("Welche Karte hilft?"). Eine Karte gilt als gesammelt, wenn das Kind
    mindestens 6 Aufgaben dieser Strategie richtig gelöst hat (bei mindestens 65 % richtig).
    ============================================================ */
-const FRESCH_ORDER = ['schwingen','kurz','verlaengern','ableiten','gross','merken'];
-const FRESCH_LEVEL = {1:['schwingen','kurz'], 2:['verlaengern','ableiten'], 3:['gross'], 4:['merken']};
+const FRESCH_ORDER = ['schwingen','kurz','verlaengern','ableiten','gross','satz','merken'];
+const FRESCH_LEVEL = {1:['schwingen','kurz'], 2:['verlaengern','ableiten'], 3:['gross','satz'], 4:['merken']};
 const FRESCH = {
   schwingen:{name:'Silben schwingen',
     merk:'Ich spreche das Wort deutlich und schwinge die Silben. Jede Silbe hat einen König. Der König ist ein Selbstlaut, ein Umlaut oder ein Zwielaut.',
@@ -1059,11 +1066,14 @@ const FRESCH = {
     merk:'Wenn ich am Wortende nicht genau höre, ob b oder p, d oder t, g oder k, dann verlängere ich das Wort.',
     ex:'Hund: Ich sage die Hunde. Jetzt höre ich das d.'},
   ableiten:{name:'Ableiten',
-    merk:'Ein Wort wird mit ä oder äu geschrieben, wenn es ein verwandtes Wort mit a oder au gibt. Gibt es keins, schreibe ich e oder eu.',
-    ex:'die Bäume: Baum. Aber Eule und heute haben kein verwandtes Wort mit au.'},
+    merk:'Ein Wort wird mit ä oder äu geschrieben, wenn es ein verwandtes Wort mit a oder au gibt. Gibt es keins, schreibe ich e oder eu. Ein Wort mit ö oder ü hat ein verwandtes Wort mit o oder u.',
+    ex:'die Bäume: Baum. Aber Eule und heute haben kein verwandtes Wort mit au. Die Töpfe: Topf.'},
   gross:{name:'Groß oder klein?',
     merk:'Nomen schreibe ich groß. Das erste Wort im Satz schreibe ich auch groß. Ein Nomen erkenne ich daran, dass ich der, die oder das davor sagen kann.',
     ex:'Der Hund bellt. Hund ist ein Nomen, Der steht am Satzanfang.'},
+  satz:{name:'Satzzeichen',
+    merk:'Am Ende eines Satzes steht ein Zeichen. Bei einer Aussage steht ein Punkt, bei einer Frage ein Fragezeichen und bei einem Ruf ein Ausrufezeichen.',
+    ex:'Ich habe einen Hund. Wo wohnst du? Hilf mir!'},
   merken:{name:'Merkwörter',
     merk:'Manche Wörter muss ich mir merken, weil keine Strategie hilft. Zum Beispiel bei Doppelvokalen, Dehnungs-h, V, ß, Qu und bei Fremdwörtern.',
     ex:'Boot, Zahn, Vater, Straße, Quelle.'},
@@ -1091,6 +1101,7 @@ function stratSvg(key, sz, gray){
     ableiten: `<path ${W} d="M54 20 L38 46 L62 50 L44 76"/><path ${W} d="M44 76 L42 58 M44 76 L60 70"/>`,
     gross: `<text x="42" y="64" text-anchor="middle" font-family="Andika, Baloo 2, sans-serif" font-weight="800" font-size="40" fill="#fff">Aa</text><text x="78" y="38" text-anchor="middle" font-family="Andika, Baloo 2, sans-serif" font-weight="800" font-size="30" fill="#fff">?</text>`,
     merken: `<path ${W} d="M24 68 L33 32 L50 54 L66 30 L77 64"/>`,
+    satz: `<text x="50" y="66" text-anchor="middle" font-family="Andika, Baloo 2, sans-serif" font-weight="800" font-size="44" fill="#fff">.?!</text>`,
     kiste: `<text x="50" y="68" text-anchor="middle" font-family="Andika, Baloo 2, sans-serif" font-weight="800" font-size="56" fill="#fff">?</text>`,
   }[key] || '';
   const IMG = STRAT_IMG[key];
@@ -1137,13 +1148,13 @@ function stratHead(item){
       <div class="strat-title">${k==='kiste' ? 'Werkzeugkiste' : 'Strategiekarte'}<br><b>${f.name}</b></div>
       ${k==='kiste' ? '' : `<button class="strat-merk" onclick="stratMerk()">💡 Merksatz</button>`}
     </div>
-    ${open ? `<div class="strat-merkbox">${f.merk}${f.ex ? '<br><i>'+f.ex+'</i>' : ''}<button class="speak-btn" style="margin-left:8px;" onclick="speak(FRESCH['${k}'].merk)">🔊</button></div>` : ''}`;
+    ${open ? `<div class="strat-merkbox">${item.merk||f.merk}${(item.merk ? item.ex : f.ex) ? '<br><i>'+(item.merk ? item.ex : f.ex)+'</i>' : ''}<button class="speak-btn" style="margin-left:8px;" onclick="speak((state.practice.current.merk)||FRESCH['${k}'].merk)">🔊</button></div>` : ''}`;
 }
 window.stratMerk = function(){
   const p = state.practice, it = p && p.current;
   if(!it || !it.strat) return;
   p.merkOpen = !p.merkOpen;
-  if(p.merkOpen) speak(FRESCH[it.strat].merk);
+  if(p.merkOpen) speak(it.merk || FRESCH[it.strat].merk);
   render(true);
 };
 
@@ -1252,7 +1263,7 @@ window.stratIntroOk = function(){
   render();
 };
 
-// Die Werkzeugkiste auf der Zielseite: sechs Karten, gesammelte farbig, noch nicht erreichte grau
+// Die Werkzeugkiste auf der Zielseite: sieben Karten, gesammelte farbig, noch nicht erreichte grau
 function kisteHtml(){
   const lvl = state.levels.schreib2 || 1;
   const avail = {}; for(let l=1;l<=lvl;l++) (FRESCH_LEVEL[l]||[]).forEach(k=>avail[k]=true);
@@ -1302,6 +1313,7 @@ const READ_ERROR_LABELS = {
   lese_zuordnung: 'Wort-Bild-Zuordnung (Verbinde)',
   lese_satz:      'Satzverstehen (Satz zum Bild)',
   lese_anweisung: 'Anweisung lesen und umsetzen (Lies und male)',
+  lese_silbe:     'Silben lesen (erste Silbe, Silben verbinden)',
 };
 
 // "Bir|ne" -> Silben abwechselnd eingefärbt (Silbengliederung als Lesehilfe)
@@ -1317,6 +1329,25 @@ function kreuz(emoji, right, wrongs, typ){
   return {type:'choice', prompt:'Welches Wort passt zum Bild?', pictureEmoji:emoji,
     options:[right, ...wrongs], answer:0, layout:'single', tip:LESE_TIPS[typ],
     speak:'Welches Wort passt zum Bild?', errorCategory:'lese_'+typ};
+}
+// Silbe ankreuzen: Bild + drei Silben, die sich nur im Selbstlaut unterscheiden.
+// word = Wort mit Silbengrenze ("So|fa"), die erste Silbe ist die richtige, wrongs die anderen beiden.
+// typ 'a' = offene erste Silbe, 'b' = geschlossene erste Silbe.
+function silbeKreuz(emoji, word, wrongs, typ){
+  const right = word.split('|')[0];
+  const rule = typ==='a' ? 'Die erste Silbe endet mit einem Selbstlaut.' : 'Die erste Silbe endet mit einem Mitlaut.';
+  return {type:'choice', prompt:'Wie fängt das Wort an? Tippe die erste Silbe.', pictureEmoji:emoji,
+    options:[right, ...wrongs], answer:0, layout:'row3s',
+    tip: word.replace('|','-') + ': Die erste Silbe heißt ' + right + '. ' + rule,
+    speak:'Wie fängt das Wort an? Tippe die erste Silbe.', errorCategory:'lese_silbe'};
+}
+// Silben verbinden: links die ersten, rechts die zweiten Silben. Nur eine Zuordnung ergibt ein Wort.
+function silbenVerbinden(pairs){
+  return {type:'match', syl:true, pairs:pairs.map(pr=>({pic:pr[0], word:pr[1]})),
+    instr:'🔗 Verbinde die Silben: Tippe links eine Silbe an, dann die passende Silbe rechts.',
+    tip:'Sprich beide Silben zusammen. Nur eine Zuordnung ergibt ein Wort.',
+    speak:'Verbinde die Silben zu Wörtern. Tippe links eine Silbe an, dann die passende Silbe rechts.',
+    errorCategory:'lese_silbe'};
 }
 // Satz zum Bild: ein Satz, der sich nur in einem Wort von den anderen unterscheidet.
 function satzbild(emoji, right, wrongs){
@@ -1874,9 +1905,36 @@ const content = {
   // (3 Wörter) + Verbinde, Stufe 3 Satz zum Bild, Stufe 4 Lies und male.
   lesekai: {
     1:[
-      kreuzseite(KS_POOL), kreuzseite(KS_POOL), kreuzseite(KS_POOL),
+      kreuzseite(KS_POOL), kreuzseite(KS_POOL), kreuzseite(KS_POOL), kreuzseite(KS_POOL), kreuzseite(KS_POOL), kreuzseite(KS_POOL),
+      // ---- Silbe ankreuzen: offene erste Silbe (Selbstlaut am Silbenende) ----
+      silbeKreuz('🛋️','So|fa',['Sa','Su'],'a'),
+      silbeKreuz('🐯','Ti|ger',['Te','Ta'],'a'),
+      silbeKreuz('🐪','Ka|mel',['Ko','Ke'],'a'),
+      silbeKreuz('🦙','La|ma',['Le','Lo'],'a'),
+      silbeKreuz('👨‍✈️','Pi|lot',['Pu','Pa'],'a'),
+      silbeKreuz('🦫','Bi|ber',['Be','Bu'],'a'),
+      silbeKreuz('👖','Ho|se',['Ha','Hu'],'a'),
+      silbeKreuz('🦖','Di|no',['Do','Du'],'a'),
+      silbeKreuz('🦓','Ze|bra',['Zi','Zu'],'a'),
+      silbeKreuz('🌫️','Ne|bel',['Na','No'],'a'),
+      silbeKreuz('🐰','Ha|se',['He','Hu'],'a'),
+      silbeKreuz('🌹','Ro|se',['Ra','Ru'],'a'),
     ],
     2:[
+      // ---- Silbe ankreuzen: geschlossene erste Silbe (Mitlaut am Silbenende) ----
+      silbeKreuz('☁️','Wol|ke',['Wal','Wil'],'b'),
+      silbeKreuz('👧👦','Kin|der',['Kan','Kun'],'b'),
+      silbeKreuz('🖌️','Pin|sel',['Pan','Pun'],'b'),
+      silbeKreuz('🐕🐕','Hun|de',['Han','Hon'],'b'),
+      silbeKreuz('🐼','Pan|da',['Pen','Pon'],'b'),
+      silbeKreuz('🌷','Tul|pe',['Tal','Til'],'b'),
+      silbeKreuz('🏝️','In|sel',['An','Un'],'b'),
+      silbeKreuz('🥭','Man|go',['Men','Mon'],'b'),
+      // ---- Silben verbinden ----
+      silbenVerbinden([['Ta','fel'],['Ho','se'],['Ra','be'],['Ki','no']]),
+      silbenVerbinden([['Ze','bra'],['Pi','lot'],['Bi','ber'],['Ka','mel']]),
+      silbenVerbinden([['Kin','der'],['Pin','sel'],['Hun','de'],['Pan','da']]),
+      silbenVerbinden([['Wol','ke'],['Tul','pe'],['Man','go'],['Gar','ten']]),
       kreuz('🍐','Bir|ne',['Bie|ne','Bir|ke'],'mitte'),
       kreuz('🐝','Bie|ne',['Bir|ne','Bei|ne'],'mitte'),
       kreuz('🔔','Glo|cke',['Lo|cke','Ja|cke'],'anlaut'),
@@ -2026,6 +2084,10 @@ const content = {
       const o = mk('gross', 1, 'Tippe alle Wörter an, die großgeschrieben werden.', units, caps, tip, sentence, 'gross_klein');
       o.unitKind = 'word'; return o;
     };
+    const ablOU = (right, wrong, root) => T('ableiten', 2, ch(Q, [right, wrong], 0, right+': Es gibt ein verwandtes Wort mit '+(/ö/i.test(right)?'o':'u')+': '+root+'.', right, 'wortfamilie'), 'wortfamilie');
+    const zz = (sentence, mark, tip) => { const o = T('satz', 3, ch('Welches Zeichen steht am Ende?<br><b style="font-size:1.35em">'+sentence+'</b>', ['.','?','!'], ['.','?','!'].indexOf(mark), tip, 'Welches Zeichen steht am Ende? '+sentence, 'satzzeichen'), 'satzzeichen'); o.layout = 'row3'; return o; };
+    const kom = (right, wrong, tip) => { const o = T('satz', 2, ch('Welcher Satz ist richtig geschrieben?', [right, wrong], 0, tip, right, 'satzzeichen'), 'satzzeichen');
+      o.merk = 'Bei einer Aufzählung steht zwischen den Wörtern ein Komma. Vor „und“ steht kein Komma.'; o.ex = 'Ich esse Brot, Käse und Wurst.'; return o; };
     const mw = (right, wrong, tip) => T('merken', 1, ch('Wie schreibt man das Wort richtig?', [right, wrong], 0, tip, right, 'merkwort'), 'merkwort');
     const mix = (right, wrong, card, root) => { const o = ch(Q, [right, wrong], 0, 'Hier hilft die Karte „'+FRESCH[card].name+'“: '+root, right, null); o.strat='kiste'; o.errorCategory='strategiewahl'; return o; };
 
@@ -2149,6 +2211,23 @@ const content = {
       inK('ableiten', 2, 'Schreibe das Wort für mehrere. Leite von der Einzahl ab!', 'Mäuse', '🐭🐭', 'eine Maus → viele Mäuse: äu, weil es Maus mit au gibt.', 'wortfamilie'),
       inK('ableiten', 2, 'Schreibe das Wort für mehrere. Leite von der Einzahl ab!', 'Äpfel', '🍎🍎', 'ein Apfel → viele Äpfel: Ä, weil es Apfel mit a gibt.', 'wortfamilie'),
       inK('ableiten', 2, 'Schreibe das Wort für mehrere. Leite von der Einzahl ab!', 'Bälle', '⚽⚽', 'ein Ball → viele Bälle: ä, weil es Ball mit a gibt.', 'wortfamilie'),
+      // ---- Ableiten: ö/o und ü/u (gleiches Prinzip, neue Buchstaben) ----
+      ablOU('Töpfe', 'Tepfe', 'Topf'),
+      ablOU('Köpfe', 'Kepfe', 'Kopf'),
+      ablOU('Hüte', 'Hite', 'Hut'),
+      ablOU('Bücher', 'Bicher', 'Buch'),
+      ablOU('Füße', 'Fiße', 'Fuß'),
+      ablOU('Wörter', 'Werter', 'Wort'),
+      ablOU('Mütter', 'Metter', 'Mutter'),
+      ablOU('Vögel', 'Vegel', 'Vogel'),
+      ablOU('Hühner', 'Hiner', 'Huhn'),
+      ablOU('Flüsse', 'Flisse', 'Fluss'),
+      inK('ableiten', 2, 'Schreibe das Wort für mehrere. Leite von der Einzahl ab!', 'Töpfe', '🍲🍲', 'ein Topf → viele Töpfe: ö, weil es Topf mit o gibt.', 'wortfamilie'),
+      inK('ableiten', 2, 'Schreibe das Wort für mehrere. Leite von der Einzahl ab!', 'Hüte', '🎩🎩', 'ein Hut → viele Hüte: ü, weil es Hut mit u gibt.', 'wortfamilie'),
+      inK('ableiten', 2, 'Schreibe das Wort für mehrere. Leite von der Einzahl ab!', 'Bücher', '📚', 'ein Buch → viele Bücher: ü, weil es Buch mit u gibt.', 'wortfamilie'),
+      inK('ableiten', 2, 'Schreibe das Wort für mehrere. Leite von der Einzahl ab!', 'Vögel', '🐦🐦', 'ein Vogel → viele Vögel: ö, weil es Vogel mit o gibt.', 'wortfamilie'),
+      T('ableiten', 2, papier("Töp|fe", "🍲🍲", "Ableiten: Topf – darum mit „ö“."), 'wortfamilie'),
+      T('ableiten', 2, papier("Bü|cher", "📚", "Ableiten: Buch – darum mit „ü“."), 'wortfamilie'),
       T('ableiten', 2, papier("Bäu|me", "🌳🌳", "Ableiten: Baum – darum mit „äu“."), 'wortfamilie'),
       T('ableiten', 2, papier("Häu|ser", "🏠🏠", "Ableiten: Haus – darum mit „äu“."), 'wortfamilie'),
     ],
@@ -2191,6 +2270,22 @@ const content = {
       inK('gross', 2, 'Schreibe das Wort. Es ist ein Verb. Es wird kleingeschrieben.', 'laufen', '🏃', 'laufen ist ein Verb (ein Tunwort): klein geschrieben.', 'gross_klein', true),
       inK('gross', 2, 'Schreibe das Wort. Es ist ein Verb. Es wird kleingeschrieben.', 'malen', '🎨', 'malen ist ein Verb (ein Tunwort): klein geschrieben.', 'gross_klein', true),
       inK('gross', 2, 'Schreibe das Wort. Es ist ein Verb. Es wird kleingeschrieben.', 'singen', '🎤', 'singen ist ein Verb (ein Tunwort): klein geschrieben.', 'gross_klein', true),
+      // ---- Satzzeichen: Satzende (Aussage, Frage, Ruf) ----
+      zz('Ich habe einen Hund', '.', 'Das ist eine Aussage. Am Ende steht ein Punkt.'),
+      zz('Die Sonne scheint', '.', 'Das ist eine Aussage. Am Ende steht ein Punkt.'),
+      zz('Mia spielt im Garten', '.', 'Das ist eine Aussage. Am Ende steht ein Punkt.'),
+      zz('Wir gehen in die Schule', '.', 'Das ist eine Aussage. Am Ende steht ein Punkt.'),
+      zz('Der Bus kommt gleich', '.', 'Das ist eine Aussage. Am Ende steht ein Punkt.'),
+      zz('Wo wohnst du', '?', 'Das ist eine Frage. Am Ende steht ein Fragezeichen.'),
+      zz('Wie heißt du', '?', 'Das ist eine Frage. Am Ende steht ein Fragezeichen.'),
+      zz('Hast du einen Bruder', '?', 'Das ist eine Frage. Am Ende steht ein Fragezeichen.'),
+      zz('Was isst du gern', '?', 'Das ist eine Frage. Am Ende steht ein Fragezeichen.'),
+      zz('Kommst du mit', '?', 'Das ist eine Frage. Am Ende steht ein Fragezeichen.'),
+      zz('Hilf mir', '!', 'Das ist ein Ruf. Am Ende steht ein Ausrufezeichen.'),
+      zz('Pass auf', '!', 'Das ist ein Ruf. Am Ende steht ein Ausrufezeichen.'),
+      zz('Stopp', '!', 'Das ist ein Ruf. Am Ende steht ein Ausrufezeichen.'),
+      zz('Achtung', '!', 'Das ist ein Ruf. Am Ende steht ein Ausrufezeichen.'),
+      zz('Lauf schnell', '!', 'Das ist ein Ruf. Am Ende steht ein Ausrufezeichen.'),
       T('gross', 1, papier("Blume", "🌷", "Nomen schreibe ich mit einem großen Anfangsbuchstaben."), 'gross_klein'),
       T('gross', 1, papier("Haus", "🏠", "Nomen schreibe ich mit einem großen Anfangsbuchstaben."), 'gross_klein'),
     ],
@@ -2233,6 +2328,15 @@ const content = {
       T('merken', 1, papier("Zahn", "🦷", "Merkwort: Zahn hat ein Dehnungs-h. Abdecken, schreiben, vergleichen."), 'merkwort'),
       T('merken', 1, papier("Vo|gel", "🐦", "Merkwort: Vogel schreibe ich mit V."), 'merkwort'),
       T('merken', 1, papier("Stra|ße", "🛣️", "Merkwort: Straße schreibe ich mit ß."), 'merkwort'),
+      // ---- Satzzeichen: Komma bei Aufzählung ----
+      kom('Ich kaufe Äpfel, Birnen und Bananen.', 'Ich kaufe Äpfel Birnen und Bananen.', 'Bei einer Aufzählung steht zwischen den Wörtern ein Komma. Vor „und“ steht keins.'),
+      kom('Im Zoo sehe ich Affen, Löwen und Bären.', 'Im Zoo sehe ich Affen Löwen und Bären.', 'Zwischen Affen und Löwen steht ein Komma. Vor „und“ steht keins.'),
+      kom('Mia, Tom und Ali spielen Fußball.', 'Mia Tom und Ali spielen Fußball.', 'Nach Mia steht ein Komma. Vor „und“ steht keins.'),
+      kom('Ich esse Brot, Käse und Wurst.', 'Ich esse Brot Käse und Wurst.', 'Nach Brot steht ein Komma. Vor „und“ steht keins.'),
+      kom('Ich mag Hunde, Katzen und Pferde.', 'Ich mag Hunde, Katzen, und Pferde.', 'Vor „und“ steht kein Komma.'),
+      kom('Wir singen, tanzen und lachen.', 'Wir singen tanzen und lachen.', 'Nach singen steht ein Komma. Vor „und“ steht keins.'),
+      kom('Es gibt rote, gelbe und blaue Stifte.', 'Es gibt rote gelbe und blaue Stifte.', 'Nach rote steht ein Komma. Vor „und“ steht keins.'),
+      kom('Im Ranzen sind ein Heft, ein Stift und ein Lineal.', 'Im Ranzen sind ein Heft ein Stift und ein Lineal.', 'Nach Heft steht ein Komma. Vor „und“ steht keins.'),
       // ---- Welche Karte hilft? (freie Strategiewahl) ----
       swc('Hun_', 'Am Ende höre ich d oder t. Das Wort heißt Hund.', ['verlaengern','ableiten','gross','merken'], 'Hund: Am Wortende hilft die Karte Verlängern: die Hunde.'),
       swc('Ber_', 'Am Ende höre ich g oder k. Das Wort heißt Berg.', ['verlaengern','ableiten','gross','merken'], 'Berg: Am Wortende hilft die Karte Verlängern: die Berge.'),
@@ -2263,7 +2367,7 @@ const content = {
   // Berufsbildung, 785 Wörter), organisiert nach den dort benannten
   // Rechtschreibphänomenen statt erfundener Wortlisten.
   grundwortschatz: {
-    1:[ // Regelhafte Laut-Buchstaben-Beziehung / offene Silbe
+    1:[ // Regelhafte Laut-Buchstaben-Beziehung / offene Silbe, dazu kleine Wörter
       ch('Welches Wort ist richtig geschrieben?', ['Blume','Blome'], 0, 'Offene Silbe: Blu-me – der Vokal davor wird lang gesprochen.', 'Blume', 'offene_silbe'),
       ch('Welches Wort ist richtig geschrieben?', ['Hase','Hasse'], 0, 'Offene Silbe: Ha-se – lang gesprochener Vokal, kein doppelter Konsonant.', 'Hase', 'offene_silbe'),
       ch('Welches Wort ist richtig geschrieben?', ['Dose','Dosse'], 0, 'Offene Silbe: Do-se.', 'Dose', 'offene_silbe'),
@@ -2277,6 +2381,20 @@ const content = {
       ch('Welches Wort ist richtig geschrieben?', ['Birne','Birrne'], 0, 'Offene Silbe: Bir-ne.', 'Birne', 'offene_silbe'),
       papier("Blu|me", "🌸", "Blu-me: zwei Silben, am Ende steht „e“."),
       papier("Lam|pe", "img:Lampe.png", "Lam-pe: erst „m“, dann „p“."),
+      // ---- Kleine Wörter (Funktionswörter), die ich oft brauche ----
+      ch('Welches Wort ist richtig geschrieben?', ['und','unt'], 0, '„und“ ist ein kleines Wort, das ich oft brauche. Ich höre t, aber ich schreibe d.', 'und', 'funktionswort'),
+      ch('Welches Wort ist richtig geschrieben?', ['ich','ihc'], 0, '„ich“: erst i, dann ch.', 'ich', 'funktionswort'),
+      ch('Welches Wort ist richtig geschrieben?', ['wir','vir'], 0, '„wir“ schreibe ich mit w wie Wind.', 'wir', 'funktionswort'),
+      ch('Welches Wort ist richtig geschrieben?', ['oder','oda'], 0, '„oder“ endet mit „er“.', 'oder', 'funktionswort'),
+      ch('Welches Wort ist richtig geschrieben?', ['auf','uf'], 0, '„auf“ beginnt mit dem Zwielaut „au“.', 'auf', 'funktionswort'),
+      ch('Mia ___ Tom spielen.', ['und','oder'], 0, 'Beide spielen zusammen. „und“ verbindet die Namen.', undefined, 'funktionswort'),
+      ch('Magst du Tee ___ Saft?', ['oder','und'], 0, 'Du suchst dir eins aus: Tee oder Saft. „oder“ heißt: das eine oder das andere.', undefined, 'funktionswort'),
+      ch('Das Buch liegt ___ dem Tisch.', ['auf','und'], 0, 'Wo liegt das Buch? auf dem Tisch.', undefined, 'funktionswort'),
+      ch('Welches Wort ist richtig geschrieben?', ['Wir','Vir'], 0, '„Wir“ schreibe ich mit W wie Wind.', 'Wir', 'funktionswort'),
+      ch('Welches Wort ist richtig geschrieben?', ['Ich','Ihc'], 0, '„Ich“: erst I, dann ch.', 'Ich', 'funktionswort'),
+      papier("und", "➕", "„und“: höre t, schreibe d. Abdecken, schreiben, vergleichen."),
+      papier("oder", "🔀", "„oder“: o-d-e-r. Abdecken, schreiben, vergleichen."),
+      papier("auf", "⬆️", "„auf“: a-u-f. Abdecken, schreiben, vergleichen."),
     ],
     2:[ // Diphthonge & Konsonantenverdopplung/ck
       ch('Welches Wort ist richtig geschrieben?', ['Haus','Hous'], 0, 'Zwielaut „au": Haus – Häuser.', 'Haus', 'zwielaut'),
@@ -2303,14 +2421,41 @@ const content = {
       ch('Welches Wort ist richtig geschrieben?', ['Frühstück','Frühstük'], 0, '„ck" nach kurzem Vokal am Wortende: Frühstück.', 'Frühstück', 'doppelkonsonant'),
       papier("Fuß|ball", "⚽", "Zusammengesetzt: Fuß + Ball."),
       papier("Fahr|rad", "🚲", "Zusammengesetzt: fahren + Rad; „rr“ ist die Nahtstelle."),
+      ch('Welches Wort ist richtig geschrieben?', ['ihr','ir'], 0, '„ihr“ hat ein Dehnungs-h. Das muss ich mir merken.', 'ihr', 'funktionswort'),
+      ch('Habt ___ Hunger?', ['ihr','ir'], 0, '„ihr“ hat ein Dehnungs-h. Das muss ich mir merken.', undefined, 'funktionswort'),
+      ch('Da ist Ben. Ich sehe ___ .', ['ihn','in'], 0, 'Ich sehe ihn: Es geht um Ben, eine Person. „in“ sagt, wo etwas ist.', undefined, 'funktionswort'),
+      ch('Ben ist ___ der Schule.', ['in','ihn'], 0, 'Wo ist Ben? in der Schule. „in“ sagt, wo etwas ist.', undefined, 'funktionswort'),
     ],
     4:[ // Profi-Stufe: längere Wörter, ß-Regel, das/dass-Unterscheidung
+      // Die ersten drei Wortpaare erscheinen beim Stufenstart als „Entdecken“: Sie führen die ß/ss-Regel ein.
+      ch('Welches Wort ist richtig geschrieben?', ['Fuß','Fuss'], 0, 'Fuß: langer Selbstlaut, darum ß.', 'Fuß', 'ss_sz'),
+      ch('Welches Wort ist richtig geschrieben?', ['Fluss','Fluß'], 0, 'Fluss: kurzer Selbstlaut, darum ss.', 'Fluss', 'ss_sz'),
+      ch('Welches Wort ist richtig geschrieben?', ['Gruß','Gruss'], 0, 'Gruß: langer Selbstlaut, darum ß.', 'Gruß', 'ss_sz'),
       ch('Welches Wort ist richtig geschrieben?', ['Fußballspiel','Fusballspiel'], 0, 'Zusammengesetzt: Fuß + Ball + Spiel, „ß" bleibt erhalten.', 'Fußballspiel', 'wortfamilie'),
       ch('Welches Wort ist richtig geschrieben?', ['Werkzeugkasten','Werkzeugkasden'], 0, 'Zusammengesetzt: Werkzeug + Kasten.', 'Werkzeugkasten', 'wortfamilie'),
       ch('Welches Wort ist richtig geschrieben?', ['Straße','Strasse'], 0, 'Nach einem langen Vokal oder Zwielaut schreibt man „ß": Stra-ße.', 'Straße'),
       ch('Ich glaube, ___ es heute regnet.', ['dass','das'], 0, '„dass" leitet hier einen Nebensatz ein – nicht durch „welches" ersetzbar, also doppel-s.'),
       ch('___ Buch, das ich lese, ist spannend.', ['Das','Dass'], 0, '„Das" bezieht sich auf „Buch" – man könnte „welches" einsetzen, also nur ein „s".'),
       ch('Welches Wort ist richtig geschrieben?', ['Fahrradhelm','Farradhelm'], 0, 'Zusammengesetzt: fahren + Rad + Helm.', 'Fahrradhelm', 'wortfamilie'),
+      // ---- ß oder ss: erst Selbstlaut kurz oder lang hören, dann schreiben ----
+      ch('Fuß: Ist der Selbstlaut kurz oder lang?', ['kurz','lang'], 1, 'Fuß: Der Selbstlaut klingt lang. Nach langem Selbstlaut schreibe ich ß.', undefined, 'ss_sz'),
+      ch('Fluss: Ist der Selbstlaut kurz oder lang?', ['kurz','lang'], 0, 'Fluss: Der Selbstlaut klingt kurz. Nach kurzem Selbstlaut schreibe ich ss.', undefined, 'ss_sz'),
+      ch('Gruß: Ist der Selbstlaut kurz oder lang?', ['kurz','lang'], 1, 'Gruß: Der Selbstlaut klingt lang. Nach langem Selbstlaut schreibe ich ß.', undefined, 'ss_sz'),
+      ch('Kuss: Ist der Selbstlaut kurz oder lang?', ['kurz','lang'], 0, 'Kuss: Der Selbstlaut klingt kurz. Nach kurzem Selbstlaut schreibe ich ss.', undefined, 'ss_sz'),
+      ch('Spaß: Ist der Selbstlaut kurz oder lang?', ['kurz','lang'], 1, 'Spaß: Der Selbstlaut klingt lang. Nach langem Selbstlaut schreibe ich ß.', undefined, 'ss_sz'),
+      ch('Wasser: Ist der Selbstlaut kurz oder lang?', ['kurz','lang'], 0, 'Wasser: Der Selbstlaut klingt kurz. Nach kurzem Selbstlaut schreibe ich ss.', undefined, 'ss_sz'),
+      ch('groß: Ist der Selbstlaut kurz oder lang?', ['kurz','lang'], 1, 'groß: Der Selbstlaut klingt lang. Nach langem Selbstlaut schreibe ich ß.', undefined, 'ss_sz'),
+      ch('Schloss: Ist der Selbstlaut kurz oder lang?', ['kurz','lang'], 0, 'Schloss: Der Selbstlaut klingt kurz. Nach kurzem Selbstlaut schreibe ich ss.', undefined, 'ss_sz'),
+      ch('Welches Wort ist richtig geschrieben?', ['Kuss','Kuß'], 0, 'Kuss: kurzer Selbstlaut, darum ss.', 'Kuss', 'ss_sz'),
+      ch('Welches Wort ist richtig geschrieben?', ['Spaß','Spass'], 0, 'Spaß: langer Selbstlaut, darum ß.', 'Spaß', 'ss_sz'),
+      ch('Welches Wort ist richtig geschrieben?', ['Wasser','Waßer'], 0, 'Wasser: kurzer Selbstlaut, darum ss.', 'Wasser', 'ss_sz'),
+      ch('Welches Wort ist richtig geschrieben?', ['heiß','heiss'], 0, 'heiß: Hier steht der Zwielaut „ei“. Nach einem Zwielaut schreibe ich ß.', 'heiß', 'ss_sz'),
+      ch('Welches Wort ist richtig geschrieben?', ['Schloss','Schloß'], 0, 'Schloss: kurzer Selbstlaut, darum ss.', 'Schloss', 'ss_sz'),
+      ch('Welches Wort ist richtig geschrieben?', ['müssen','müßen'], 0, 'müs-sen: kurzer Selbstlaut, darum ss.', 'müssen', 'ss_sz'),
+      ch('Welches Wort ist richtig geschrieben?', ['draußen','draussen'], 0, 'drau-ßen: Hier steht der Zwielaut „au“. Nach einem Zwielaut schreibe ich ß.', 'draußen', 'ss_sz'),
+      papier("Fuß", "🦶", "Fuß: langer Selbstlaut, darum ß. Abdecken, schreiben, vergleichen."),
+      papier("Fluss", "🏞️", "Fluss: kurzer Selbstlaut, darum ss. Abdecken, schreiben, vergleichen."),
+      papier("Gruß", "👋", "Gruß: langer Selbstlaut, darum ß. Abdecken, schreiben, vergleichen."),
     ],
   },
   // Vertiefung für leistungsstarke Kinder (Klasse 1-4-Spanne) - kein Teil der
@@ -2899,10 +3044,10 @@ const STATION_INFO = {
   buchstabe:{kurz:'Buchstabe ↔ Laut', tut:'Zu Bildern Buchstaben und Wörter zuordnen: Anlaut- und Auslautbuchstabe, fehlender Buchstabe im Wort (Lückenwort), dann das ganze passende Wort wählen.', bsp:'Bild Sonne: S_nne – welcher Buchstabe fehlt? (o / a / u)', stufen:'1 Anlaut/Auslaut-Buchstabe · 2 fehlender Buchstabe (Anfang, Ende, Mitte) · 3 passendes Wort zum Bild · 4 verwechselbare Buchstaben (b/d/p), Qu/Pf/St/Sp, Konsonantenhäufungen'},
   silbendock:{kurz:'Laute und Silben aufschreiben', tut:'Das Kind hört ein Wort und schreibt einen Laut oder eine Silbe selbst auf (am Gerät, teils auf Papier).', bsp:'Hörwort „Mond“ – den letzten Laut schreiben: d', stufen:'1 erster Laut · 2 letzter Laut · 3 eine Silbe · 4 die ersten zwei Silben'},
   lesen:{kurz:'Wörter und Sätze genau lesen', tut:'Ähnlich aussehende Wörter unterscheiden, Lückensätze lesen und den Sinn von Sätzen verstehen.', bsp:'„Ben nimmt einen Schirm mit, ___.“ – weil es regnet / weil die Sonne scheint / weil er Hunger hat', stufen:'1 ähnliche Wörter unterscheiden · 2 Satz mit Lücke (ein Wort) · 3 längerer Satz, Wortgruppe wählen · 4 ganzen Nebensatz wählen (ab Stufe 2 ohne Vorlesen)'},
-  lesekai:{kurz:'Wörter und Sätze zu Bildern lesen', tut:'Wort–Bild- und Satz–Bild-Zuordnung, lange Wörter mit Silbenfarben, „Lies und male“. Prüft genaues Erlesen ohne Raten.', bsp:'Satz „Der Hund sitzt unter dem Tisch.“ – das passende Bild wählen', stufen:'1 Wort–Bild · 2 lange Wörter mit Silbenfarben · 3 Satz–Bild · 4 lesen und malen'},
+  lesekai:{kurz:'Wörter und Sätze zu Bildern lesen', tut:'Erste Silbe zum Bild ankreuzen, Silben zu Wörtern verbinden, Wort–Bild- und Satz–Bild-Zuordnung, lange Wörter mit Silbenfarben, „Lies und male“. Prüft genaues Erlesen ohne Raten.', bsp:'Bild Wolke: erste Silbe Wol – Wal – Wil? Oder: Satz „Der Hund sitzt unter dem Tisch.“ – das passende Bild wählen', stufen:'1 Silbe ankreuzen (offene Silbe) + Wort–Bild · 2 Silbe ankreuzen (geschlossene Silbe), Silben verbinden, lange Wörter mit Silbenfarben · 3 Satz–Bild · 4 lesen und malen'},
   schreib1:{kurz:'Wörter lauttreu schreiben', tut:'Das Kind schreibt Wörter nach Gehör, die so geschrieben werden, wie sie klingen (am Gerät und auf Papier).', bsp:'Bild Lampe – „Lampe“ schreiben', stufen:'1 einfache lauttreue Wörter · 2 neue Buchstaben · 3 Konsonantenhäufungen · 4 Häufungen am Anfang und Ende'},
-  schreib2:{kurz:'Rechtschreib-Strategien (Niko-Karten)', tut:'Sechs Strategiekarten wie im Niko-Sprachbuch: Silben schwingen (Könige markieren), Kurzer Selbstlaut (doppelter Mitlaut), Verlängern (Hund – Hunde), Ableiten (Bäume – Baum), Groß oder klein? (Nomen, Satzanfang) und Merkwörter. Am Ende wählt das Kind selbst: Welche Karte hilft?', bsp:'Hun_ – Welche Karte hilft? Verlängern: Hunde → Hund', stufen:'1 Silben schwingen + Kurzer Selbstlaut · 2 Verlängern + Ableiten · 3 Groß oder klein? · 4 Merkwörter + Strategie frei wählen'},
-  grundwortschatz:{kurz:'Merkwörter üben', tut:'Häufige Wörter des Hamburger Grundwortschatzes richtig schreiben (Auswählen, Schreiben, Abdecken–Schreiben–Vergleichen auf Papier).', bsp:'Vater oder Fater? – richtig wählen und aufschreiben', stufen:'1 Wörter mit unbetontem e · 2 Doppellaute und doppelte Konsonanten · 3 Verlängern/Ableiten · 4 ß, das/dass, lange Wörter'},
+  schreib2:{kurz:'Rechtschreib-Strategien (Niko-Karten)', tut:'Strategiekarten nach dem Vorbild des Niko-Sprachbuchs: Silben schwingen (Könige markieren), Kurzer Selbstlaut (doppelter Mitlaut), Verlängern (Hund – Hunde), Ableiten (Bäume – Baum, Töpfe – Topf), Groß oder klein? (Nomen, Satzanfang), Satzzeichen (Satzende, Komma bei Aufzählung; Ergänzung zum Bildungsplan Deutsch) und Merkwörter. Am Ende wählt das Kind selbst: Welche Karte hilft?', bsp:'Hun_ – Welche Karte hilft? Verlängern: Hunde → Hund', stufen:'1 Silben schwingen + Kurzer Selbstlaut · 2 Verlängern + Ableiten (ä, äu, ö, ü) · 3 Groß oder klein? + Satzende (. ? !) · 4 Merkwörter + Komma bei Aufzählung + Strategie frei wählen'},
+  grundwortschatz:{kurz:'Merkwörter üben', tut:'Häufige Wörter des Hamburger Grundwortschatzes richtig schreiben (Auswählen, Schreiben, Abdecken–Schreiben–Vergleichen auf Papier).', bsp:'Vater oder Fater? – richtig wählen und aufschreiben', stufen:'1 Wörter mit unbetontem e + kleine Wörter (und, oder, ich, wir, auf) · 2 Doppellaute und doppelte Konsonanten · 3 Verlängern/Ableiten + ihr/ihn · 4 ß oder ss, das/dass, lange Wörter'},
   satzbau:{kurz:'Eigene Sätze schreiben', tut:'Ein Wort einprägen und aus dem Kopf schreiben, dann eigene Sätze aus Bildbausteinen bauen und Wort für Wort aufschreiben (Papier).', bsp:'Bausteine: Der Hund / rennt / im Park – Satz schreiben', stufen:'1 Wort einprägen und schreiben · 2 Satz mit drei Bausteinen · 3 mehr Bausteine · 4 Satz mit vier Bausteinen'},
   diktat:{kurz:'Sätze nach Diktat schreiben', tut:'Das Kind hört einen Satz, schreibt ihn auf Papier und vergleicht selbst mit der Lösung.', bsp:'Hörsatz: „Die Katze schläft.“', stufen:'1 kurze Sätze · 2 längere Sätze, Selbstkontrolle · 3 kniffligere Sätze · 4 sehr lange Sätze'},
   blitzlesen:{kurz:'Wörter blitzschnell erkennen', tut:'Ein Wort erscheint nur kurz, danach wird das passende Bild gewählt. Trainiert automatisierte Worterkennung unter Zeitdruck.', bsp:'Wort „Schmetterling“ blitzt auf – Bild wählen', stufen:'1 kurze bekannte Wörter · 2 längere zusammengesetzte · 3 lange, ungewöhnliche · 4 sehr lange Wörter, kürzeste Zeit'},
@@ -2924,6 +3069,9 @@ const FP_CAT_INFO = {
   gross_klein:{label:'Groß- und Kleinschreibung', desc:'Nomen oder Satzanfänge werden kleingeschrieben bzw. Verben und Adjektive großgeschrieben.', mass:'Strategiekarte Groß oder klein?: Artikelprobe (der, die, das davor sagen), Nomen im Satz markieren, Satzanfang prüfen.'},
   merkwort:{label:'Merkwörter', desc:'Wörter mit Doppelvokal, Dehnungs-h, V, ß, Qu oder Fremdwörter, die sich nicht ableiten lassen, werden nicht richtig abgerufen.', mass:'Täglich Abdecken–Schreiben–Vergleichen mit 3–5 Merkwörtern (Merkkarte, Merkwörter-Symbol).'},
   strategiewahl:{label:'Passende Strategie wählen', desc:'Das Kind weiß nicht sicher, welche Strategie bei diesem Rechtschreibproblem hilft.', mass:'Werkzeugkiste: Zu jedem Wort fragen „Welche Karte hilft?“ und die Strategie laut begründen.'},
+  satzzeichen:{label:'Satzzeichen', desc:'Satzende (Punkt, Fragezeichen, Ausrufezeichen) oder Komma bei Aufzählungen werden vergessen oder falsch gesetzt.', mass:'Strategiekarte Satzzeichen: Satz laut lesen, Satzart bestimmen (Aussage, Frage, Ruf), Zeichen am Satzende setzen; bei Aufzählungen die Wörter einzeln benennen und Kommas setzen.'},
+  funktionswort:{label:'Kleine Wörter (und, oder, ich, wir, auf, ihr)', desc:'Häufige kleine Wörter werden lautnah geschrieben (unt, vir, ir).', mass:'Kleine Wörter als Merkwörter: täglich Abdecken–Schreiben–Vergleichen, im Satz lesen und schreiben.'},
+  ss_sz:{label:'ß oder ss', desc:'Nach langem Selbstlaut oder Zwielaut steht ß, nach kurzem Selbstlaut ss; die Regel wird nicht genutzt.', mass:'Erst Selbstlaut kurz oder lang hören (Silben schwingen), dann ß oder ss wählen; Wortpaare sammeln (Fuß – Fluss).'},
   zwielaut:{label:'Zwielaute ei/ai, eu/äu, au', desc:'Zwielaute werden verwechselt oder nicht als Einheit erkannt.', mass:'Merkwörter sammeln, Wörter mit ei/eu/au nach Zwielaut sortieren, Abdecken–Schreiben–Vergleichen.'},
 };
 const FP_MASS = {
@@ -2931,11 +3079,11 @@ const FP_MASS = {
   buchstabe:{aus:'Anlauttabelle (Niko) nutzen, Buchstaben-Laut-Zuordnung mit Handzeichen, verwechselbare Buchstaben gegenüberstellen.'},
   silbendock:{aus:'Wörter in Silben sprechen und mit Silbenbögen/Silbenhäuschen markieren, erste Silbe vor/nach dem Hören aufschreiben.'},
   lesen:{aus:'Lautes Lesen mit Silbenfarben (Lesetandem), Wiederholtes Lesen kurzer Texte, Lesezeit festhalten.'},
-  lesekai:{aus:'Wort-Bild-Zuordnung mit „Lies mal"-Material, Minimalpaare lesen und die Unterschiede einkreisen.'},
+  lesekai:{aus:'Wort-Bild-Zuordnung mit „Lies mal"-Material, Silben mit Silbenbögen lesen und zu Wörtern verbinden, Minimalpaare lesen und die Unterschiede einkreisen.'},
   blitzlesen:{aus:'Kurze Blitzlese-Phasen im Heft oder mit Wortkarten, bekannte Wörter immer wieder erlesen.'},
   lesekompetenz:{aus:'Lesestrategien: Frage zuerst lesen, Textstelle unterstreichen, Antwort begründen („Wo steht das?").'},
   schreib1:{aus:'Wörter lauttreu mit Papier-Schreibblatt schreiben, Selbstkontrolle Buchstabe für Buchstabe, Silbenbögen einzeichnen.'},
-  schreib2:{aus:'Niko-Strategiekarten (Silben schwingen, Kurzer Selbstlaut, Verlängern, Ableiten, Groß oder klein?, Merkwörter) im Heft anwenden; bei jedem Wort laut fragen: Welche Karte hilft?'},
+  schreib2:{aus:'Niko-Strategiekarten (Silben schwingen, Kurzer Selbstlaut, Verlängern, Ableiten, Groß oder klein?, Satzzeichen, Merkwörter) im Heft anwenden; bei jedem Wort laut fragen: Welche Karte hilft?'},
   grundwortschatz:{aus:'Täglich 5 Minuten Abdecken–Schreiben–Vergleichen mit 3–5 Wörtern aus dem Hamburger Grundwortschatz.'},
   satzbau:{aus:'Satz zuerst sprechen, dann Wort für Wort schreiben; Wortgrenzen und Satzanfang/Satzende markieren.'},
   diktat:{aus:'Lernwörter vor dem Diktat sichern; nach dem Diktat Fehler markieren und berichtigen.'},
@@ -3470,10 +3618,11 @@ function buildFoerderplanHTML(){
   <ul class="fp-lit">
     <li>Frith, U. (1985): Beneath the surface of developmental dyslexia. – Entwicklung von der logographischen über die alphabetische zur orthografischen Strategie.</li>
     <li>Gough, P. B. &amp; Tunmer, W. E. (1986): Decoding, reading, and reading disability. Remedial and Special Education 7 – Lesen als Zusammenspiel von Dekodieren und Sprachverstehen („Simple View of Reading“).</li>
-    <li>May, P. (2002), dargestellt bei Martens, D. (2007): LRS – Der regelzentrierte Förderansatz. – alphabetische, orthografische und morphematische Strategie.</li>
-    <li>Galuschka, K. et al. (2014), dargestellt in: Evidenzbasierte LRS-Förderung (Broschüre 2019) und AWMF-Leitlinie Lese-Rechtschreib-Störung – phonologische Bewusstheit und Buchstaben-Laut-Zuordnung wirken kombiniert am besten.</li>
+    <li>May, P. (2002), dargestellt bei Martens, D. (2007): LRS – Der regelzentrierte Förderansatz. – alphabetische, orthografische und morphematische Strategie (Praxisbericht, kein Wirksamkeitsnachweis; nur als Anregung für regelgeleitetes Arbeiten genutzt).</li>
+    <li>Galuschka, K. et al. (2014), PLoS ONE – Meta-Analyse: Die Vermittlung von Buchstaben-Laut-Zuordnungen (Phonics) ist die am besten belegte Förderung; Hall, C. et al. (2022), Reading Research Quarterly – Programme mit Rechtschreibanteil wirken etwas stärker. Dargestellt auch in: Huemer, Pointner, Schöfl &amp; Landerl (2019): Evidenzbasierte LRS-Förderung (BMBWF Wien) und in der AWMF-S3-Leitlinie 028-044 (2015; Überarbeitung in Arbeit).</li>
     <li>Schnabel – Handreichung Klasse 1–10, Hamburg (Stand April 2024) – Silbenorientierung, Strukturtypen der Silbe.</li>
-    <li>Hardy, I. et al. (2011): Adaptive Lerngelegenheiten. Zeitschrift für Pädagogik 6; Meier, C. (2019): KI-basierte adaptive Lernumgebungen – Anpassung der Aufgabenschwierigkeit an die Leistung.</li>
+    <li>Behörde für Schule und Berufsbildung Hamburg (01/2025): Handreichung Förderung und Unterstützung von Schülerinnen und Schülern mit Schwierigkeiten oder besonderen Schwierigkeiten im Lesen, Rechtschreiben oder Rechnen – Rechtsrahmen, Förderplanung.</li>
+    <li>Hardy, I. et al. (2011): Adaptive Lerngelegenheiten. Zeitschrift für Pädagogik 6; Meier, C. (2019): Adaptive Lernumgebungen – Anpassung der Aufgabenschwierigkeit an die Leistung. Die Anpassung in Buchstabenhafen ist regelbasiert; ein Wirksamkeitsnachweis für diese App liegt nicht vor.</li>
   </ul>
   <div class="fp-note">Diese Auswertung fasst den digitalen Übungsverlauf aus Buchstabenhafen zusammen. Sie beruht auf Aufgaben der App, nicht auf einem standardisierten Test, und ersetzt weder die verbindliche schulische Testung (z. B. SCHNABEL/SLS) noch die pädagogische Einschätzung der Lehrkraft. Sie ist kein rechtsgültiger Förderplan nach § 5 VO Notenschutz. Einschätzungen mit geringer Datenlage (wenige Aufgaben) sind vorläufig. Die Einzelfehler (Wörter, Laute) werden seit dem Update der App erfasst. Vor Verwendung im Förderplan/DiViS ist die Auswertung von der zuständigen Lehrkraft zu prüfen. Daten werden nur lokal auf dem Gerät gespeichert.</div>
 </body>
@@ -3910,11 +4059,11 @@ function rerenderKeepScroll(){
 
 function renderMatchBody(item, isStatic){
   const p = state.practice;
-  const instr = `<div class="task-instr">🔗 Verbinde: Tippe ein Bild an, dann das passende Wort.</div>
+  const instr = `<div class="task-instr">${item.instr || '🔗 Verbinde: Tippe ein Bild an, dann das passende Wort.'}</div>
     <button class="speak-btn" onclick="speakCurrent()">🔊</button>`;
   if(isStatic){
     const rows = item.pairs.map(pr =>
-      `<div class="m-row"><span class="m-rowpic">${renderPicVal(pr.pic)}</span><span class="m-arrow">→</span><span class="m-rowword">${fmtOpt(pr.word)}</span></div>`
+      `<div class="m-row"><span class="m-rowpic">${renderPicVal(pr.pic)}</span><span class="m-arrow">${item.syl ? '+' : '→'}</span><span class="m-rowword">${fmtOpt(pr.word)}${item.syl ? ' = <b>'+pr.pic+pr.word+'</b>' : ''}</span></div>`
     ).join('');
     return instr + `<div class="m-rows">${rows}</div>`;
   }
@@ -3922,7 +4071,7 @@ function renderMatchBody(item, isStatic){
   const order = (p.matchOrder && p.matchOrder.length===item.pairs.length) ? p.matchOrder : item.pairs.map((_,i)=>i);
   const pics = item.pairs.map((pr,i)=>{
     const isDone = done.includes(i);
-    const cls = 'm-btn m-pic' + (isDone?' m-done':'') + (p.matchSel===i ? ' m-sel':'');
+    const cls = 'm-btn m-pic' + (item.syl?' m-syl':'') + (isDone?' m-done':'') + (p.matchSel===i ? ' m-sel':'');
     return `<button class="${cls}" ${isDone?'disabled':''} onclick="matchPic(${i})">${renderPicVal(pr.pic)}</button>`;
   }).join('');
   const words = order.map(j=>{
@@ -3945,6 +4094,7 @@ window.matchWord = function(j){
   if(p.matchSel===null || p.matchSel===undefined){ p.matchNeedPic = true; rerenderKeepScroll(); return; }
   if(p.matchSel===j){
     p.matchDone.push(j); p.matchSel = null; p.matchFlash = null;
+    if(p.current.syl && p.matchDone.length<p.current.pairs.length){ try{ const pr = p.current.pairs[j]; speak(pr.pic + pr.word); }catch(e){} }
     if(p.matchDone.length===p.current.pairs.length){
       window.practiceAnswer(p.matchWrong===0 ? 0 : 1);   // sauber = ohne falsches Antippen
       return;
@@ -4407,7 +4557,7 @@ function renderItemBody0(item, handlerName){
   if(item.type==='input') body += posBarHtml(item);
   if(!item.noRead) body += `<button class="speak-btn" onclick="speakCurrent()">🔊</button>`;
   if(item.type==='choice'){
-    const cls = (item.options.length<=2 || item.layout==='single') ? 'options single' : 'options';
+    const cls = (item.layout==='row3' || item.layout==='row3s') ? ('options row3' + (item.layout==='row3s' ? ' row3s' : '')) : ((item.options.length<=2 || item.layout==='single') ? 'options single' : 'options');
     body += `<div class="${cls}">` + item.options.map((opt,i)=>
       `<button class="opt-btn" onclick="${handlerName}(${i})">${fmtOpt(opt)}</button>`
     ).join('') + `</div>`;
@@ -6041,7 +6191,7 @@ function renderItemBodyStatic0(item, given){
   if(item.type==='input') body += posBarHtml(item);
   body += `<button class="speak-btn" onclick="speakCurrent()">🔊</button>`;
   if(item.type==='choice'){
-    const cls = (item.options.length<=2 || item.layout==='single') ? 'options single' : 'options';
+    const cls = (item.layout==='row3' || item.layout==='row3s') ? ('options row3' + (item.layout==='row3s' ? ' row3s' : '')) : ((item.options.length<=2 || item.layout==='single') ? 'options single' : 'options');
     body += `<div class="${cls}">` + item.options.map((opt,i)=>{
       let cls2='opt-btn';
       if(i===item.answer) cls2+=' correct';
