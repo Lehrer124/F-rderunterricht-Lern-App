@@ -1516,6 +1516,7 @@ function dictate(sentence, tip){
 // Deutschen hat zu viele Ausnahmen für eine zuverlässige Faustregel).
 // Wörter ohne Eintrag gelten als einsilbig (ein Bogen über das ganze Wort).
 const wordSyllables = {
+  nase:['Na','se'], wolke:['Wol','ke'], igel:['I','gel'],
   blume:['Blu','me'],
   fisch:['Fisch'],
   sonne:['Son','ne'],
@@ -2960,6 +2961,18 @@ const content = {
       wordstudy('Sonne', '☀️', 'Präg dir Bild und Wort gut ein.'),
       wordstudy('Apfel', '🍎', 'Präg dir Bild und Wort gut ein.'),
       wordstudy('Auto', '🚗', 'Präg dir Bild und Wort gut ein.'),
+      wordstudy('Maus', '🐭', 'Präg dir Bild und Wort gut ein.'),
+      wordstudy('Hase', '🐰', 'Präg dir Bild und Wort gut ein.'),
+      wordstudy('Ball', '⚽', 'Präg dir Bild und Wort gut ein.'),
+      wordstudy('Buch', '📖', 'Präg dir Bild und Wort gut ein.'),
+      wordstudy('Eis', '🍦', 'Präg dir Bild und Wort gut ein.'),
+      wordstudy('Brot', '🍞', 'Präg dir Bild und Wort gut ein.'),
+      wordstudy('Nase', '👃', 'Präg dir Bild und Wort gut ein.'),
+      wordstudy('Mond', '🌙', 'Präg dir Bild und Wort gut ein.'),
+      wordstudy('Stern', '⭐', 'Präg dir Bild und Wort gut ein.'),
+      wordstudy('Wolke', '☁️', 'Präg dir Bild und Wort gut ein.'),
+      wordstudy('Igel', '🦔', 'Präg dir Bild und Wort gut ein.'),
+      wordstudy('Hand', '✋', 'Präg dir Bild und Wort gut ein.'),
     ],
     2:[
       satzRound([
@@ -4179,7 +4192,7 @@ function playLetterSoundThenWord(key, word){
    ein Satz oder lädt eine Datei nicht, spricht der ganze Text wie bisher
    die Browser-Stimme - nichts bricht ab.
    ============================================================ */
-const TTS_VER = '20261119j';   // bei neuen Sprachdateien erhöhen: verhindert, dass der Browser alte und neue Dateien mischt
+const TTS_VER = '20261119m';   // bei neuen Sprachdateien erhöhen: verhindert, dass der Browser alte und neue Dateien mischt
 const TTS_FILES = ['audio-1.bin','audio-2.bin','audio-3.bin'], TTS_SPLIT = 13000000, TTS_HDR = 32;   // jede Datei beginnt mit einem 32-Byte-Kopf   // Länge der ersten beiden Dateien (GitHub erlaubt Uploads bis 25 MB)
 const TTS = {idx:null, buf:null, q:[], busy:false, el:null, gen:0, urls:{}, rangeOk:true, miss:{}};
 function cyrb53(str){
@@ -5254,19 +5267,31 @@ function stationCard(d, info, pos){
     </div>`;
 }
 
+// Stationen, an denen für das Kind etwas zu lernen ist, in der Reihenfolge der Hafenkarte (Dein Weg).
+function neededStations(){
+  const withStatus = domains.map(d => ({d, info: domainStatus(d)}));
+  const known = state.knownAtStart || {};
+  // Reihenfolge: Auffrischung zuerst; dann Stationen, an denen etwas zu lernen ist
+  // (nicht wartend), begonnene vor neuen, niedrige Stufe vor hoher.
+  // Abwechslung: Die Station, die zuletzt geübt wurde, rückt hinter andere; heute weniger geübte Stationen kommen zuerst.
+  const today = todayStr(), checks = (state.selfChecks||[]).filter(c=>c.date===today);
+  const lastDom = checks.length ? checks[checks.length-1].domainId : null;
+  const todayN = id => checks.filter(c=>c.domainId===id).length;
+  const rank = ({d,info}) => [info.status==='review'?0:1, (nextLevelBlocked(d.id).length && stationStarted(d.id))?1:0, d.id===lastDom?1:0, todayN(d.id), stationStarted(d.id)?0:1, state.levels[d.id]||1, TIERS[d.id]||0, domains.indexOf(d)];
+  const cmp = (a,b)=>{ const ra=rank(a), rb=rank(b); for(let i=0;i<ra.length;i++){ if(ra[i]!==rb[i]) return ra[i]-rb[i]; } return 0; };
+  const needed = withStatus
+    .filter(x => (x.info.status==='active' || x.info.status==='review') && !(known[x.d.id] && x.info.status==='active'))
+    .sort(cmp);
+
+  return needed;
+}
+
 function screenMap(){
   ensureTrophies();
   const withStatus = domains.map(d => ({d, info: domainStatus(d)}));
   const known = state.knownAtStart || {};
   const showAll = !!state.showAllStations;
-
-  // Reihenfolge: Auffrischung zuerst; dann Stationen, an denen etwas zu lernen ist
-  // (nicht wartend), begonnene vor neuen, niedrige Stufe vor hoher.
-  const rank = ({d,info}) => [info.status==='review'?0:1, (nextLevelBlocked(d.id).length && stationStarted(d.id))?1:0, stationStarted(d.id)?0:1, state.levels[d.id]||1, TIERS[d.id]||0, domains.indexOf(d)];
-  const cmp = (a,b)=>{ const ra=rank(a), rb=rank(b); for(let i=0;i<ra.length;i++){ if(ra[i]!==rb[i]) return ra[i]-rb[i]; } return 0; };
-  const needed = withStatus
-    .filter(x => (x.info.status==='active' || x.info.status==='review') && !(known[x.d.id] && x.info.status==='active'))
-    .sort(cmp);
+  const needed = neededStations();
 
   let wegList, moreList = [];
   if(showAll){
@@ -7193,6 +7218,12 @@ function screenLetterDrill(){
 const DF_STRENGTH = {"phon": ["Du kannst Reime, Silben und Anfangslaute hören.", "Du hörst auch bei kniffligen Wörtern genau hin.", "Du hörst schwierige Reime und Anfangslaute heraus.", "Du hörst sogar bei langen Wörtern genau hin."], "buchstabe": ["Du weißt, mit welchem Buchstaben ein Wort anfängt.", "Du findest fehlende Buchstaben in einem Wort.", "Du findest zu einem Bild das richtige Wort.", "Du unterscheidest Buchstaben, die leicht zu verwechseln sind."], "silbendock": ["Du schreibst den ersten Laut eines Wortes auf.", "Du schreibst den letzten Laut eines Wortes auf.", "Du hörst eine Silbe heraus und schreibst sie auf.", "Du schreibst die ersten zwei Silben eines Wortes auf."], "lesen": ["Du liest ähnliche Wörter genau und unterscheidest sie.", "Du liest einen Satz und findest das Wort, das fehlt.", "Du liest längere Sätze und findest die passenden Wörter.", "Du liest einen Satz und findest den passenden Satzteil."], "schreib1": ["Du schreibst einfache Wörter so auf, wie du sie hörst.", "Du schreibst auch Wörter mit neuen Buchstaben richtig auf.", "Du schreibst Wörter mit vielen Mitlauten hintereinander.", "Du schreibst schwierige Wörter mit vielen Mitlauten auf."], "schreib2": ["Du kennst Tricks, um Wörter richtig zu schreiben.", "Du findest mit Verlängern und Ableiten den richtigen Buchstaben.", "Du schreibst Nomen groß und setzt das richtige Satzzeichen.", "Du kennst viele Merkwörter und weißt, welcher Trick hilft."], "grundwortschatz": ["Du schreibst viele einfache Merkwörter richtig.", "Du schreibst Wörter mit Doppellauten und doppelten Mitlauten richtig.", "Du schreibst Wörter richtig, die man verlängern oder ableiten muss.", "Du schreibst auch lange Wörter und schwierige Merkwörter richtig."]};
 const DF_NEXT = {"phon": ["Reime, Silben und Anfangslaute zu hören.", "auch bei kniffligen Wörtern genau hinzuhören.", "schwierige Reime und Anfangslaute herauszuhören.", "auch bei langen Wörtern genau hinzuhören."], "buchstabe": ["zu hören, mit welchem Buchstaben ein Wort anfängt.", "fehlende Buchstaben in einem Wort zu finden.", "zu einem Bild das richtige Wort zu finden.", "Buchstaben zu unterscheiden, die leicht zu verwechseln sind."], "silbendock": ["den ersten Laut eines Wortes aufzuschreiben.", "den letzten Laut eines Wortes aufzuschreiben.", "eine Silbe herauszuhören und aufzuschreiben.", "die ersten zwei Silben eines Wortes aufzuschreiben."], "lesen": ["ähnliche Wörter genau zu lesen.", "einen Satz zu lesen und das fehlende Wort zu finden.", "längere Sätze zu lesen und die passenden Wörter zu finden.", "einen Satz zu lesen und den passenden Satzteil zu finden."], "schreib1": ["einfache Wörter so aufzuschreiben, wie du sie hörst.", "auch Wörter mit neuen Buchstaben aufzuschreiben.", "Wörter mit vielen Mitlauten hintereinander zu schreiben.", "schwierige Wörter mit vielen Mitlauten aufzuschreiben."], "schreib2": ["Tricks anzuwenden, mit denen du Wörter richtig schreibst.", "mit Verlängern und Ableiten den richtigen Buchstaben zu finden.", "Nomen großzuschreiben und das richtige Satzzeichen zu setzen.", "Merkwörter zu üben und den passenden Trick dazu zu finden."], "grundwortschatz": ["viele einfache Merkwörter richtig zu schreiben.", "Wörter mit Doppellauten und doppelten Mitlauten richtig zu schreiben.", "Wörter richtig zu schreiben, die man verlängern oder ableiten muss.", "auch lange Wörter und schwierige Merkwörter richtig zu schreiben."]};
 const DF_AHA = {"phon": "Wenn du Laute und Silben genau hörst, kannst du ein Wort in seine Teile zerlegen. Das ist der erste Schritt zum Schreiben. Danach helfen dir Regeln und Wortmuster, das Wort auch richtig zu schreiben.", "buchstabe": "Jeder Laut hat einen Buchstaben. Wenn du beides zusammenbringst, kannst du jedes Wort lesen und schreiben.", "silbendock": "Jedes Wort besteht aus Silben, wie Bausteine. Wenn du die Silben hörst, werden auch lange Wörter ganz leicht.", "lesen": "Viele Wörter sehen fast gleich aus. Wer genau liest, versteht den Satz und verwechselt nichts mehr.", "schreib1": "Wenn du jeden Laut aufschreibst, hast du schon das Gerüst des Wortes. Danach kommen Regeln und Wortmuster dazu, damit das Wort auch richtig geschrieben ist.", "schreib2": "Manche Wörter hört man nicht richtig. Mit Tricks wie Verlängern weißt du, ob Hund mit d oder mit t geschrieben wird.", "grundwortschatz": "Manche Wörter muss man sich einfach merken. Wenn du sie kennst, schreibst du schneller und sicherer."};
+DF_NEXT.satzbau = ["Wörter anzuschauen, sie dir zu merken und aus dem Kopf aufzuschreiben.","einen eigenen kurzen Satz zu bauen und aufzuschreiben.","einen eigenen Satz mit mehr Bausteinen zu bauen.","einen langen, eigenen Satz zu bauen und aufzuschreiben."];
+DF_AHA.satzbau = "Wenn du ein Wort in Bausteinen siehst und es dir merkst, schreibst du es sicherer. So wird aus einzelnen Wörtern ein ganzer Satz.";
+DF_NEXT.lesekai = ["zu einem Bild die passende Silbe und das passende Wort zu lesen.","auch längere Wörter in Silben zu lesen und zu verbinden.","einen ganzen Satz zu lesen und das passende Bild zu finden.","Sätze genau zu lesen und zu malen, was dasteht."];
+DF_AHA.lesekai = "Wenn du genau liest, was dasteht, verstehst du den Satz. Dann entstehen Bilder in deinem Kopf.";
+DF_NEXT.diktat = ["einen kurzen Satz zu hören und auf Papier aufzuschreiben.","etwas längere Sätze zu schreiben und selbst zu überprüfen.","kniffligere Sätze sicher aufzuschreiben.","sehr lange Sätze sicher aufzuschreiben."];
+DF_AHA.diktat = "In einem Satz kommen Wörter, Großbuchstaben und Satzzeichen zusammen. Wenn du deinen Satz selbst überprüfst, findest du Fehler und kannst sie verbessern.";
 const DF_TEXT = {
   hello:'Super, das hast du toll gemacht! Ich möchte dir gern eine Rückmeldung geben.',
   can:'Das kannst du schon richtig gut:',
@@ -7214,9 +7245,9 @@ function diagFeedbackModel(){
   });
   const strengths = rows.filter(x=>x.m>=1).sort((a,b)=>b.m-a.m || a.i-b.i).slice(0,3)
     .map(x=>({d:x.d, text:DF_STRENGTH[x.d.id][x.m-1]}));
-  const open = rows.filter(x=>x.m<4).sort((a,b)=> (TIERS[a.d.id]-TIERS[b.d.id]) || (a.m-b.m) || (a.i-b.i));
-  const nx = open[0] || null;
-  return {strengths, next: nx ? {d:nx.d, text: DF_NEXT[nx.d.id][nx.m], aha: DF_AHA[nx.d.id]} : null};
+  const nx = neededStations()[0] || null;
+  const lvl = nx ? Math.max(0, Math.min(3, (state.levels[nx.d.id]||1)-1)) : 0;
+  return {strengths, next: nx ? {d:nx.d, text: DF_NEXT[nx.d.id][lvl], aha: DF_AHA[nx.d.id]} : null};
 }
 function screenDiagFeedback(){
   const m = diagFeedbackModel();
