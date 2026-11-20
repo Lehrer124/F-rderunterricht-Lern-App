@@ -129,6 +129,8 @@
   .prompt-text{font-size:1.3rem;font-weight:600;line-height:1.4;color:var(--harbor-dark);margin:6px 0 4px;font-family:'Baloo 2';}
   .speak-btn.wide{width:auto;height:auto;min-height:48px;border-radius:26px;padding:8px 20px;font-size:1.05rem;font-family:'Andika';font-weight:700;display:inline-flex;gap:8px;margin:6px 0;}
   .btnrow{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:center;margin:10px 0;}
+  @keyframes werkPulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.35);opacity:.7;}}
+  .werk-pulse{animation:werkPulse 1s ease-in-out infinite;transform-box:fill-box;transform-origin:center;}
   .speak-btn{
     background:var(--sun);border:none;color:var(--harbor-dark);
     border-radius:50%;width:52px;height:52px;font-size:1.4rem;cursor:pointer;margin:10px auto 4px;
@@ -4192,7 +4194,7 @@ function playLetterSoundThenWord(key, word){
    ein Satz oder lädt eine Datei nicht, spricht der ganze Text wie bisher
    die Browser-Stimme - nichts bricht ab.
    ============================================================ */
-const TTS_VER = '20261119m';   // bei neuen Sprachdateien erhöhen: verhindert, dass der Browser alte und neue Dateien mischt
+const TTS_VER = '20261119n';   // bei neuen Sprachdateien erhöhen: verhindert, dass der Browser alte und neue Dateien mischt
 const TTS_FILES = ['audio-1.bin','audio-2.bin','audio-3.bin'], TTS_SPLIT = 13000000, TTS_HDR = 32;   // jede Datei beginnt mit einem 32-Byte-Kopf   // Länge der ersten beiden Dateien (GitHub erlaubt Uploads bis 25 MB)
 const TTS = {idx:null, buf:null, q:[], busy:false, el:null, gen:0, urls:{}, rangeOk:true, miss:{}};
 function cyrb53(str){
@@ -4687,6 +4689,7 @@ function render(skipAudioStop){
 // bzw. die Vergleichsphase erscheint - einmal je Phase, auch wenn danach neu gezeichnet wird.
 function autoSpeakHook(){
   try{
+    if(state.screen==='werkstatt'){ setTimeout(()=>{ if(state.screen==='werkstatt') werkInit(); }, 0); return; }
     if(state.screen==='practice' && state.practice && state.practice.jump && !state.practice.jumpSpoken){
       state.practice.jumpSpoken = true;
       setTimeout(()=>{ if(state.screen==='practice') speakJump(); }, 500);
@@ -4732,6 +4735,8 @@ function renderScreen(){
   if(state.screen==='drilloffer') return screenDrillOffer();
   if(state.screen==='letterdrill') return screenLetterDrill();
   if(state.screen==='drilldone') return screenDrillDone();
+  if(state.screen==='werkstatt') return screenWerkstatt();
+  if(state.screen==='werkpick') return screenWerkPick();
   if(state.screen==='diagreport') return screenDiagReport();
   if(state.screen==='diagfeedback') return screenDiagFeedback();
   if(state.screen==='vertiefung') return screenVertiefung();
@@ -7172,6 +7177,9 @@ window.drillAnswer = function(given){
   } else {
     const key = item.speak;
     d.wrongAttempts[key] = (d.wrongAttempts[key]||0) + 1;
+    // Wiederholt falsch bei demselben Buchstaben = Buchstabe-Laut-Zuordnung noch nicht verstanden: Werkstatt ist dann verbindlich
+    d.werkDone = d.werkDone || {};
+    if(d.wrongAttempts[key] >= 2 && !d.werkDone[letter] && WERK_ALL.indexOf(letter) >= 0) d.werkPending = letter;
     if(d.wrongAttempts[key] < 4){
       d.queue.push(item); // nochmal hinten anstellen, bis es sitzt
     } else {
@@ -7182,6 +7190,11 @@ window.drillAnswer = function(given){
 };
 
 window.nextDrillItem = function(){
+  const dd = state.drill;
+  if(dd && dd.werkPending){
+    const k = dd.werkPending; dd.werkPending = null; dd.werkDone = dd.werkDone || {}; dd.werkDone[k] = true;
+    startWerkstatt([k], 'drillnext', true); return;
+  }
   pickDrillItem();
   render();
   if(state.screen==='drilldone') speakDrillDone();
@@ -7387,6 +7400,352 @@ window.speakDrillDone = function(){
   speak('Buchstaben-Training geschafft! ' + summaryText);
 };
 
+/* ---------- Buchstabenwerkstatt: Hören – Nachspuren – aus dem Kopf schreiben ---------- */
+// Gedacht für Buchstaben, bei denen die Zuordnung Buchstabe–Laut noch unsicher ist (Buchstaben-Training, Lehrkraft-Auswahl).
+// Grundlage: Buchstabe und Laut werden ausdrücklich verknüpft (Phonics); die Schreibbewegung stützt das Wiedererkennen des
+// Buchstabens (Longcamp 2005, Kiefer 2015). Nachspuren ist dabei nur die Brücke zur richtigen Strichrichtung - gefestigt wird
+// erst durch das Schreiben aus dem Gedächtnis und auf Papier. Schreibwege: unverbundene Druckschrift (Hamburger Bildungsplan:
+// „motorisch günstige Schreibbewegung“). Raster: Oberlinie y=15, Mittellinie y=55, Grundlinie y=105, Unterlänge bis y=140.
+const WERK_DOTS_A = ['M36 3 L36 4','M64 3 L64 4'];
+const WERK_DOTS_LOW = ['M34 36 L34 37','M58 36 L58 37'];
+const WERK_O_UP = 'M52 14 C26 14 14 36 14 60 C14 84 26 106 52 106 C78 106 90 84 90 60 C90 36 78 14 52 14';
+const WERK_U_UP = 'M20 15 L20 78 C20 114 80 114 80 78 L80 15';
+const WERK_O_LOW = 'M50 54 C28 54 18 66 18 80 C18 98 30 108 50 108 C70 108 82 98 82 80 C82 66 70 54 50 54';
+const WERK_U_LOW = ['M22 55 L22 90 C22 112 62 112 68 90','M68 55 L68 105'];
+const WERK_A_LOW = ['M68 68 C58 52 22 52 22 80 C22 108 58 110 68 94','M68 55 L68 105'];
+const WERK_A_UP = ['M50 15 L16 105','M50 15 L84 105','M30 72 L70 72'];
+const GLYPHS = {
+  'A':WERK_A_UP, 'Ä':WERK_A_UP.concat(WERK_DOTS_A),
+  'B':['M25 15 L25 105','M25 15 L50 15 C80 15 80 60 50 60 L25 60','M25 60 L55 60 C92 60 92 105 55 105 L25 105'],
+  'C':['M82 32 C72 8 16 8 16 60 C16 112 72 112 82 88'],
+  'D':['M25 15 L25 105','M25 15 L45 15 C96 15 96 105 45 105 L25 105'],
+  'E':['M25 15 L25 105','M25 15 L80 15','M25 60 L70 60','M25 105 L80 105'],
+  'F':['M25 15 L25 105','M25 15 L80 15','M25 60 L70 60'],
+  'G':['M82 32 C72 8 16 8 16 60 C16 112 78 118 84 80 L84 64 L54 64'],
+  'H':['M22 15 L22 105','M78 15 L78 105','M22 60 L78 60'],
+  'I':['M50 15 L50 105'],
+  'J':['M66 15 L66 80 C66 110 22 114 18 84'],
+  'K':['M25 15 L25 105','M78 15 L25 66','M42 50 L80 105'],
+  'L':['M25 15 L25 105 L80 105'],
+  'M':['M18 105 L18 15 L50 72 L82 15 L82 105'],
+  'N':['M22 105 L22 15 L78 105 L78 15'],
+  'O':[WERK_O_UP], 'Ö':[WERK_O_UP].concat(WERK_DOTS_A),
+  'P':['M25 15 L25 105','M25 15 L50 15 C88 15 88 64 50 64 L25 64'],
+  'Q':[WERK_O_UP,'M58 78 L88 108'],
+  'R':['M25 15 L25 105','M25 15 L50 15 C88 15 88 64 50 64 L25 64','M50 64 L82 105'],
+  'S':['M80 30 C72 10 22 8 22 38 C22 62 78 56 78 84 C78 114 28 112 18 90'],
+  'T':['M50 15 L50 105','M15 15 L85 15'],
+  'U':[WERK_U_UP], 'Ü':[WERK_U_UP].concat(WERK_DOTS_A),
+  'V':['M15 15 L50 105 L85 15'],
+  'W':['M10 15 L30 105 L50 40 L70 105 L90 15'],
+  'X':['M18 15 L82 105','M82 15 L18 105'],
+  'Y':['M15 15 L50 62 L50 105','M85 15 L50 62'],
+  'Z':['M18 15 L82 15 L18 105 L82 105'],
+  'a':WERK_A_LOW, 'ä':WERK_A_LOW.concat(WERK_DOTS_LOW),
+  'b':['M25 15 L25 105','M25 70 C44 50 82 58 82 82 C82 108 44 112 25 96'],
+  'c':['M70 66 C58 50 20 54 20 80 C20 108 58 112 70 94'],
+  'd':['M70 68 C58 52 22 52 22 80 C22 108 58 110 70 94','M70 15 L70 105'],
+  'e':['M20 80 L72 80 C72 54 22 50 20 82 C20 110 54 112 70 96'],
+  'f':['M64 22 C42 12 38 30 38 50 L38 105','M20 58 L60 58'],
+  'g':['M68 68 C58 52 22 52 22 80 C22 108 58 110 68 94','M68 55 L68 124 C68 146 40 146 20 134'],
+  'h':['M25 15 L25 105','M25 72 C38 52 72 50 72 76 L72 105'],
+  'i':['M45 58 L45 105','M45 36 L45 37'],
+  'j':['M45 58 L45 126 C45 146 28 146 18 136','M45 36 L45 37'],
+  'k':['M25 15 L25 105','M70 55 L25 86','M42 76 L72 105'],
+  'l':['M45 15 L45 105'],
+  'm':['M14 55 L14 105','M14 74 C22 50 46 50 46 74 L46 105','M46 74 C54 50 80 50 80 74 L80 105'],
+  'n':['M25 55 L25 105','M25 74 C36 50 70 50 70 76 L70 105'],
+  'o':[WERK_O_LOW], 'ö':[WERK_O_LOW].concat(WERK_DOTS_LOW),
+  'p':['M25 55 L25 140','M25 70 C44 50 82 58 82 82 C82 108 44 112 25 96'],
+  'q':['M68 68 C58 52 22 52 22 80 C22 108 58 110 68 94','M68 55 L68 140'],
+  'r':['M28 55 L28 105','M28 74 C36 54 54 50 70 58'],
+  's':['M66 64 C56 50 26 52 26 68 C26 86 64 80 64 98 C64 114 30 112 20 100'],
+  't':['M45 25 L45 98 C45 108 56 108 66 104','M24 58 L66 58'],
+  'u':WERK_U_LOW, 'ü':WERK_U_LOW.concat(WERK_DOTS_LOW),
+  'v':['M18 55 L45 105 L72 55'],
+  'w':['M8 55 L28 105 L48 62 L68 105 L88 55'],
+  'x':['M20 55 L70 105','M70 55 L20 105'],
+  'y':['M20 55 L45 105','M70 55 L38 130 C32 142 20 142 14 138'],
+  'z':['M20 55 L70 55 L20 105 L70 105'],
+};
+const WERK_ALL = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','R','S','T','U','V','W','X','Y','Z','Ä','Ö','Ü','Sp','Pf','Qu','Sch','Au','Ei'];
+const WERK_EXTRA = { M:{emoji:'🐭',word:'Maus'}, C:{emoji:'🤡',word:'Clown'}, X:{emoji:'🧙',word:'Hexe'}, 'Ö':{emoji:'🛢️',word:'Öl'}, 'Ü':{emoji:'🎁',word:'Überraschung'} };
+const WERK_AUDIO = {'Ä':'AE','Ö':'OE','Ü':'UE','V':'V1','Sp':'SP','Pf':'PF','Qu':'QU','Sch':'SCH','Au':'AU','Ei':'EI'};
+const WERK_STEPS = ['hear','traceUp','traceLow','freeUp','freeLow','done'];
+const WERK_TEXT = {
+  hear:'Schau genau hin und hör gut zu.',
+  traceUp:'Fahre den großen Buchstaben mit dem Finger nach. Starte beim grünen Punkt.',
+  traceLow:'Jetzt der kleine Buchstabe. Starte wieder beim grünen Punkt.',
+  freeUp:'Jetzt schreibst du den großen Buchstaben allein. Denk an den Laut.',
+  freeLow:'Und jetzt den kleinen Buchstaben ganz allein.',
+  compare:'Sieht dein Buchstabe so aus?',
+  paper:'Super gemacht! Schreibe den Buchstaben jetzt auch noch einmal mit einem Stift auf Papier.',
+  good:'Prima, du hast den Buchstaben geschafft!'
+};
+function werkInfo(key){
+  const it = drillPool().find(i=>i.options[i.answer]===key);
+  const ex = WERK_EXTRA[key];
+  const chars = [...key];
+  return {
+    key,
+    emoji: it ? it.targetEmoji : (ex ? ex.emoji : '🔤'),
+    word: it ? it.speak : (ex ? ex.word : ''),
+    audio: (it && it.audioKey) || WERK_AUDIO[key] || key.toUpperCase(),
+    up: chars.map((c,i)=> i===0 ? c.toUpperCase() : c.toLowerCase()),
+    low: chars.map(c=>c.toLowerCase())
+  };
+}
+function werkShift(d, dx){
+  return d.replace(/([MLC])([^MLC]*)/g, (m,c,args)=>{
+    const n = args.trim().split(/[\s,]+/).map(Number);
+    for(let i=0;i<n.length;i+=2) n[i] += dx;
+    return c + n.join(' ') + ' ';
+  });
+}
+window.startWerkstatt = function(keys, ret, mandatory){
+  const list = (keys||[]).filter(k=>WERK_ALL.indexOf(k)>=0);
+  if(!list.length){ state.screen = ret || 'map'; render(); return; }
+  state.werk = {list, i:0, step:0, ret: ret || 'map', phase:'draw', demoKey:null, mandatory:!!mandatory};
+  state.screen = 'werkstatt'; render();
+};
+window.werkLeave = function(){
+  werkStop();
+  const w = state.werk; state.werk = null;
+  if(w && w.ret==='drillnext'){ state.screen = 'letterdrill'; nextDrillItem(); return; }
+  state.screen = (w && w.ret) || 'map'; render();
+};
+function werkCur(){ const w = state.werk; return w ? werkInfo(w.list[w.i]) : null; }
+window.werkHear = function(){
+  const info = werkCur(); if(!info) return;
+  const after = ()=>{ if(info.word) speak(info.word); };
+  playLautIso(info.audio, ok=>{ if(ok) after(); else playAudioKey(info.audio, after); });
+};
+function werkSpeakStep(){
+  const w = state.werk; if(!w) return;
+  const st = WERK_STEPS[w.step];
+  if(st==='hear'){ speak(WERK_TEXT.hear); }
+  else if(st==='done'){ speak(WERK_TEXT.paper); }
+  else if(WERK_TEXT[st]) speak(WERK_TEXT[st]);
+}
+window.werkNext = function(){
+  const w = state.werk; if(!w) return;
+  werkStop();
+  w.step++; w.phase = 'draw'; w.demoKey = null;
+  if(w.step >= WERK_STEPS.length){
+    if(w.i < w.list.length-1){ w.i++; w.step = 0; }
+    else { return werkLeave(); }
+  }
+  render();
+};
+function werkStepGlyphs(info, st){
+  return (st==='traceUp' || st==='freeUp') ? info.up : info.low;
+}
+function werkProgressHtml(step){
+  return `<div style="display:flex;gap:8px;justify-content:center;margin:6px 0 10px;">${WERK_STEPS.slice(0,5).map((s,i)=>`<span style="width:${i===step?26:12}px;height:12px;border-radius:8px;background:${i<step?'#3FA34D':(i===step?'#E2672E':'#D8C9A8')};"></span>`).join('')}</div>`;
+}
+function screenWerkstatt(){
+  const w = state.werk; if(!w) return '';
+  const info = werkInfo(w.list[w.i]);
+  const st = WERK_STEPS[w.step];
+  const title = info.up.join('') + ' ' + info.low.join('');
+  let body = '';
+  if(st==='hear'){
+    body = `
+      <div style="font-size:5.2rem;line-height:1.1;margin:6px 0;">${info.emoji}</div>
+      <div style="font-family:'Baloo 2';font-weight:800;font-size:3.4rem;color:var(--harbor-dark);letter-spacing:6px;">${info.up.join('')} ${info.low.join('')}</div>
+      <div style="font-size:1.1rem;color:#4B6473;margin:4px 0 10px;">${info.up.join('')} wie ${info.word}</div>
+      <button class="btn btn-primary" style="font-size:1.3rem;padding:14px 26px;" onclick="werkHear()">🔊 Laut hören</button>
+      <button class="btn btn-primary btn-block" style="margin-top:16px;" onclick="werkNext()">Weiter ▶️</button>`;
+  } else if(st==='done'){
+    body = `
+      <div style="font-size:3rem;">🎉</div>
+      <div style="font-family:'Baloo 2';font-weight:800;font-size:2.4rem;color:var(--harbor-dark);">${info.emoji} ${title}</div>
+      <p style="font-size:1.1rem;line-height:1.5;margin:10px 0;">✏️ ${WERK_TEXT.paper}</p>
+      <button class="speak-btn" onclick="werkSpeakStep()">🔊</button>
+      <button class="btn btn-primary btn-block" style="margin-top:14px;" onclick="werkNext()">${w.i < w.list.length-1 ? 'Nächster Buchstabe ▶️' : 'Fertig ✔️'}</button>`;
+  } else {
+    const isTrace = (st==='traceUp' || st==='traceLow');
+    const label = werkStepGlyphs(info, st).join('');
+    body = `
+      <div style="font-size:1.1rem;font-family:'Baloo 2';font-weight:700;color:var(--harbor-dark);">${WERK_TEXT[st]}</div>
+      <button class="speak-btn" onclick="werkSpeakStep()">🔊</button>
+      <div style="display:flex;gap:10px;justify-content:center;align-items:center;margin:4px 0;"><span style="font-size:2rem;">${info.emoji}</span><span style="font-family:'Baloo 2';font-weight:800;font-size:1.6rem;color:#4B6473;">${isTrace ? label : '?'}</span><button class="btn btn-ghost" style="padding:6px 12px;" onclick="werkHear()">🔊 Laut</button></div>
+      <div id="werkBox" style="display:flex;justify-content:center;margin:8px 0;"></div>
+      <div id="werkMsg" style="min-height:26px;font-size:1.05rem;font-weight:700;color:#3FA34D;"></div>
+      <div id="werkBtns" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:6px;"></div>`;
+  }
+  return `
+  ${topbar('Buchstabenwerkstatt', title, false)}
+  <main>
+    <div class="prompt-card" style="text-align:center;">
+      ${werkProgressHtml(w.step)}
+      ${body}
+      ${w.mandatory ? '' : '<button class="btn btn-ghost" style="margin-top:12px;" onclick="werkLeave()">Später weitermachen</button>'}
+    </div>
+  </main>`;
+}
+/* --- Zeichenfläche (Nachspuren und freies Schreiben) --- */
+let werkRun = null;
+function werkStop(){
+  if(werkRun){ werkRun.dead = true; if(werkRun.raf) cancelAnimationFrame(werkRun.raf); }
+  werkRun = null;
+}
+function werkSvgBase(W, showModel, glyphs){
+  let lines = `<line x1="0" x2="${W}" y1="15" y2="15" stroke="#E7DFCB" stroke-width="1.5" stroke-dasharray="4 4"/>
+    <line x1="0" x2="${W}" y1="55" y2="55" stroke="#E7DFCB" stroke-width="1.5" stroke-dasharray="4 4"/>
+    <line x1="0" x2="${W}" y1="105" y2="105" stroke="#9CC3D3" stroke-width="2.5"/>`;
+  const paths = [];
+  glyphs.forEach((g,gi)=>{ (GLYPHS[g]||[]).forEach((d,si)=>{ paths.push({d: werkShift(d, gi*100), si, multi:(GLYPHS[g]||[]).length>1}); }); });
+  return {lines, paths};
+}
+function werkInit(){
+  const w = state.werk; if(!w) return;
+  const st = WERK_STEPS[w.step];
+  const box = document.getElementById('werkBox');
+  werkStop();
+  if(!box) {
+    // Hör-Schritt: Laut einmal automatisch abspielen, danach den Satz
+    if(st==='hear' && w.demoKey!=='hear'+w.i){ w.demoKey = 'hear'+w.i; setTimeout(()=>{ if(state.screen==='werkstatt' && state.werk===w) { werkSpeakStep(); setTimeout(()=>{ if(state.screen==='werkstatt' && state.werk===w) werkHear(); }, 2600); } }, 450); }
+    if(st==='done' && w.demoKey!=='done'+w.i){ w.demoKey = 'done'+w.i; setTimeout(()=>{ if(state.screen==='werkstatt' && state.werk===w) werkSpeakStep(); }, 450); }
+    return;
+  }
+  const info = werkInfo(w.list[w.i]);
+  const glyphs = werkStepGlyphs(info, st);
+  const W = glyphs.length * 100;
+  const base = werkSvgBase(W, false, glyphs);
+  const hasDots = glyphs.some(g=>'ÄÖÜ'.indexOf(g)>=0), hasDesc = glyphs.some(g=>'gjpqyQ'.indexOf(g)>=0);
+  const yTop = hasDots ? -12 : 0, yBot = hasDesc ? 152 : 120;
+  const maxPx = Math.min(340, 175*glyphs.length+55);
+  const isTrace = (st==='traceUp' || st==='traceLow');
+  const ghost = isTrace ? base.paths.map(p=>`<path class="wg" d="${p.d}" fill="none" stroke="#D5E0E6" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>`).join('') : '';
+  const prog = isTrace ? base.paths.map(p=>`<path class="wp" d="${p.d}" fill="none" stroke="#1B6E7F" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>`).join('') : '';
+  box.innerHTML = `<svg id="werkSvg" viewBox="0 ${yTop} ${W} ${yBot-yTop}" style="width:100%;max-width:${maxPx}px;touch-action:none;background:#fff;border-radius:18px;border:2px solid var(--line);cursor:crosshair;">
+    ${base.lines}${ghost}${prog}<g id="werkMarks"></g><g id="werkInk"></g><circle id="werkDot" r="8" cx="-50" cy="-50" fill="#E2672E" stroke="#fff" stroke-width="2.5"/></svg>`;
+  const svg = document.getElementById('werkSvg');
+  const msg = document.getElementById('werkMsg'), btns = document.getElementById('werkBtns');
+  const run = werkRun = {svg, dead:false, down:false, cur:0, strokes:[], R:18};
+  const toPt = e=>{ const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY; const m = svg.getScreenCTM(); return m ? p.matrixTransform(m.inverse()) : {x:0,y:0}; };
+  const ppu = (svg.getBoundingClientRect().width || 300) / W;
+  run.R = Math.max(13, Math.min(30, 44/ppu));
+  if(isTrace){
+    const gp = svg.querySelectorAll('path.wg'), pp = svg.querySelectorAll('path.wp');
+    base.paths.forEach((p,i)=>{
+      const path = pp[i], len = path.getTotalLength(), n = Math.max(2, Math.ceil(len/3)+1), pts = [];
+      for(let k=0;k<n;k++){ const q = path.getPointAtLength(len*k/(n-1)); pts.push({x:q.x,y:q.y}); }
+      path.setAttribute('stroke-dasharray', len); path.setAttribute('stroke-dashoffset', len);
+      run.strokes.push({path, len, pts, idx:0, p, ghost:gp[i]});
+    });
+    const drawMarks = ()=>{
+      const g = document.getElementById('werkMarks'); if(!g) return;
+      const order = run.strokes.map((s,i)=>i).filter(i=>i!==run.cur); if(run.cur<run.strokes.length) order.push(run.cur);
+      g.innerHTML = order.map(i=>run.strokes[i]).map(s=>{ const i = run.strokes.indexOf(s); return s.done ? '' : `<g><circle cx="${s.pts[0].x}" cy="${s.pts[0].y}" r="${i===run.cur?9:7}" fill="#3FA34D" stroke="#fff" stroke-width="2.5"${i===run.cur?' class="werk-pulse"':''}/>${s.p.multi?`<text x="${s.pts[0].x}" y="${s.pts[0].y+4}" font-size="11" font-weight="800" text-anchor="middle" fill="#fff" style="pointer-events:none;">${s.p.si+1}</text>`:''}</g>`; }).join('');
+    };
+    run.drawMarks = drawMarks; drawMarks();
+    const finish = ()=>{
+      msg.textContent = '⭐ ' + WERK_TEXT.good;
+      btns.innerHTML = `<button class="btn btn-primary" onclick="werkNext()">Weiter ▶️</button><button class="btn btn-ghost" onclick="render()">🔄 Noch einmal</button>`;
+      speak(WERK_TEXT.good);
+    };
+    const move = e=>{
+      const s = run.strokes[run.cur]; if(!s) return;
+      const q = toPt(e); let best = -1;
+      for(let j=s.idx; j<=Math.min(s.pts.length-1, s.idx+8); j++){
+        const dx = s.pts[j].x - q.x, dy = s.pts[j].y - q.y;
+        if(dx*dx+dy*dy <= run.R*run.R) best = j;
+      }
+      if(best >= s.idx){
+        s.idx = best + 1;
+        const frac = Math.min(1, best/(s.pts.length-1));
+        s.path.setAttribute('stroke-dashoffset', s.len*(1-frac));
+        if(best >= s.pts.length-1){
+          s.done = true; s.path.setAttribute('stroke-dashoffset', 0); run.cur++;
+          drawMarks();
+          if(run.cur >= run.strokes.length) finish();
+        }
+      }
+    };
+    svg.addEventListener('pointerdown', e=>{ e.preventDefault(); try{ svg.setPointerCapture(e.pointerId); }catch(x){} run.down = true; run.demoStop = true; document.getElementById('werkDot').setAttribute('cx',-50); move(e); });
+    svg.addEventListener('pointermove', e=>{ if(run.down){ e.preventDefault(); move(e); } });
+    ['pointerup','pointercancel'].forEach(t=>svg.addEventListener(t, ()=>{ run.down = false; }));
+    btns.innerHTML = `<button class="btn btn-ghost" onclick="werkDemo()">▶ Zeig es mir</button>`;
+    // Vormachen: Punkt fährt die Schreibrichtung einmal vor
+    if(w.demoKey !== st+w.i){ w.demoKey = st+w.i; setTimeout(()=>{ if(werkRun===run && !run.dead){ werkSpeakStep(); setTimeout(()=>{ if(werkRun===run && !run.dead) werkDemo(); }, 4200); } }, 450); }
+  } else {
+    // Freies Schreiben aus dem Gedächtnis
+    const ink = document.getElementById('werkInk'); let cur = null;
+    const addPt = e=>{ const q = toPt(e); cur.d += ' L' + q.x.toFixed(1) + ' ' + q.y.toFixed(1); cur.el.setAttribute('d', cur.d); };
+    svg.addEventListener('pointerdown', e=>{ if(run.locked) return; e.preventDefault(); try{ svg.setPointerCapture(e.pointerId); }catch(x){} run.down = true;
+      const q = toPt(e); const el = document.createElementNS('http://www.w3.org/2000/svg','path');
+      el.setAttribute('fill','none'); el.setAttribute('stroke','#1B6E7F'); el.setAttribute('stroke-width','9'); el.setAttribute('stroke-linecap','round'); el.setAttribute('stroke-linejoin','round');
+      cur = {el, d:'M'+q.x.toFixed(1)+' '+q.y.toFixed(1)+' L'+q.x.toFixed(1)+' '+(q.y+0.1).toFixed(1)}; el.setAttribute('d', cur.d); ink.appendChild(el); run.inked = true;
+      document.getElementById('werkFin') && (document.getElementById('werkFin').disabled = false); });
+    svg.addEventListener('pointermove', e=>{ if(run.down && cur && !run.locked){ e.preventDefault(); addPt(e); } });
+    ['pointerup','pointercancel'].forEach(t=>svg.addEventListener(t, ()=>{ run.down = false; cur = null; }));
+    btns.innerHTML = `<button id="werkFin" class="btn btn-primary" disabled onclick="werkFree()">✅ Fertig</button><button class="btn btn-ghost" onclick="werkClear()">🗑️ Löschen</button>`;
+    if(w.demoKey !== st+w.i){ w.demoKey = st+w.i; setTimeout(()=>{ if(werkRun===run && !run.dead) werkSpeakStep(); }, 450); }
+  }
+}
+window.werkDemo = function(){
+  const run = werkRun; if(!run || run.dead) return;
+  run.demoStop = false; const dot = document.getElementById('werkDot'); let si = 0, t0 = null;
+  const strokes = run.strokes;
+  const step = ts=>{
+    if(run.dead || run.demoStop){ dot.setAttribute('cx',-50); return; }
+    const s = strokes[si]; if(!s){ dot.setAttribute('cx',-50); return; }
+    if(t0===null) t0 = ts;
+    const dur = Math.max(800, s.len*16), f = Math.min(1, (ts - t0)/dur);
+    const q = s.path.getPointAtLength(s.len*f);
+    dot.setAttribute('cx', q.x); dot.setAttribute('cy', q.y);
+    if(f>=1){ si++; t0 = null; run.raf = setTimeout(()=>{ run.raf = requestAnimationFrame(step); }, 300); return; }
+    run.raf = requestAnimationFrame(step);
+  };
+  if(run.raf){ cancelAnimationFrame(run.raf); }
+  run.raf = requestAnimationFrame(step);
+};
+window.werkClear = function(){
+  const run = werkRun; if(!run) return;
+  const ink = document.getElementById('werkInk'); if(ink) ink.innerHTML = '';
+  const fin = document.getElementById('werkFin'); if(fin) fin.disabled = true;
+  document.querySelectorAll('.wmodel').forEach(e=>e.remove());
+  run.locked = false; run.inked = false;
+  const msg = document.getElementById('werkMsg'); if(msg) msg.textContent = '';
+  const btns = document.getElementById('werkBtns');
+  btns.innerHTML = `<button id="werkFin" class="btn btn-primary" disabled onclick="werkFree()">✅ Fertig</button><button class="btn btn-ghost" onclick="werkClear()">🗑️ Löschen</button>`;
+};
+window.werkFree = function(){
+  const run = werkRun, w = state.werk; if(!run || !w) return;
+  run.locked = true;
+  const info = werkCur(), st = WERK_STEPS[w.step], glyphs = werkStepGlyphs(info, st);
+  const base = werkSvgBase(glyphs.length*100, true, glyphs);
+  const svg = run.svg, ink = document.getElementById('werkInk');
+  const g = document.createElementNS('http://www.w3.org/2000/svg','g'); g.setAttribute('class','wmodel');
+  g.innerHTML = base.paths.map(p=>`<path d="${p.d}" fill="none" stroke="#3FA34D" stroke-opacity=".45" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 9"/>`).join('');
+  svg.insertBefore(g, ink.nextSibling);
+  document.getElementById('werkMsg').textContent = WERK_TEXT.compare;
+  document.getElementById('werkMsg').style.color = '#0F3145';
+  document.getElementById('werkBtns').innerHTML = `<button class="btn btn-primary" onclick="werkNext()">👍 Ja, passt</button><button class="btn btn-ghost" onclick="werkClear()">🔁 Noch einmal</button>`;
+  speak(WERK_TEXT.compare);
+};
+/* --- Auswahl (Lehrkraft / Nachschlagen) --- */
+function screenWerkPick(){
+  return `
+  ${topbar('Buchstabenwerkstatt', 'Buchstabe wählen', true)}
+  <main>
+    <div class="prompt-card" style="text-align:center;">
+      <p style="font-size:1rem;color:#4B6473;margin-bottom:10px;">Tippe auf den Buchstaben, den du üben willst.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:10px;">
+        ${WERK_ALL.map(k=>{ const i = werkInfo(k); return `<button class="btn btn-ghost" style="flex-direction:column;padding:10px 4px;font-family:'Baloo 2';font-weight:800;font-size:1.3rem;" onclick="startWerkstatt(['${k}'],'werkpick')"><span style="font-size:1.6rem;">${i.emoji}</span>${i.up.join('')} ${i.low.join('')}</button>`; }).join('')}
+      </div>
+    </div>
+  </main>`;
+}
+window.openWerkPick = function(){ state.showTeacher = false; state.screen = 'werkpick'; render(); };
+window.werkPracticeFlagged = function(){
+  const d = state.drill || {flagged:[]};
+  const keys = d.flagged.map(s=>String(s).split(' (')[0]);
+  startWerkstatt(keys, 'drilldone');
+};
+
 /* ---------- Lehrkraft-Ansicht ---------- */
 // Kleines SVG-Balkendiagramm für den Stufenverlauf - bewusst minimalistisch,
 // keine Bibliothek nötig.
@@ -7558,6 +7917,7 @@ function renderTeacherOverlay(){
       <p style="font-size:0.82rem;color:#6B7F8C;line-height:1.5;margin-top:16px;">
       Funktionsweise: Der Lotsen-Check beginnt je Bereich auf Stufe 2 und prüft von dort aus eine Stufe höher oder tiefer. Alle Aufgaben werden direkt am Bildschirm gelöst (Antippen oder Eintippen); Papieraufgaben kommen im Check nicht vor. Steht ein Kind noch ganz am Anfang (in einem Voraussetzungsbereich nicht einmal Stufe 1 sicher bestanden), entfallen die Folgebereiche, die schon Lese- oder Schreibkompetenz voraussetzen (Maßstab sind die Voraussetzungen der Hafenkarte); sie starten auf Stufe 1 und sind im Bericht als „nicht geprüft“ vermerkt. Je Stufe werden zwischen 2 und 5 Aufgaben gestellt, quer durch die Aufgabenformate und Strategien dieser Stufe. Eine Stufe gilt nur als bestanden, wenn die Wahrscheinlichkeit, dass ein Kind durch reines Raten dasselbe Ergebnis erreicht, höchstens 10 % beträgt (Ratewahrscheinlichkeit je Aufgabe: 1 durch Anzahl der Antworten; beim Eintippen etwa 3 %) und höchstens ein Fehler vorkommt; bei zwei Fehlern gilt die Stufe als nicht bestanden. Die Startstufe ist die höchste sicher bestandene Stufe (mindestens Stufe 1). Jede Diagnose wird als Bericht gespeichert (Testergebnis je Aufgabe, aktueller Lernstand als „Ich kann"-Aussage, nächster Lernschritt) und dient bei einer Wiederholung (z. B. nach einem halben Jahr) automatisch als Vergleichsbasis. Ein Aufstieg passiert erst, wenn mindestens 8 Versuche auf der aktuellen Stufe protokolliert sind UND von den letzten 6 Versuchen höchstens 1 falsch war (über mehrere Sitzungen hinweg gespeichert) – reines Raten reicht damit nicht für einen Aufstieg. Sind von den letzten 4 Versuchen mindestens 3 falsch, geht es eine Stufe zurück. Die Fehlerzahl je Bereich wird fortlaufend gezählt. Nach jeder Sitzung schätzt das Kind anhand einer „Ich kann..."-Aussage zum konkreten Lernziel der Stufe seine eigene Beherrschung ein – dargestellt als wachsende Pflanze in drei selbst gezeichneten Stufen (Keim, kleine Blätter, blühend) statt als Gesichtsausdruck, damit nicht die Person, sondern der noch wachsende Lernstand bewertet wird – sichtbar oben in der Tabelle, mit Warnhinweis bei auffälliger Abweichung von der tatsächlichen Fehlerzahl. Ein gemeisterter Bereich (🏆) wird nach 14 Tagen automatisch zur kurzen Auffrischung (🔁, 4 Aufgaben aus Stufe 2+3 gemischt) wieder vorgelegt; läuft die Auffrischung gut, verlängert sich die Frist um weitere 14 Tage, bei Schwierigkeiten schon nach 3 Tagen erneut oder mit Rückstufung. Lesefahrrinne/Schreibwerft schalten sich erst frei, wenn Lauthafen, Buchstabenbrücke & Silbendock mindestens Stufe 2 erreicht haben; Leuchtturm/Speicherstadt entsprechend erst nach Lesefahrrinne/Schreibwerft – angelehnt an die alphabetische-vor-orthografischer-Strategie-Abfolge, damit kein Kind mit Aufgaben konfrontiert wird, für die die Grundlage fehlt. Der Fortschritt wird ausschließlich lokal auf diesem Gerät gespeichert (kein Server, keine Übertragung von Kinderdaten). Dies ist ein Funktionsprototyp; für den Realeinsatz braucht es größere, psychometrisch abgesicherte Aufgabenpools sowie eine Anbindung an die schulische Dokumentation (z. B. DiViS/Förderplan, SCHNABEL-Ergebnisse).</p>
       ${(state.diagReports&&state.diagReports.length) ? `<button class="btn btn-ghost" style="margin-top:16px;" onclick="viewDiagReport()">📋 Diagnosebericht ansehen</button>` : ''}
+      <button class="btn btn-ghost" style="margin-top:10px;" onclick="openWerkPick()">✏️ Buchstabenwerkstatt öffnen</button>
       <button class="btn btn-primary" style="margin-top:16px;" onclick="exportFoerderplan()">📄 Förderplan-Auszug exportieren</button>
       <p style="font-size:0.78rem;color:#6B7F8C;line-height:1.4;margin-top:4px;">Erzeugt eine druckbare Übersicht (Lernausgangslage, Förderziele, Verlauf) als Arbeitsgrundlage für den diagnosegestützten Förderplan nach § 5 VO Notenschutz – kein fertiger, rechtsgültiger Förderplan und kein Ersatz für SCHNABEL/SLS.</p>
       <button class="btn btn-ghost" style="margin-top:10px;" onclick="toggleAllStations()">${state.showAllStations ? '👁️ Wieder nur „Dein Weg" zeigen' : '👁️ Alle Stationen zeigen (Lehrkraft)'}</button>
