@@ -622,6 +622,7 @@ const DEPS = {
   diktat:          {1:[['schreib2',2],['grundwortschatz',2],['satzbau',2]], 3:[['schreib2',3],['grundwortschatz',3]]},
 };
 function depsMissing(id, level){
+  if(window.BH_ADMIN) return [];
   const tab = DEPS[id]; if(!tab) return [];
   const need = {};
   Object.keys(tab).map(Number).filter(L=>L<=level).forEach(L=>{
@@ -651,6 +652,7 @@ function nextLevelBlocked(id){
   return lvl<4 ? depsMissing(id, lvl+1) : [];
 }
 function domainStatus(d){
+  if(window.BH_ADMIN) return {status:'active'};
   const missing = depsMissing(d.id, 1);
   if(missing.length && !stationStarted(d.id)) return {status:'locked', missing};
   const lvl = state.levels[d.id]||1;
@@ -1762,9 +1764,9 @@ const content = {
       Object.assign(pic('🔁','👖','Hose', ['🥫','🌳','🍎'], 0, 'Hose – Dose: reimt sich!'), {sub:1}),
       Object.assign(pic('🔁','🐕','Hund', ['👄','🌳','🍎'], 0, 'Hund – Mund: reimt sich!'), {sub:1}),
       Object.assign(pic('🔁','🍞','Brot', ['🚤','🌳','🍎'], 0, 'Brot – Boot: reimt sich!'), {sub:1}),
-      Object.assign(pic('🔁','🚪','Tür', ['🐻','🌳','🍎'], 0, 'Tür – Bär: reimt sich!'), {sub:2}),
-      Object.assign(pic('🔁','🐟','Fisch', ['🪑','🌳','🍎'], 0, 'Fisch – Tisch: reimt sich!'), {sub:2}),
-      Object.assign(pic('🎯','👃','Nase', ['🍜','🌳','🐟'], 0, 'Nase – Nudel: gleicher Anlaut „N".'), {sub:1}),
+      Object.assign(pic('🔁','🧚','Fee', ['🍵','🌳','🍎'], 0, 'Fee – Tee: reimt sich!'), {sub:2}),
+      Object.assign(pic('🔁','🏗️','Kran', ['🦢','🌳','🍎'], 0, 'Kran – Schwan: reimt sich!'), {sub:2}),
+      Object.assign(pic('🎯','👃','Nase', ['🦏','🌳','🐟'], 0, 'Nase – Nashorn: gleicher Anlaut „N".'), {sub:1}),
       Object.assign(pic('🎯','🌹','Rose', ['🚀','🌳','🐟'], 0, 'Rose – Rakete: gleicher Anlaut „R".'), {sub:1}),
       Object.assign(pic('🎯','🐋','Wal', ['☁️','🌳','🍎'], 0, 'Wal – Wolke: gleicher Anlaut „W".'), {sub:2}),
       Object.assign(pic('🎯','🐟','Fisch', ['🪶','🌳','🍎'], 0, 'Fisch – Feder: gleicher Anlaut „F".'), {sub:2}),
@@ -1776,7 +1778,7 @@ const content = {
       Object.assign(pic('👏','🦆','Ente', [silbenbogen(1),silbenbogen(2),silbenbogen(3)], 1, 'En-te: zwei Bögen.'), {sub:1}),
     ],
     2:[
-      pic('🔁','☀️','Sonne', ['🛢️','🐟','⭐'], 0, 'Sonne – Tonne: reimt sich!'),
+      pic('🔁','☀️','Sonne', ['🗑️','🐟','⭐'], 0, 'Sonne – Tonne: reimt sich!'),
       pic('👏','🦋','Schmetterling', [silbenbogen(2),silbenbogen(3),silbenbogen(4)], 1, 'Schwinge mit: Schmet-ter-ling. Drei Bögen!'),
       pic('🎯','🌸','Blume', ['⚡','🌙','🐱'], 0, 'Blume – Blitz: gleicher Anfang „Bl".'),
       pic('🔁','🌳','Baum', ['img:Traum.png','⚽','🐟'], 0, 'Baum – Traum: reimt sich!'),
@@ -1788,8 +1790,8 @@ const content = {
       Object.assign(pic('🔁','🪱','Wurm', ['🗼','🌳','🍎'], 0, 'Wurm – Turm: reimt sich!'), {sub:1}),
       Object.assign(pic('🔁','🦟','Mücke', ['🌉','🌳','🍎'], 0, 'Mücke – Brücke: reimt sich!'), {sub:1}),
       Object.assign(pic('🔁','🦔','Igel', ['🪞','🌳','🍎'], 0, 'Igel – Spiegel: reimt sich!'), {sub:2}),
-      Object.assign(pic('🔁','✋','Hand', ['🏖️','🌳','🍎'], 0, 'Hand – Sand: reimt sich!'), {sub:1}),
-      Object.assign(pic('🔁','🕯️','Kerze', ['❤️','🌳','🍎'], 0, 'Kerze – Herze: reimt sich!'), {sub:2}),
+      Object.assign(pic('🔁','🌹','Rose', ['👖','🌳','🍎'], 0, 'Rose – Hose: reimt sich!'), {sub:1}),
+      Object.assign(pic('🔁','❄️','Schnee', ['🍀','🌳','🍎'], 0, 'Schnee – Klee: reimt sich!'), {sub:2}),
       Object.assign(pic('🎯','👟','Schuh', ['✂️','🌳','🐟'], 0, 'Schuh – Schere: gleicher Anlaut „Sch".'), {sub:1}),
       Object.assign(pic('🎯','🕷️','Spinne', ['🪞','🌳','🐟'], 0, 'Spinne – Spiegel: gleicher Anlaut „Sp".'), {sub:2}),
       Object.assign(pic('🎯','👗','Kleid', ['🎹','🌳','🐟'], 0, 'Kleid – Klavier: gleicher Anlaut „Kl".'), {sub:2}),
@@ -1811,15 +1813,15 @@ const content = {
       pic('🔁','🏺','Vase', ['👃','⚽','🌳'], 0, 'Vase – Nase: reimt sich!'),
       pic('🎯','⭐','Stern', ['🪑','🌳','🐟'], 0, 'Stern – Stuhl: gleicher Anlaut „St".'),
       Object.assign(pic('🔁','🐓','Hahn', ['🦷','🌳','🍎'], 0, 'Hahn – Zahn: reimt sich!'), {sub:1}),
-      Object.assign(pic('🔁','⛰️','Berg', ['🧙','🌳','🍎'], 0, 'Berg – Zwerg: reimt sich!'), {sub:2}),
+      Object.assign(pic('🔁','🍚','Reis', ['🍦','🌳','🍎'], 0, 'Reis – Eis: reimt sich!'), {sub:2}),
       Object.assign(pic('🔁','👜','Tasche', ['🍼','🌳','🍎'], 0, 'Tasche – Flasche: reimt sich!'), {sub:1}),
       Object.assign(pic('🔁','🌲','Tanne', ['🫖','🌳','🍎'], 0, 'Tanne – Kanne: reimt sich!'), {sub:2}),
-      Object.assign(pic('🎯','🧙','Zwerg', ['🧅','🌳','🐟'], 0, 'Zwerg – Zwiebel: gleicher Anlaut „Zw".'), {sub:2}),
-      Object.assign(pic('🎯','🏹','Pfeil', ['🐴','🌳','🐟'], 0, 'Pfeil – Pferd: gleicher Anlaut „Pf".'), {sub:1}),
+      Object.assign(pic('🎯','2️⃣','Zwei', ['🧅','🌳','🐟'], 0, 'Zwei – Zwiebel: gleicher Anlaut „Zw".'), {sub:2}),
+      Object.assign(pic('🎯','🍳','Pfanne', ['🐴','🌳','🐟'], 0, 'Pfanne – Pferd: gleicher Anlaut „Pf".'), {sub:1}),
       Object.assign(pic('🎯','🏖️','Strand', ['img:Strumpf.png','🌳','🍎'], 0, 'Strand – Strumpf: gleicher Anlaut „Str".'), {sub:2}),
       Object.assign(pic('🎯','❄️','Schnee', ['🐌','🌳','🍎'], 0, 'Schnee – Schnecke: gleicher Anlaut „Schn".'), {sub:1}),
       Object.assign(pic('🎯','🍇','Traube', ['🚜','🌳','🐟'], 0, 'Traube – Traktor: gleicher Anlaut „Tr".'), {sub:2}),
-      Object.assign(pic('👏','🍯','Marmelade', [silbenbogen(3),silbenbogen(4),silbenbogen(5)], 1, 'Mar-me-la-de: vier Bögen.'), {sub:2}),
+      Object.assign(pic('👏','🐊','Krokodil', [silbenbogen(2),silbenbogen(3),silbenbogen(4)], 1, 'Kro-ko-dil: drei Bögen.'), {sub:2}),
       Object.assign(pic('👏','🚒','Feuerwehr', [silbenbogen(2),silbenbogen(3),silbenbogen(4)], 1, 'Feu-er-wehr: drei Bögen.'), {sub:1}),
       Object.assign(pic('👏','🦜','Papagei', [silbenbogen(2),silbenbogen(3),silbenbogen(4)], 1, 'Pa-pa-gei: drei Bögen.'), {sub:1}),
       Object.assign(pic('👏','🍉','Wassermelone', [silbenbogen(3),silbenbogen(4),silbenbogen(5)], 1, 'Was-ser-me-lo-ne: fünf Bögen!'), {sub:2}),
@@ -1828,15 +1830,15 @@ const content = {
     4:[ // Profi-Stufe: mehrsilbige Wörter, Konsonantenhäufungen im Anlaut
       pic('👏','☂️','Regenschirm', [silbenbogen(2),silbenbogen(3),silbenbogen(4)], 1, 'Re-gen-schirm: drei Bögen.'),
       pic('👏','🥔','Kartoffel', [silbenbogen(2),silbenbogen(3),silbenbogen(4)], 1, 'Kar-tof-fel: drei Bögen.'),
-      pic('🔁','❄️','Schnee', ['🦌','🌳','🐟'], 0, 'Schnee – Reh: reimt sich!'),
+      pic('🔁','🍵','Tee', ['🧚','🌳','🐟'], 0, 'Tee – Fee: reimt sich!'),
       pic('🎯','🐊','Krokodil', ['👑','🐟','🌳'], 0, 'Krokodil – Krone: gleicher Anlaut „Kr".'),
       pic('🎯','👓','Brille', ['🍞','🐟','🌙'], 0, 'Brille – Brot: gleicher Anlaut „Br".'),
       pic('🔁','🪟','Fenster', ['👻👻','🌳','🐟'], 0, 'Fenster – Gespenster: reimt sich!'),
       Object.assign(pic('🔁','🖌️','Pinsel', ['🏝️','🌳','🍎'], 0, 'Pinsel – Insel: reimt sich!'), {sub:1}),
       Object.assign(pic('🔁','🔨','Hammer', ['📎','🌳','🍎'], 0, 'Hammer – Klammer: reimt sich!'), {sub:2}),
-      Object.assign(pic('🎯','🍑','Pflaume', ['🌱','🌳','🐕'], 0, 'Pflaume – Pflanze: gleicher Anlaut „Pfl".'), {sub:1}),
+      Object.assign(pic('🎯','🩹','Pflaster', ['🌱','🌳','🐕'], 0, 'Pflaster – Pflanze: gleicher Anlaut „Pfl".'), {sub:1}),
       Object.assign(pic('🎯','🐍','Schlange', ['🔒','🌳','🐟'], 0, 'Schlange – Schloss: gleicher Anlaut „Schl".'), {sub:1}),
-      Object.assign(pic('🎯','🥛','Glas', ['🔔','🌳','🍎'], 0, 'Glas – Glocke: gleicher Anlaut „Gl".'), {sub:1}),
+      Object.assign(pic('🎯','💡','Glühbirne', ['🔔','🌳','🍎'], 0, 'Glühbirne – Glocke: gleicher Anlaut „Gl".'), {sub:1}),
       Object.assign(pic('🎯','🪰','Fliege', ['🍼','🌳','🍎'], 0, 'Fliege – Flasche: gleicher Anlaut „Fl".'), {sub:2}),
       Object.assign(pic('🎯','🐷','Schwein', ['🦢','🌳','🍎'], 0, 'Schwein – Schwan: gleicher Anlaut „Schw".'), {sub:2}),
       Object.assign(pic('🎯','👑','Krone', ['🏗️','🌳','🍎'], 0, 'Krone – Kran: gleicher Anlaut „Kr".'), {sub:2}),
@@ -1844,7 +1846,7 @@ const content = {
       Object.assign(pic('👏','🖊️','Kugelschreiber', [silbenbogen(3),silbenbogen(4),silbenbogen(5)], 1, 'Ku-gel-schrei-ber: vier Bögen.'), {sub:2}),
       Object.assign(pic('👏','🚂','Lokomotive', [silbenbogen(4),silbenbogen(5),silbenbogen(6)], 1, 'Lo-ko-mo-ti-ve: fünf Bögen.'), {sub:2}),
       Object.assign(pic('👏','🍊','Orange', [silbenbogen(2),silbenbogen(3),silbenbogen(4)], 1, 'O-ran-ge: drei Bögen.'), {sub:1}),
-      Object.assign(pic('👏','🧹','Staubsauger', [silbenbogen(2),silbenbogen(3),silbenbogen(4)], 1, 'Staub-sau-ger: drei Bögen.'), {sub:1}),
+      Object.assign(pic('👏','🧹','Besen', [silbenbogen(1),silbenbogen(2),silbenbogen(3)], 1, 'Be-sen: zwei Bögen.'), {sub:1}),
       Object.assign(pic('👏','✈️','Flugzeug', [silbenbogen(1),silbenbogen(2),silbenbogen(3)], 1, 'Flug-zeug: zwei Bögen.'), {sub:1}),
       Object.assign(pic('👏','🎒','Rucksack', [silbenbogen(1),silbenbogen(2),silbenbogen(3)], 1, 'Ruck-sack: zwei Bögen.'), {sub:1}),
       Object.assign(pic('👏','🎺','Trompete', [silbenbogen(2),silbenbogen(3),silbenbogen(4)], 1, 'Trom-pe-te: drei Bögen.'), {sub:2}),
@@ -1876,6 +1878,9 @@ const content = {
       pic('🔡','🛸','Ufo', ['U','O','A'], 0, 'U-fo: erster Laut „U".', true),
       pic('🔡','🐦','Vogel', ['V','F','W'], 0, 'V-ogel klingt wie „F", wird aber mit V geschrieben.', true, 'V1'),
       pic('🔡','🐃','Yak', ['Y','J','I'], 0, 'Y-ak: erster Laut „Y".', true),
+      pic('🔡','🐭','Maus', ['M','N','W'], 0, 'M-aus: erster Laut „M".', true),
+      pic('🔡','🤡','Clown', ['C','K','Z'], 0, 'C-lown: erster Laut klingt wie „K", wird aber mit C geschrieben.', false, 'C'),
+      pic('🔡','⭐','Stern', ['St','Sp','Sch'], 0, 'Am Wortanfang klingt „st" wie „scht".', false, 'ST'),
       // Sonderlaute & Lautverbindungen (Mehrbuchstaben-Laute)
       pic('🔚','📖','Buch', ['ch','sch','k'], 0, 'Ach-Laut: „ch" am Ende, nach „u" wie in Buch.', false, 'CH1'),
       pic('🔚','🥛','Milch', ['ch','sch','k'], 0, 'Ich-Laut: „ch" am Ende, wie in Milch.', false, 'CH2'),
@@ -3203,7 +3208,7 @@ function diagResItems(r){
 let state = {
   screen:'start',
   diag:{domainIndex:0, stage:'mid', midCorrect:null, current:null, answeredThisStep:false},
-  levels:{}, stars:{}, diagDone:false, history:[], errorCounts:{}, attemptLogs:{}, levelDays:{}, substeps:{}, recentItems:{},
+  levels:{}, stars:{}, diagDone:false, history:[], errorCounts:{}, attemptLogs:{}, levelDays:{}, substeps:{}, recentItems:{}, dayLocks:{}, dayOffset:0,
   mastery:{}, selfChecks:[], pendingSelfCheck:null, pendingReview:false,
   wordStore:[], onboardStep:0, errorProfile:{}, errorLog:[], fpSnapshots:[], sessionMin:30, showOsk:true, endurance:null, sessionLog:[], session:null, pauseReturn:'practice', pauseIdx:0, pauseStep:0, discoverSeen:{},
   trophies:{}, knownAtStart:{}, fresch:{}, stationsVersion:3, showMoreStations:false, showAllStations:false, showStarHelp:false,
@@ -3219,7 +3224,8 @@ function weekKey(date){
   const localMs = date.getTime() - date.getTimezoneOffset()*60000;
   return 'W' + Math.floor(localMs/86400000/7);
 }
-function todayStr(){ return new Date().toISOString().slice(0,10); }
+function todayStr(){ const off = (typeof state!=='undefined' && state && state.dayOffset) || 0; return new Date(Date.now() + off*86400000).toISOString().slice(0,10); }
+function dayLocked(id){ return !!(state.dayLocks && state.dayLocks[id]===todayStr()); }
 function escapeHtml(s){
   return String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
@@ -3231,6 +3237,7 @@ function addDays(dateStr, n){
 
 const STORAGE_KEY = 'buchstabenhafen_progress_v1';
 function saveProgress(){
+  if(window.BH_ADMIN) return;
   const now = new Date();
   const wk = weekKey(now);
   const snapshot = {week:wk, date:now.toISOString().slice(0,10), levels:{...state.levels}, stars:{...state.stars}, sv:3};
@@ -3245,7 +3252,7 @@ function saveProgress(){
   try{
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       levels: state.levels, stars: state.stars, diagDone: !!state.diagDone, history: state.history,
-      errorCounts: state.errorCounts, attemptLogs: state.attemptLogs, levelDays: state.levelDays, substeps: state.substeps, recentItems: state.recentItems,
+      errorCounts: state.errorCounts, attemptLogs: state.attemptLogs, levelDays: state.levelDays, dayLocks: state.dayLocks, dayOffset: state.dayOffset, substeps: state.substeps, recentItems: state.recentItems,
       mastery: state.mastery, selfChecks: state.selfChecks,
       needsBasicLetterDrill: state.needsBasicLetterDrill,
       diagReports: state.diagReports, wordStore: state.wordStore, errorProfile: state.errorProfile, errorLog: state.errorLog, fpSnapshots: state.fpSnapshots, sessionMin: state.sessionMin, showOsk: state.showOsk, endurance: state.endurance, sessionLog: state.sessionLog, histV3: true, discoverSeen: state.discoverSeen, fresch: state.fresch,
@@ -3265,7 +3272,7 @@ function loadProgress(){
       state.history = d.history || [];
       state.errorCounts = d.errorCounts || {};
       state.attemptLogs = d.attemptLogs || {};
-      state.levelDays = d.levelDays || {};
+      state.levelDays = d.levelDays || {}; state.dayLocks = d.dayLocks || {}; state.dayOffset = d.dayOffset || 0;
       state.substeps = d.substeps || {};
       state.recentItems = d.recentItems || {};
       state.mastery = d.mastery || {};
@@ -3296,7 +3303,7 @@ function loadProgress(){
 window.exportData = function(){
   const payload = {
     levels: state.levels, stars: state.stars, diagDone: !!state.diagDone, history: state.history,
-    errorCounts: state.errorCounts, attemptLogs: state.attemptLogs, levelDays: state.levelDays, substeps: state.substeps, recentItems: state.recentItems,
+    errorCounts: state.errorCounts, attemptLogs: state.attemptLogs, levelDays: state.levelDays, dayLocks: state.dayLocks, dayOffset: state.dayOffset, substeps: state.substeps, recentItems: state.recentItems,
     mastery: state.mastery, selfChecks: state.selfChecks,
     needsBasicLetterDrill: state.needsBasicLetterDrill,
     diagReports: state.diagReports, wordStore: state.wordStore, errorProfile: state.errorProfile, errorLog: state.errorLog, fpSnapshots: state.fpSnapshots, sessionMin: state.sessionMin, showOsk: state.showOsk, endurance: state.endurance, sessionLog: state.sessionLog, histV3: true, discoverSeen: state.discoverSeen, fresch: state.fresch,
@@ -3321,6 +3328,7 @@ window.exportData = function(){
 };
 
 window.importData = function(file){
+  if(window.BH_ADMIN){ alert('Im Administrator-Modus nicht möglich.'); return; }
   if(!file) return;
   const reader = new FileReader();
   reader.onload = function(e){
@@ -3336,7 +3344,7 @@ window.importData = function(file){
       state.history = d.history || [];
       state.errorCounts = d.errorCounts || {};
       state.attemptLogs = d.attemptLogs || {};
-      state.levelDays = d.levelDays || {};
+      state.levelDays = d.levelDays || {}; state.dayLocks = d.dayLocks || {}; state.dayOffset = d.dayOffset || 0;
       state.substeps = d.substeps || {};
       state.recentItems = d.recentItems || {};
       state.mastery = d.mastery || {};
@@ -4140,9 +4148,10 @@ window.exportFoerderplan = function(){
 };
 
 window.confirmReset = function(){
+  if(window.BH_ADMIN){ alert('Im Administrator-Modus nicht möglich.'); return; }
   if(confirm('Fortschritt wirklich löschen und neu starten?')){
     state.levels={}; state.stars={}; state.diagDone=false; state.history=[];
-    state.errorCounts={}; state.attemptLogs={}; state.levelDays={}; state.substeps={}; state.recentItems={}; state.mastery={}; state.selfChecks=[];
+    state.errorCounts={}; state.attemptLogs={}; state.levelDays={}; state.dayLocks={}; state.dayOffset=0; state.substeps={}; state.recentItems={}; state.mastery={}; state.selfChecks=[];
     state.needsBasicLetterDrill=false; state.diagReports=[]; state.wordStore=[]; state.onboardStep=0; state.errorProfile={}; state.errorLog=[]; state.fpSnapshots=[]; state.endurance=null; state.sessionLog=[]; state.session=null; try{localStorage.removeItem(SESSION_KEY);}catch(e){} state.discoverSeen={}; state.fresch={}; state.trophies={}; state.knownAtStart={};
     try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
     state.showTeacher=false;
@@ -4178,9 +4187,10 @@ function stripSyllableHyphens(text){
 // normale Sprachausgabe (das ganze Wort) zurück - nichts bricht ab.
 // Spielt die Aufnahme des isolierten Lauts ab und spricht danach das ganze
 // Wort - wartet auf das tatsächliche Ende der Aufnahme (kein geratenes Timing).
-function playLetterSoundThenWord(key, word){
-  if(!key){ speak(word); return; }
-  playAudioKey(key, ()=>{ speak(word); });
+function playLetterSoundThenWord(key, word, extra){
+  const full = extra ? (word + '. ' + extra) : word;
+  if(!key){ speak(full); return; }
+  playAudioKey(key, ()=>{ speak(full); });
 }
 
 
@@ -4194,7 +4204,7 @@ function playLetterSoundThenWord(key, word){
    ein Satz oder lädt eine Datei nicht, spricht der ganze Text wie bisher
    die Browser-Stimme - nichts bricht ab.
    ============================================================ */
-const TTS_VER = '20261119n';   // bei neuen Sprachdateien erhöhen: verhindert, dass der Browser alte und neue Dateien mischt
+const TTS_VER = '20261120a';   // bei neuen Sprachdateien erhöhen: verhindert, dass der Browser alte und neue Dateien mischt
 const TTS_FILES = ['audio-1.bin','audio-2.bin','audio-3.bin'], TTS_SPLIT = 13000000, TTS_HDR = 32;   // jede Datei beginnt mit einem 32-Byte-Kopf   // Länge der ersten beiden Dateien (GitHub erlaubt Uploads bis 25 MB)
 const TTS = {idx:null, buf:null, q:[], busy:false, el:null, gen:0, urls:{}, rangeOk:true, miss:{}};
 function cyrb53(str){
@@ -4678,7 +4688,7 @@ function stopAllAudio(){
 function render(skipAudioStop){
   if(!skipAudioStop) stopAllAudio();
   const app = document.getElementById('app');
-  app.innerHTML = renderScreen() + holdHtml();
+  app.innerHTML = renderScreen() + holdHtml() + (window.BH_ADMIN ? `<button onclick="adminEnd()" style="position:fixed;left:8px;bottom:8px;z-index:9999;background:#7A8791;color:#fff;border:0;border-radius:10px;padding:6px 12px;font-size:0.8rem;opacity:.85;">🔧 Administrator beenden</button>` : '');
   if(state.showTeacher) app.innerHTML += renderTeacherOverlay();
   if(state.showInfo) app.innerHTML += renderInfoOverlay();
   if(state.showStarHelp) app.innerHTML += renderStarHelpOverlay();
@@ -4693,6 +4703,11 @@ function autoSpeakHook(){
     if(state.screen==='practice' && state.practice && state.practice.jump && !state.practice.jumpSpoken){
       state.practice.jumpSpoken = true;
       setTimeout(()=>{ if(state.screen==='practice') speakJump(); }, 500);
+      return;
+    }
+    if(state.screen==='practice' && state.practice && state.practice.graphIntro && !state.practice.answered){
+      const gk = 'gi|'+state.practice.graphIntro+'|'+state.practice.itemsDone;
+      if(window._autoKey!==gk){ window._autoKey = gk; setTimeout(()=>{ if(state.screen==='practice' && state.practice && state.practice.graphIntro) graphIntroSpeak(); }, 450); }
       return;
     }
     if(state.screen!=='practice') return;
@@ -5238,6 +5253,7 @@ function stationCard(d, info, pos){
     badge = `<div class="stars-badge">🔁 Auffrischen</div>`;
     extra = `<div class="lock-note">Kurzer Check, ob das noch sicher sitzt.</div>`;
   }
+  if(dayLocked(d.id) && info.status==='active') extra = `<div class="lock-note">✅ Für heute geschafft – beim nächsten Üben geht es hier eine Stufe hoch.</div>`;
   if(info.status==='locked'){
     badge = `<div class="stars-badge">🔒</div>`;
     const names = info.missing.map(x=>`${x.d.name} (Stufe ${x.need})`).join(' & ');
@@ -5282,7 +5298,7 @@ function neededStations(){
   const today = todayStr(), checks = (state.selfChecks||[]).filter(c=>c.date===today);
   const lastDom = checks.length ? checks[checks.length-1].domainId : null;
   const todayN = id => checks.filter(c=>c.domainId===id).length;
-  const rank = ({d,info}) => [info.status==='review'?0:1, (nextLevelBlocked(d.id).length && stationStarted(d.id))?1:0, d.id===lastDom?1:0, todayN(d.id), stationStarted(d.id)?0:1, state.levels[d.id]||1, TIERS[d.id]||0, domains.indexOf(d)];
+  const rank = ({d,info}) => [info.status==='review'?0:1, dayLocked(d.id)?1:0, (nextLevelBlocked(d.id).length && stationStarted(d.id))?1:0, d.id===lastDom?1:0, todayN(d.id), stationStarted(d.id)?0:1, state.levels[d.id]||1, TIERS[d.id]||0, domains.indexOf(d)];
   const cmp = (a,b)=>{ const ra=rank(a), rb=rank(b); for(let i=0;i<ra.length;i++){ if(ra[i]!==rb[i]) return ra[i]-rb[i]; } return 0; };
   const needed = withStatus
     .filter(x => (x.info.status==='active' || x.info.status==='review') && !(known[x.d.id] && x.info.status==='active'))
@@ -5392,6 +5408,7 @@ function screenMap(){
   ${topbar('Deine Hafenkarte','Wähle eine Station', false)}
   <main>
     <div class="map-lumi"><img class="ml-lumi" src="${LUMI_IMG}" alt="Lotse Lumi" draggable="false"><div class="map-lumi-t"><div class="map-lumi-h">Moin! Ich bin Lumi.</div><p>Ich habe deinen Startpunkt gefunden. Übe in jeder Station – die Aufgaben passen sich automatisch an dein Tempo an.</p></div><img class="ml-side" src="${MAP_HERO}" alt="" draggable="false"></div>
+    ${adminPanelHtml()}
     ${drillBanner}
     ${vertiefungBanner}
     ${wordStoreBanner}
@@ -5747,7 +5764,7 @@ const QUICK_MS = 1100, IDLE_CAP_MS = 90000, SESSION_GAP_MS = 20*60000, FINAL_MS 
 const SESSION_KEY = 'buchstabenhafen_session_v1';
 function netTargetMs(){ return (NET_TARGET[state.sessionMin]||20)*60000; }
 function endur(){ if(!state.endurance) state.endurance = {blockMin:BLOCK_START, stable:0, hist:[]}; return state.endurance; }
-function saveSession(){ try{ localStorage.setItem(SESSION_KEY, JSON.stringify(state.session)); }catch(e){} }
+function saveSession(){ if(window.BH_ADMIN) return; try{ localStorage.setItem(SESSION_KEY, JSON.stringify(state.session)); }catch(e){} }
 function loadSession(){
   try{ const raw = localStorage.getItem(SESSION_KEY); if(raw){ const s = JSON.parse(raw); if(s && s.date===todayStr() && Date.now()-s.last < SESSION_GAP_MS) state.session = s; } }catch(e){}
 }
@@ -5793,6 +5810,7 @@ function evaluateBlock(s){
 }
 // Gibt 'sessionend', 'pause' oder null zurück
 function sessionGate(){
+  if(window.BH_ADMIN) return null;
   const s = sessionEnsure(); sessionTick();
   const left = netTargetMs() - s.net;
   if(s.ended || left <= -30000){ s.ended = true; finalizeSession(); return 'sessionend'; }
@@ -6294,6 +6312,7 @@ function pickPracticeItem(){
     p.merkOpen = false; p.stratIntro = null;
     if(it && it.type==='mark') p.markSel = it.units.map(()=>false);
     p.stratVid = false;
+    p.graphIntro = graphIntroFor(it, p);
     if(it && it.strat && it.strat!=='kiste' && FRESCH[it.strat] && !fr(it.strat).seen && !p.isWordReview && !p.isReview && !p.easy){ p.stratIntro = it.strat; p.stratVid = !!videoFor(it.strat); }
     else if(it && it.strat==='kiste' && !state.discoverSeen['lw_kiste'] && !p.isWordReview && !p.isReview && !p.easy){ p.stratIntro = 'kiste'; p.stratVid = true; }
   }
@@ -6380,6 +6399,7 @@ function screenPractice(){
   const d = anyDomain(state.practice.domainId);
   const p = state.practice;
   if(p.guessAlert && !p.answered) return screenGuessAlert();
+  if(p.graphIntro && !p.answered) return screenGraphIntro();
   if(p.stratIntro && !p.answered) return screenStratIntro();
   if(paperNeededNow(p) && !p.paperAck) return screenPaper();
   const item = p.current;
@@ -6400,7 +6420,8 @@ function screenPractice(){
       feedback = `<div class="feedback-box feedback-tip">💡 Kein Problem, das lernst du noch! Hier die Erklärung:<br><br>${item.tip}${p.levelDownMsg?('<br><br>'+p.levelDownMsg):''}</div>`;
     } else {
       const hintLine = item.type==='input' ? (diffHint(p.lastGiven, item.answer) + '<br><br>') : '';
-      feedback = `<div class="feedback-box feedback-tip">💡 Das war leider noch nicht richtig – versuche es noch mal. Das schaffst du!<br><br>${hintLine}${item.tip}${p.levelDownMsg?('<br><br>'+p.levelDownMsg):''}</div>`;
+      const nt = letterNote(item, p.lastGiven);
+      feedback = `<div class="feedback-box feedback-tip">💡 Das war leider noch nicht richtig – versuche es noch mal. Das schaffst du!<br><br>${hintLine}${nt?(nt.show+'<br><br>'):''}${item.tip}${p.levelDownMsg?('<br><br>'+p.levelDownMsg):''}</div>`;
     }
     if(p.jump) feedback += jumpBoxHtml(p);
     else feedback += `<button class="btn btn-primary btn-block" style="margin-top:14px;" onclick="nextPracticeItem()">Weiter →</button>`;
@@ -6876,6 +6897,11 @@ window.practiceAnswer = function(given){
   const guessed = !correct && quick && ratePattern;
   if(ratePattern){ p.guessAlert = true; p.recent = []; }
   if(!correct && !guessed && !p.easy) p.sessionErrors = (p.sessionErrors||0) + 1;
+  if(!correct && !guessed && !p.easy && !p.isReview && p.domainId==='buchstabe' && item.type==='pic' && item.taskIcon!=='🔠' && typeof item.options[item.answer]==='string'){
+    const wg = item.options[item.answer]; p.gWrong = p.gWrong || {}; p.gWrong[wg] = (p.gWrong[wg]||0) + 1;
+    const wk = graphemeKey(wg); p.werkDone = p.werkDone || {};
+    if(p.gWrong[wg] >= 2 && !p.werkDone[wk] && WERK_ALL.indexOf(wk) >= 0) p.werkPending = wk;
+  }
 
   if(!guessed && !p.easy){
     p.attemptLog.push(correct);
@@ -6932,12 +6958,14 @@ window.practiceAnswer = function(given){
       const winOk = lastSix.filter(x=>!x).length <= RU.errs;
       if(winOk && daysAtLevel(p.domainId, p.level) < RU.days){
         if(!p.dayWaitShown){
-          p.dayWaitShown = true;
+          p.dayWaitShown = true; p.dayLock = true;
+          state.dayLocks = state.dayLocks || {}; state.dayLocks[p.domainId] = todayStr();
           p.levelUpMsg = '👍 Das klappt schon richtig gut! Beim nächsten Üben an einem anderen Tag geht es hier eine Stufe hoch.';
         }
       } else if(winOk && wait.length){
         if(!p.waitShown){
-          p.waitShown = true;
+          p.waitShown = true; p.dayLock = true;
+          state.dayLocks = state.dayLocks || {}; state.dayLocks[p.domainId] = todayStr();
           p.levelUpMsg = '👍 Das kannst du schon richtig gut! Damit es hier weitergeht, übst du zuerst: ' + wait.map(x=>x.d.name+' (Stufe '+x.need+')').join(' und ') + '.';
         }
       } else if(winOk){
@@ -7002,7 +7030,8 @@ window.practiceAnswer = function(given){
     const hint = diffHint(given, item.answer);
     speak('Das war leider noch nicht richtig. ' + hint + ' Versuche es noch einmal, das schaffst du! ' + item.tip + (p.levelDownMsg ? ' ' + p.levelDownMsg : ''));
   } else {
-    speak('Das war leider noch nicht richtig. Versuche es noch einmal, das schaffst du! ' + item.tip + (p.levelDownMsg ? ' ' + p.levelDownMsg : ''));
+    const nt = letterNote(item, given);
+    speak('Das war leider noch nicht richtig. ' + (nt ? nt.say + ' ' : 'Versuche es noch einmal, das schaffst du! ') + item.tip + (p.levelDownMsg ? ' ' + p.levelDownMsg : ''));
   }
 
   saveProgress();
@@ -7011,6 +7040,7 @@ window.practiceAnswer = function(given){
 
 window.nextPracticeItem = function(){
   const p = state.practice;
+  if(p && p.werkPending){ const wk = p.werkPending; p.werkPending = null; p.werkDone = p.werkDone || {}; p.werkDone[wk] = true; startWerkstatt([wk], 'practicenext', true); return; }
   state.levels[p.domainId] = p.level;
   if(p.pendingDiscoverLevel){
     const level = p.pendingDiscoverLevel;
@@ -7028,6 +7058,7 @@ window.nextPracticeItem = function(){
   }
   sessionEnsure(); sessionTick();
   maybeEasy(p);
+  if(p.dayLock && !window.BH_ADMIN && !p.isReview && !p.isWordReview){ p.itemsDone = Math.max(p.itemsDone, p.sessionTarget || 6); }   // Ziel für heute erreicht: Einheit endet, Lumi schickt zu einer anderen Station
   const target = p.sessionTarget || 6;
   if(p.itemsDone >= target){
     if(p.final && state.session) state.session.ended = true;
@@ -7114,7 +7145,7 @@ window.selectSelfCheck = function(rating){
 // bestehenden Buchstabenbrücke-Stufe-1-Pool (Anlaut-Aufgaben), damit es keine
 // doppelte Wortliste braucht.
 function drillPool(){
-  return (content.buchstabe[1]||[]).filter(i => i.taskIcon === '🔡');
+  return (content.buchstabe[1]||[]).concat(content.buchstabe[4]||[]).filter(i => i.taskIcon === '🔡');
 }
 
 const DRILL_OFFER_TEXT = 'Lotse Lumi schlägt dir ein kurzes Buchstaben-Training vor, weil einige Buchstaben-Laute noch unsicher wirken. Das hilft, bevor es mit den Stationen weitergeht.';
@@ -7171,7 +7202,9 @@ window.drillAnswer = function(given){
   // Erst die echte Aufnahme des isolierten Lauts (z.B. "M.m4a"), danach das
   // ganze Wort - wartet auf das tatsächliche Ende der Aufnahme.
   const audioKey = item.audioKey || letter.toUpperCase();
-  playLetterSoundThenWord(audioKey, item.speak);
+  const dn = correct ? null : letterNote(item, given);
+  playLetterSoundThenWord(audioKey, item.speak, dn ? dn.say : null);
+  state.discoverSeen = state.discoverSeen || {}; state.discoverSeen['gr_'+String(letter).toLowerCase()] = true;
   if(correct){
     d.doneCount++;
   } else {
@@ -7212,6 +7245,7 @@ function screenLetterDrill(){
     reveal = `
       <div style="font-size:2.6rem;font-family:'Baloo 2';font-weight:700;color:var(--harbor-dark);margin:14px 0 4px;">${letter} ${letter.toLowerCase()}</div>
       <div style="font-size:1rem;color:#4B6473;">${letter} wie ${item.speak}</div>
+      ${(!d.lastCorrect && letterNote(item, d.lastGiven)) ? `<div class="feedback-box feedback-tip" style="margin-top:12px;text-align:left;">💡 ${letterNote(item, d.lastGiven).show}</div>` : ''}
       <button class="btn btn-primary btn-block" style="margin-top:16px;" onclick="nextDrillItem()">Weiter →</button>`;
   }
   return `
@@ -7225,6 +7259,124 @@ function screenLetterDrill(){
   </main>`;
 }
 
+
+
+// ===== Einordnung ähnlicher Laute / Buchstaben mit mehreren Lauten + Einführung neuer Buchstaben =====
+// {x} im Text = Buchstabe: im Bild so geschrieben, in der Aufnahme als Buchstabenname gesprochen.
+const LETTER_SAY = {V:'Vau',F:'Eff',W:'Weh',Y:'Ypsilon',J:'Jott',I:'I',IE:'I E',EI:'E I',AI:'A I','ÄU':'Ä U',EU:'E U','Ä':'Ä',E:'E','Ö':'Ö',O:'O','Ü':'Ü',U:'U',A:'A',QU:'Ku U',K:'Ka',CK:'C K',TZ:'Te Zett',Z:'Zett',N:'En',NG:'En Ge',SP:'Es Pe',ST:'Es Te',SCH:'Es Ce Ha',PF:'Pe Eff',P:'Pe',B:'Be',D:'De',T:'Te',G:'Ge',S:'Es',CH:'Ce Ha',X:'Iks',C:'Ce',KS:'K S',KW:'K W',L:'El',M:'Em',H:'Ha'};
+const LETTER_CONF = {
+  'v|f':'Du hast Recht, der Laut hört sich an wie {F}. Das {V} ist ein Buchstabe, der mehrere Laute hat. Es klingt wie {F} bei Vogel und wie {W} bei Vase. Die Wörter, die mit {V} geschrieben werden, muss man sich merken.',
+  'v|w':'Du hast Recht, manchmal klingt das {V} wie {W}, zum Beispiel bei Vase. Bei Vogel klingt es wie {F}. Die Wörter, die mit {V} geschrieben werden, muss man sich merken.',
+  'f|v':'Du hast Recht, auch das {V} kann wie {F} klingen, zum Beispiel bei Vogel. Bei Feder schreibt man aber {F}. Das muss man sich merken.',
+  'w|v':'Du hast Recht, das {V} kann auch wie {W} klingen, zum Beispiel bei Vase. Bei Wolke schreibt man aber {W}. Das muss man sich merken.',
+  'y|i':'Du hast Recht, am Ende klingt das {Y} wie ein kurzes {I}, zum Beispiel bei Teddy. Am Anfang klingt es wie {J}, zum Beispiel bei Yak. Die Wörter mit {Y} muss man sich merken.',
+  'y|ie':'Du hast Recht, am Ende klingt das {Y} fast wie {IE}. Bei Teddy schreibt man aber {Y}. Die Wörter mit {Y} muss man sich merken.',
+  'y|j':'Du hast Recht, am Anfang klingt das {Y} wie {J}, zum Beispiel bei Yak. Die Wörter mit {Y} muss man sich merken.',
+  'j|y':'Du hast Recht, am Anfang klingen {J} und {Y} gleich. Bei Joghurt schreibt man {J}. Das muss man sich merken.',
+  'ie|i':'Du hast Recht, das lange {I} hört sich an wie ein {I}. Meistens schreibt man es aber mit {IE}, zum Beispiel bei Biene.',
+  'ei|ai':'Du hast Recht, {EI} klingt wie {AI}. Wir schreiben diesen Laut aber meistens mit {EI}, zum Beispiel bei Eis.',
+  'ei|ie':'Aufgepasst: {IE} klingt wie ein langes {I}. Bei Eis hörst du den Laut {EI}.',
+  'äu|eu':'Du hast Recht, {ÄU} und {EU} klingen gleich. Bei Mäuse schreibt man {ÄU}, weil es von Maus kommt.',
+  'eu|ei':'Aufgepasst: {EI} klingt anders. Bei Euro hörst du den Laut {EU}.',
+  'ä|e':'Du hast Recht, {Ä} und {E} klingen oft gleich. Schau, ob es ein Wort mit {A} dazu gibt: Äpfel kommt von Apfel.',
+  'ö|o':'Das {Ö} klingt nicht wie {O}. Spitze die Lippen. Das {Ö} hat zwei Punkte.',
+  'ü|u':'Das {Ü} klingt nicht wie {U}. Spitze die Lippen und sprich ein {I}. Das {Ü} hat zwei Punkte.',
+  'ü|i':'Du hast Recht, das {Ü} klingt ähnlich wie {I}. Beim {Ü} spitzt du die Lippen. Das {Ü} hat zwei Punkte.',
+  'qu|k':'Du hast Recht, man hört {K}. Man hört auch ein {W}. Zusammen klingt es wie {KW}. Man schreibt aber immer {Q} und {U}.',
+  'qu|kw':'Du hast Recht, es klingt wie {KW}. Man schreibt diesen Laut aber immer mit {Q} und {U}.',
+  'ck|k':'Du hast Recht, {CK} klingt wie {K}. Nach einem kurzen Selbstlaut schreibt man {CK}, zum Beispiel bei Jacke.',
+  'tz|z':'Du hast Recht, {TZ} klingt wie {Z}. Nach einem kurzen Selbstlaut schreibt man {TZ}, zum Beispiel bei Katze.',
+  'tz|ts':'Du hast Recht, es klingt wie {Z}. Nach einem kurzen Selbstlaut schreibt man {TZ}, zum Beispiel bei Katze.',
+  'ng|n':'Bei Schlange hörst du den Laut {NG}. Er klingt hinten im Hals und ist nicht nur ein {N}.',
+  'ng|nk':'Bei Schlange hörst du den Laut {NG}. Ein {K} hörst du dort nicht.',
+  'sp|st':'Am Wortanfang hörst du den Laut Sch und danach {P}. Man schreibt aber {SP}, zum Beispiel bei Spinne.',
+  'sp|sch':'Du hast Recht, am Wortanfang hörst du Sch. Danach kommt ein {P}. Man schreibt aber {SP}, zum Beispiel bei Spinne.',
+  'st|sp':'Am Wortanfang hörst du den Laut Sch und danach {T}. Man schreibt aber {ST}, zum Beispiel bei Stern.',
+  'st|sch':'Du hast Recht, am Wortanfang hörst du Sch. Danach kommt ein {T}. Man schreibt aber {ST}, zum Beispiel bei Stern.',
+  'pf|p':'Du hast Recht, man hört {P}. Man hört aber auch ein {F}. Beide Laute zusammen schreibt man {PF}.',
+  'pf|f':'Du hast Recht, man hört {F}. Man hört aber auch ein {P}. Beide Laute zusammen schreibt man {PF}.',
+  'b|p':'Du hast Recht, {B} und {P} klingen ähnlich. Halte die Hand vor den Mund. Beim {P} spürst du einen Luftstoß, beim {B} nicht.',
+  'p|b':'Du hast Recht, {B} und {P} klingen ähnlich. Halte die Hand vor den Mund. Beim {P} spürst du einen Luftstoß, beim {B} nicht.',
+  'd|t':'Du hast Recht, {D} und {T} klingen ähnlich. Halte die Hand vor den Mund. Beim {T} spürst du einen Luftstoß, beim {D} nicht.',
+  't|d':'Du hast Recht, {D} und {T} klingen ähnlich. Halte die Hand vor den Mund. Beim {T} spürst du einen Luftstoß, beim {D} nicht.',
+  'g|k':'Du hast Recht, {G} und {K} klingen ähnlich. Halte die Hand vor den Mund. Beim {K} spürst du einen Luftstoß, beim {G} nicht.',
+  'k|g':'Du hast Recht, {G} und {K} klingen ähnlich. Halte die Hand vor den Mund. Beim {K} spürst du einen Luftstoß, beim {G} nicht.',
+  's|z':'Das {S} bei Sonne wird weich gesummt. Das {Z} klingt dagegen wie T und S zusammen.',
+  'z|s':'Das {Z} klingt wie T und S zusammen. Das {S} bei Sonne wird dagegen weich gesummt.',
+  'z|t':'Du hast Recht, am Anfang hörst du ein T. Danach kommt ein S. Zusammen schreibt man das {Z}.',
+  'ch|sch':'Das {CH} hört sich anders an als Sch. Es klingt wie ein leises Hauchen. Sch zischt wie bei Schaf.',
+  'ch|k':'Das {CH} hört sich anders an als {K}. Es klingt wie ein leises Hauchen.',
+  'x|k':'Du hast Recht, man hört {K}. Man hört auch ein S. Beide Laute zusammen schreibt man {X}, zum Beispiel bei Hexe.',
+  'c|k':'Du hast Recht, das {C} klingt bei Clown wie {K}. Wörter mit {C} muss man sich merken.',
+  'c|z':'Du hast Recht, das {C} kann auch wie {Z} klingen. Bei Clown klingt es wie {K}. Wörter mit {C} muss man sich merken.'
+};
+const LETTER_INTRO = {
+  y:'Das {Y} klingt am Anfang wie {J}, zum Beispiel bei Yak. Am Ende klingt es wie ein kurzes {I}, zum Beispiel bei Teddy. Die Wörter mit {Y} muss man sich merken.',
+  v:'Das {V} klingt wie {F}, zum Beispiel bei Vogel. Manchmal klingt es auch wie {W}, zum Beispiel bei Vase. Die Wörter mit {V} muss man sich merken.',
+  ie:'Das lange {I} schreibt man meistens mit {IE}, zum Beispiel bei Biene.',
+  ck:'Nach einem kurzen Selbstlaut schreibt man {CK}. Es klingt wie {K}, zum Beispiel bei Jacke.',
+  tz:'Nach einem kurzen Selbstlaut schreibt man {TZ}. Es klingt wie {Z}, zum Beispiel bei Katze.',
+  ng:'{NG} ist ein Laut, der hinten im Hals klingt, zum Beispiel bei Schlange.',
+  qu:'{Q} gibt es nur mit {U}. Zusammen klingt es wie {KW}, zum Beispiel bei Qualle.',
+  'äu':'{ÄU} klingt wie {EU}. Man schreibt {ÄU}, wenn es ein Wort mit {AU} dazu gibt, zum Beispiel Mäuse von Maus.',
+  eu:'{EU} ist ein Doppellaut, zum Beispiel bei Euro.',
+  x:'{X} klingt wie {K} und S zusammen, zum Beispiel bei Hexe.',
+  c:'Das {C} klingt bei Clown wie {K}. Die Wörter mit {C} muss man sich merken.',
+  ch:'Das {CH} klingt wie ein leises Hauchen, zum Beispiel bei Buch und bei Milch.',
+  pf:'Man hört {P} und {F} zusammen. Man schreibt {PF}, zum Beispiel bei Pfanne.',
+  sp:'Am Wortanfang hörst du Sch und {P}. Man schreibt aber {SP}, zum Beispiel bei Spinne.',
+  st:'Am Wortanfang hörst du Sch und {T}. Man schreibt aber {ST}, zum Beispiel bei Stern.'
+};
+const LETTER_INTRO_LEAD = 'Das ist ein neuer Buchstabe. Hör genau hin.';
+function letterShow(t){ return t.replace(/\{([^}]+)\}/g, (m,x)=>x.length>1 ? x.toLowerCase() : x); }
+function letterSay(t){ return t.replace(/\{([^}]+)\}/g, (m,x)=>LETTER_SAY[x.toUpperCase()] || x); }
+function graphemeKey(g){ return g ? g.charAt(0).toUpperCase() + g.slice(1) : g; }
+function letterNote(item, given){
+  if(!item || item.type!=='pic' || item.taskIcon==='🔠' || typeof given!=='number') return null;
+  const a = item.options[item.answer], g = item.options[given];
+  if(typeof a!=='string' || typeof g!=='string') return null;
+  const t = LETTER_CONF[(a+'|'+g).toLowerCase()];
+  return t ? {show:letterShow(t), say:letterSay(t)} : null;
+}
+function graphIntroFor(item, p){
+  if(!p || p.domainId!=='buchstabe' || p.isReview || p.isWordReview || p.easy) return null;
+  if(!item || item.type!=='pic' || ['🔡','🔚','🔍'].indexOf(item.taskIcon)<0) return null;
+  const g = String(item.options[item.answer]).toLowerCase();
+  if(!LETTER_INTRO[g]) return null;
+  state.discoverSeen = state.discoverSeen || {};
+  return state.discoverSeen['gr_'+g] ? null : g;
+}
+function screenGraphIntro(){
+  const p = state.practice, g = p.graphIntro, item = p.current, d = anyDomain(p.domainId);
+  const t = LETTER_INTRO[g];
+  const big = g.charAt(0).toUpperCase() + g.slice(1) + ' ' + g;
+  return `
+  ${topbar(d.name, d.sub, true)}
+  <main>
+    <div class="prompt-card" style="text-align:center;">
+      <div class="domain-tag" style="background:${d.color}22;">✨ Neuer Buchstabe</div>
+      <div style="font-family:'Baloo 2';font-weight:800;font-size:3.4rem;color:var(--harbor-dark);margin:8px 0 0;">${big}</div>
+      <div style="margin:4px 0;"><span style="font-size:2.6rem;">${String(item.targetEmoji).startsWith('img:')||String(item.targetEmoji).startsWith('<') ? '' : item.targetEmoji}</span></div>
+      <p style="font-size:1.1rem;line-height:1.5;margin:10px 4px;font-family:'Baloo 2';font-weight:600;">${letterShow(t)}</p>
+      <button class="speak-btn" onclick="graphIntroSpeak()">🔊</button>
+      <button class="btn btn-primary btn-block" style="margin-top:14px;" onclick="graphIntroOk()">Verstanden! ▶️</button>
+    </div>
+  </main>`;
+}
+window.graphIntroSpeak = function(){
+  const p = state.practice; if(!p || !p.graphIntro) return;
+  const g = p.graphIntro, item = p.current, t = LETTER_INTRO[g];
+  const key = item.audioKey || (g.toUpperCase());
+  stopAllAudio();
+  speak(LETTER_INTRO_LEAD);
+  setTimeout(()=>{ if(state.practice===p && p.graphIntro) playAudioKey(key, ()=>{ speak(letterSay(t)); }); }, 0);
+};
+window.graphIntroOk = function(){
+  const p = state.practice; if(!p) return;
+  const g = p.graphIntro;
+  if(g){ state.discoverSeen['gr_'+g] = true; p.graphIntro = null; saveProgress(); }
+  render();
+};
 
 // ===== Kindgerechte Rückmeldung nach der Diagnostik (Lotse Lumi) =====
 // Alle Sätze sind fest formuliert (nur diese liegen als Thorsten-Aufnahme vor).
@@ -7468,9 +7620,9 @@ const GLYPHS = {
   'y':['M20 55 L45 105','M70 55 L38 130 C32 142 20 142 14 138'],
   'z':['M20 55 L70 55 L20 105 L70 105'],
 };
-const WERK_ALL = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','R','S','T','U','V','W','X','Y','Z','Ä','Ö','Ü','Sp','Pf','Qu','Sch','Au','Ei'];
-const WERK_EXTRA = { M:{emoji:'🐭',word:'Maus'}, C:{emoji:'🤡',word:'Clown'}, X:{emoji:'🧙',word:'Hexe'}, 'Ö':{emoji:'🛢️',word:'Öl'}, 'Ü':{emoji:'🎁',word:'Überraschung'} };
-const WERK_AUDIO = {'Ä':'AE','Ö':'OE','Ü':'UE','V':'V1','Sp':'SP','Pf':'PF','Qu':'QU','Sch':'SCH','Au':'AU','Ei':'EI'};
+const WERK_ALL = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','R','S','T','U','V','W','X','Y','Z','Ä','Ö','Ü','Sp','St','Pf','Qu','Sch','Au','Ei','Eu','Äu','Ie','Ck','Tz','Ng','Ch'];
+const WERK_EXTRA = { Ie:{emoji:'🐝',word:'Biene'}, Ck:{emoji:'🧥',word:'Jacke'}, Tz:{emoji:'🐈',word:'Katze'}, Ng:{emoji:'🐍',word:'Schlange'}, Ch:{emoji:'📖',word:'Buch'}, 'Äu':{emoji:'🐭',word:'Mäuse'}, M:{emoji:'🐭',word:'Maus'}, C:{emoji:'🤡',word:'Clown'}, X:{emoji:'🧙',word:'Hexe'}, 'Ö':{emoji:'🛢️',word:'Öl'}, 'Ü':{emoji:'🎁',word:'Überraschung'} };
+const WERK_AUDIO = {'Ie':'IE','Ck':'CK','Tz':'TZ','Ng':'NG','Ch':'CH1','Äu':'AEU','Eu':'EU','St':'ST','Ä':'AE','Ö':'OE','Ü':'UE','V':'V1','Sp':'SP','Pf':'PF','Qu':'QU','Sch':'SCH','Au':'AU','Ei':'EI'};
 const WERK_STEPS = ['hear','traceUp','traceLow','freeUp','freeLow','done'];
 const WERK_TEXT = {
   hear:'Schau genau hin und hör gut zu.',
@@ -7479,6 +7631,10 @@ const WERK_TEXT = {
   freeUp:'Jetzt schreibst du den großen Buchstaben allein. Denk an den Laut.',
   freeLow:'Und jetzt den kleinen Buchstaben ganz allein.',
   compare:'Sieht dein Buchstabe so aus?',
+  say:'Sprich den Laut laut mit, während du schreibst.',
+  ok:'Das sieht gut aus. Prima!',
+  retry:'Fast! Schau dir die grünen Punkte an und versuche es noch einmal.',
+  skip:'Das üben wir gleich noch mit Stift und Papier. Weiter geht es.',
   paper:'Super gemacht! Schreibe den Buchstaben jetzt auch noch einmal mit einem Stift auf Papier.',
   good:'Prima, du hast den Buchstaben geschafft!'
 };
@@ -7512,6 +7668,7 @@ window.werkLeave = function(){
   werkStop();
   const w = state.werk; state.werk = null;
   if(w && w.ret==='drillnext'){ state.screen = 'letterdrill'; nextDrillItem(); return; }
+  if(w && w.ret==='practicenext'){ state.screen = 'practice'; nextPracticeItem(); return; }
   state.screen = (w && w.ret) || 'map'; render();
 };
 function werkCur(){ const w = state.werk; return w ? werkInfo(w.list[w.i]) : null; }
@@ -7615,17 +7772,30 @@ function werkInit(){
   const base = werkSvgBase(W, false, glyphs);
   const hasDots = glyphs.some(g=>'ÄÖÜ'.indexOf(g)>=0), hasDesc = glyphs.some(g=>'gjpqyQ'.indexOf(g)>=0);
   const yTop = hasDots ? -12 : 0, yBot = hasDesc ? 152 : 120;
-  const maxPx = Math.min(340, 175*glyphs.length+55);
+  const M = 34;                                   // Rand rund um den Buchstaben: der Finger darf auch daneben ansetzen
+  const vbX = -M, vbY = yTop - M, vbW = W + 2*M, vbH = (yBot - yTop) + 2*M;
+  const availH = Math.max(260, (window.innerHeight||800) - 330);
+  const maxPx = Math.max(240, Math.min(availH * vbW / vbH, (window.innerWidth||800) - 36, 640));
   const isTrace = (st==='traceUp' || st==='traceLow');
   const ghost = isTrace ? base.paths.map(p=>`<path class="wg" d="${p.d}" fill="none" stroke="#D5E0E6" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>`).join('') : '';
   const prog = isTrace ? base.paths.map(p=>`<path class="wp" d="${p.d}" fill="none" stroke="#1B6E7F" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>`).join('') : '';
-  box.innerHTML = `<svg id="werkSvg" viewBox="0 ${yTop} ${W} ${yBot-yTop}" style="width:100%;max-width:${maxPx}px;touch-action:none;background:#fff;border-radius:18px;border:2px solid var(--line);cursor:crosshair;">
+  box.innerHTML = `<svg id="werkSvg" viewBox="${vbX} ${vbY} ${vbW} ${vbH}" style="width:100%;max-width:${maxPx}px;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;background:#fff;border-radius:18px;border:2px solid var(--line);cursor:crosshair;">
     ${base.lines}${ghost}${prog}<g id="werkMarks"></g><g id="werkInk"></g><circle id="werkDot" r="8" cx="-50" cy="-50" fill="#E2672E" stroke="#fff" stroke-width="2.5"/></svg>`;
   const svg = document.getElementById('werkSvg');
   const msg = document.getElementById('werkMsg'), btns = document.getElementById('werkBtns');
   const run = werkRun = {svg, dead:false, down:false, cur:0, strokes:[], R:18};
   const toPt = e=>{ const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY; const m = svg.getScreenCTM(); return m ? p.matrixTransform(m.inverse()) : {x:0,y:0}; };
-  const ppu = (svg.getBoundingClientRect().width || 300) / W;
+  const ppu = (svg.getBoundingClientRect().width || 300) / vbW;
+  // Auf dem Display darf die Seite beim Schreiben nicht mitscrollen (iPad/Safari ignoriert touch-action teilweise)
+  const stopTouch = e=>{ if(e.cancelable) e.preventDefault(); };
+  ['touchstart','touchmove'].forEach(t=>{ svg.addEventListener(t, stopTouch, {passive:false}); box.addEventListener(t, stopTouch, {passive:false}); });
+  // Sobald das Kind zu schreiben beginnt: Laut und Wort noch einmal, dazu die Aufforderung zum Mitsprechen
+  const firstTouch = ()=>{
+    if(run.sounded) return; run.sounded = true; run.demoStop = true;
+    stopAllAudio();
+    playLautIso(info.audio, ok=>{ const after = ()=>{ speak((info.word ? info.word + '. ' : '') + WERK_TEXT.say); }; if(ok) after(); else playAudioKey(info.audio, after); });
+  };
+  run.firstTouch = firstTouch;
   run.R = Math.max(13, Math.min(30, 44/ppu));
   if(isTrace){
     const gp = svg.querySelectorAll('path.wg'), pp = svg.querySelectorAll('path.wp');
@@ -7664,7 +7834,7 @@ function werkInit(){
         }
       }
     };
-    svg.addEventListener('pointerdown', e=>{ e.preventDefault(); try{ svg.setPointerCapture(e.pointerId); }catch(x){} run.down = true; run.demoStop = true; document.getElementById('werkDot').setAttribute('cx',-50); move(e); });
+    svg.addEventListener('pointerdown', e=>{ e.preventDefault(); try{ svg.setPointerCapture(e.pointerId); }catch(x){} run.down = true; run.demoStop = true; document.getElementById('werkDot').setAttribute('cx',-50); firstTouch(); move(e); });
     svg.addEventListener('pointermove', e=>{ if(run.down){ e.preventDefault(); move(e); } });
     ['pointerup','pointercancel'].forEach(t=>svg.addEventListener(t, ()=>{ run.down = false; }));
     btns.innerHTML = `<button class="btn btn-ghost" onclick="werkDemo()">▶ Zeig es mir</button>`;
@@ -7673,11 +7843,12 @@ function werkInit(){
   } else {
     // Freies Schreiben aus dem Gedächtnis
     const ink = document.getElementById('werkInk'); let cur = null;
-    const addPt = e=>{ const q = toPt(e); cur.d += ' L' + q.x.toFixed(1) + ' ' + q.y.toFixed(1); cur.el.setAttribute('d', cur.d); };
+    run.inkStrokes = []; run.tries = run.tries || 0;
+    const addPt = e=>{ const q = toPt(e); cur.d += ' L' + q.x.toFixed(1) + ' ' + q.y.toFixed(1); cur.el.setAttribute('d', cur.d); cur.pts.push({x:q.x, y:q.y}); };
     svg.addEventListener('pointerdown', e=>{ if(run.locked) return; e.preventDefault(); try{ svg.setPointerCapture(e.pointerId); }catch(x){} run.down = true;
       const q = toPt(e); const el = document.createElementNS('http://www.w3.org/2000/svg','path');
       el.setAttribute('fill','none'); el.setAttribute('stroke','#1B6E7F'); el.setAttribute('stroke-width','9'); el.setAttribute('stroke-linecap','round'); el.setAttribute('stroke-linejoin','round');
-      cur = {el, d:'M'+q.x.toFixed(1)+' '+q.y.toFixed(1)+' L'+q.x.toFixed(1)+' '+(q.y+0.1).toFixed(1)}; el.setAttribute('d', cur.d); ink.appendChild(el); run.inked = true;
+      cur = {el, d:'M'+q.x.toFixed(1)+' '+q.y.toFixed(1)+' L'+q.x.toFixed(1)+' '+(q.y+0.1).toFixed(1), pts:[{x:q.x,y:q.y}]}; el.setAttribute('d', cur.d); ink.appendChild(el); run.inked = true; run.inkStrokes.push(cur.pts); firstTouch();
       document.getElementById('werkFin') && (document.getElementById('werkFin').disabled = false); });
     svg.addEventListener('pointermove', e=>{ if(run.down && cur && !run.locked){ e.preventDefault(); addPt(e); } });
     ['pointerup','pointercancel'].forEach(t=>svg.addEventListener(t, ()=>{ run.down = false; cur = null; }));
@@ -7707,24 +7878,87 @@ window.werkClear = function(){
   const ink = document.getElementById('werkInk'); if(ink) ink.innerHTML = '';
   const fin = document.getElementById('werkFin'); if(fin) fin.disabled = true;
   document.querySelectorAll('.wmodel').forEach(e=>e.remove());
-  run.locked = false; run.inked = false;
-  const msg = document.getElementById('werkMsg'); if(msg) msg.textContent = '';
+  run.locked = false; run.inked = false; run.inkStrokes = [];
+  const msg = document.getElementById('werkMsg'); if(msg){ msg.textContent = ''; msg.style.color = '#3FA34D'; }
   const btns = document.getElementById('werkBtns');
   btns.innerHTML = `<button id="werkFin" class="btn btn-primary" disabled onclick="werkFree()">✅ Fertig</button><button class="btn btn-ghost" onclick="werkClear()">🗑️ Löschen</button>`;
 };
+// Automatische, großzügige Formprüfung: Das Geschriebene wird auf den Rahmen des Musterbuchstabens
+// gelegt (Größe und Lage egal) und mit dem Muster verglichen. Kein Buchstabe liegt je perfekt auf den
+// grünen Punkten, deshalb zählen Abdeckung des Musters (recall) und Treffer der Tinte (precision) mit Toleranz.
+function werkResample(pts, step){
+  const out = [];
+  for(let i=0;i<pts.length;i++){
+    out.push(pts[i]);
+    if(i<pts.length-1){
+      const a = pts[i], b = pts[i+1], d = Math.hypot(b.x-a.x, b.y-a.y), n = Math.floor(d/step);
+      for(let k=1;k<=n;k++) out.push({x:a.x+(b.x-a.x)*k/(n+1), y:a.y+(b.y-a.y)*k/(n+1)});
+    }
+  }
+  return out;
+}
+function werkModelPoints(svg, glyphs){
+  const base = werkSvgBase(glyphs.length*100, true, glyphs), out = [];
+  base.paths.forEach(p=>{
+    const el = document.createElementNS('http://www.w3.org/2000/svg','path'); el.setAttribute('d', p.d); svg.appendChild(el);
+    const len = el.getTotalLength(), n = Math.max(2, Math.ceil(len/3)+1);
+    for(let k=0;k<n;k++){ const q = el.getPointAtLength(len*k/(n-1)); out.push({x:q.x,y:q.y}); }
+    svg.removeChild(el);
+  });
+  return out;
+}
+function werkScore(strokes, model, opt){
+  opt = opt || window.WERK_OPT || {TOLK:0.18, TOLMIN:8, TOL:13, REC:0.8, PRE:0.8, LMIN:0.6, LMAX:2.0};
+  const ink = []; strokes.forEach(st=>werkResample(st, 3).forEach(q=>ink.push(q)));
+  if(ink.length < 4 || !model.length) return {ok:false, recall:0, precision:0, why:'leer'};
+  const bb = a=>({x0:Math.min(...a.map(q=>q.x)), x1:Math.max(...a.map(q=>q.x)), y0:Math.min(...a.map(q=>q.y)), y1:Math.max(...a.map(q=>q.y))});
+  const mb = bb(model), ib = bb(ink);
+  const mw = mb.x1-mb.x0, mh = mb.y1-mb.y0, iw = ib.x1-ib.x0, ih = ib.y1-ib.y0;
+  if(ih < 24 && iw < 24) return {ok:false, recall:0, precision:0, why:'zu klein'};
+  // Muster-Rahmen auf die Tinte legen: pro Achse skalieren, schmale Muster (z. B. i, l) nur verschieben
+  const sx = mw >= 14 ? (iw >= 10 ? mw/iw : 1) : 1, sy = mh >= 14 ? (ih >= 10 ? mh/ih : 1) : 1;
+  const T = ink.map(q=>({x: mb.x0 + (q.x-ib.x0)*sx + (mw<14 ? (mw-iw)/2 : 0), y: mb.y0 + (q.y-ib.y0)*sy + (mh<14 ? (mh-ih)/2 : 0)}));
+  const near = (p, arr, r)=>{ const r2=r*r; for(let i=0;i<arr.length;i++){ const dx=arr[i].x-p.x, dy=arr[i].y-p.y; if(dx*dx+dy*dy<=r2) return true; } return false; };
+  const TOL = opt.TOLK ? Math.max(opt.TOLMIN, Math.min(opt.TOL, opt.TOLK*Math.sqrt(Math.max(mw,10)*Math.max(mh,10)))) : opt.TOL;
+  const recall = model.filter(m=>near(m, T, TOL)).length / model.length;
+  const precision = T.filter(q=>near(q, model, TOL)).length / T.length;
+  const scaleBad = (mw>=14 && iw>=10) ? Math.max(mw/iw, iw/mw) : 1;
+  const plen = a=>{ let L=0; for(let i=1;i<a.length;i++) L+=Math.hypot(a[i].x-a[i-1].x,a[i].y-a[i-1].y); return L; };
+  let inkLen = 0; strokes.forEach(st=>{ inkLen += plen(st); });
+  const modLen = model.length*3, lr = inkLen/modLen;
+  return {ok: recall >= opt.REC && precision >= opt.PRE && lr >= opt.LMIN && lr <= opt.LMAX, recall, precision, lr, strokes: strokes.length, scaleBad};
+}
+window.werkScore = werkScore;
 window.werkFree = function(){
   const run = werkRun, w = state.werk; if(!run || !w) return;
   run.locked = true;
   const info = werkCur(), st = WERK_STEPS[w.step], glyphs = werkStepGlyphs(info, st);
-  const base = werkSvgBase(glyphs.length*100, true, glyphs);
   const svg = run.svg, ink = document.getElementById('werkInk');
-  const g = document.createElementNS('http://www.w3.org/2000/svg','g'); g.setAttribute('class','wmodel');
-  g.innerHTML = base.paths.map(p=>`<path d="${p.d}" fill="none" stroke="#3FA34D" stroke-opacity=".45" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 9"/>`).join('');
-  svg.insertBefore(g, ink.nextSibling);
-  document.getElementById('werkMsg').textContent = WERK_TEXT.compare;
-  document.getElementById('werkMsg').style.color = '#0F3145';
-  document.getElementById('werkBtns').innerHTML = `<button class="btn btn-primary" onclick="werkNext()">👍 Ja, passt</button><button class="btn btn-ghost" onclick="werkClear()">🔁 Noch einmal</button>`;
-  speak(WERK_TEXT.compare);
+  const model = werkModelPoints(svg, glyphs);
+  const res = werkScore(run.inkStrokes || [], model);
+  run.tries = (run.tries||0) + 1; w.tries = (w.tries||0) + 1;
+  const msg = document.getElementById('werkMsg'), btns = document.getElementById('werkBtns');
+  const showModel = ()=>{
+    const base = werkSvgBase(glyphs.length*100, true, glyphs);
+    const g = document.createElementNS('http://www.w3.org/2000/svg','g'); g.setAttribute('class','wmodel');
+    g.innerHTML = base.paths.map(p=>`<path d="${p.d}" fill="none" stroke="#3FA34D" stroke-opacity=".55" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 9"/>`).join('');
+    svg.insertBefore(g, ink.nextSibling);
+  };
+  if(res.ok){
+    msg.textContent = '⭐ ' + WERK_TEXT.ok; msg.style.color = '#3FA34D';
+    btns.innerHTML = `<button class="btn btn-primary" onclick="werkNext()">Weiter ▶️</button>`;
+    speak(WERK_TEXT.ok);
+  } else if(run.tries >= 3){
+    showModel();
+    msg.textContent = WERK_TEXT.skip; msg.style.color = '#0F3145';
+    btns.innerHTML = `<button class="btn btn-primary" onclick="werkNext()">Weiter ▶️</button>`;
+    speak(WERK_TEXT.skip);
+  } else {
+    showModel();
+    msg.textContent = WERK_TEXT.retry; msg.style.color = '#B24C2F';
+    btns.innerHTML = `<button class="btn btn-primary" onclick="werkClear()">🔁 Noch einmal</button>`;
+    speak(WERK_TEXT.retry);
+  }
 };
 /* --- Auswahl (Lehrkraft / Nachschlagen) --- */
 function screenWerkPick(){
@@ -7745,6 +7979,46 @@ window.werkPracticeFlagged = function(){
   const keys = d.flagged.map(s=>String(s).split(' (')[0]);
   startWerkstatt(keys, 'drilldone');
 };
+
+
+/* ---------- Administrator-Modus ---------- */
+// Nur für die Lehrkraft: Passwortschutz ist eine Hürde für Kinder, keine echte Sicherheit (der Code liegt offen in der Datei).
+// Im Administrator-Modus wird nichts gespeichert, gemessen oder protokolliert; "Beenden" lädt die App neu, der gespeicherte Lernstand bleibt unverändert.
+window.BH_ADMIN = false;
+const ADMIN_HASH = '28hee2mz6iq';
+function adminHash(str){
+  let h1=0xdeadbeef, h2=0x41c6ce57;
+  for(let i=0;i<str.length;i++){ const ch=str.charCodeAt(i); h1=Math.imul(h1^ch,2654435761); h2=Math.imul(h2^ch,1597334677); }
+  h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909);
+  h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909);
+  return (4294967296*(2097151&h2)+(h1>>>0)).toString(36);
+}
+window.adminStart = function(){
+  let pw = null;
+  try{ pw = window.prompt('Passwort für den Administrator-Modus:'); }catch(e){}
+  if(pw===null) return;
+  if(adminHash('bh-admin|'+pw) !== ADMIN_HASH){ alert('Das Passwort stimmt nicht.'); return; }
+  try{ saveProgress(); }catch(e){}            // letzter Stand wird gesichert, danach nie wieder gespeichert
+  window.BH_ADMIN = true;
+  stopAllAudio();
+  state.diagDone = true; state.showTeacher = false; state.showAllStations = true; state.showMoreStations = true;
+  state.session = null; state.practice = null; state.drill = null; state.werk = null;
+  state.screen = 'map'; render();
+};
+window.adminEnd = function(){ window.BH_ADMIN = false; location.reload(); };
+window.adminOpen = function(id, lvl){
+  state.levels[id] = lvl;
+  try{ setSub(id, lvl, maxSub(id, lvl)); }catch(e){}
+  state.attemptLogs[id] = {level:lvl, log:[]};
+  state.pendingReview = false;
+  openDomain(id);
+};
+function adminPanelHtml(){
+  if(!window.BH_ADMIN) return '';
+  const all = domains.concat(advancedDomains);
+  const rows = all.map(d=>`<div style="display:flex;align-items:center;gap:6px;margin:5px 0;flex-wrap:wrap;"><span style="min-width:150px;font-weight:700;">${d.icon||''} ${d.name}</span>${[1,2,3,4].map(l=>`<button class="btn btn-ghost" style="padding:4px 12px;font-size:0.9rem;" onclick="adminOpen('${d.id}',${l})">Stufe ${l}</button>`).join('')}</div>`).join('');
+  return `<div class="prompt-card" style="border:2px dashed #7A8791;margin-bottom:16px;"><div style="font-weight:700;color:#4B5A64;margin-bottom:4px;">🔧 Administrator: alle Stationen und Stufen</div><p style="font-size:0.8rem;color:#6B7F8C;margin:0 0 6px;">Es wird nichts gespeichert und nichts protokolliert. Der Lernstand des Kindes bleibt unverändert.</p>${rows}</div>`;
+}
 
 /* ---------- Lehrkraft-Ansicht ---------- */
 // Kleines SVG-Balkendiagramm für den Stufenverlauf - bewusst minimalistisch,
@@ -7926,6 +8200,7 @@ function renderTeacherOverlay(){
       <button class="btn btn-ghost" style="margin-top:10px;" onclick="document.getElementById('importFileInput').click()">📥 Daten importieren</button>
       <input type="file" id="importFileInput" accept="application/json" style="display:none;" onchange="importData(this.files[0])">
       <button class="btn btn-ghost" style="margin-top:10px;" onclick="confirmReset()">🔄 Fortschritt dieses Geräts zurücksetzen</button>
+      <div style="text-align:center;margin-top:26px;"><button onclick="adminStart()" style="background:none;border:0;color:#A9B2B8;font-size:0.72rem;padding:6px 10px;cursor:pointer;">Administrator</button></div>
     </div>
   </div>`;
 }
